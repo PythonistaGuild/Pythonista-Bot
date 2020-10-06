@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import aiohttp
 from discord.ext import commands
 
 
@@ -27,3 +28,6 @@ class Bot(commands.Bot):
 
     def __init__(self):
         super().__init__(command_prefix=commands.when_mentioned_or('>>'))
+
+    async def __ainit__(self) -> None:
+        self.session = aiohttp.ClientSession()
