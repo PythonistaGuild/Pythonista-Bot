@@ -21,10 +21,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import configparser
+from discord.ext import commands
 
 
-__all__ = ('CONFIG', )
+__all__ = ('CONFIG', 'Cog', 'Context')
 
 
 CONFIG = configparser.RawConfigParser()
 CONFIG.read('config.ini')
+
+
+class Cog(commands.Cog):
+    pass
+
+
+class Context(commands.Context):
+    pass
