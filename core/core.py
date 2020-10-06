@@ -32,7 +32,9 @@ CONFIG.read('config.ini')
 
 
 class Cog(commands.Cog):
-    pass
+
+    def __init_subclass__(cls, **kwargs):
+        cls.HELP_THUMB = kwargs.get('thumbnail', 'https://i.imgur.com/J2FKHNW.png')
 
 
 class Context(commands.Context):
