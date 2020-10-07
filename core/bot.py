@@ -22,7 +22,7 @@ SOFTWARE.
 """
 import aiohttp
 from discord.ext import commands
-
+import mystbin
 
 class Bot(commands.Bot):
 
@@ -31,6 +31,7 @@ class Bot(commands.Bot):
 
     async def __ainit__(self) -> None:
         self.session = aiohttp.ClientSession()
+        self.mb_client = mystbin.MystbinClient(session=self.session)
 
     async def on_ready(self) -> None:
         """ On Bot ready - cache is built. """

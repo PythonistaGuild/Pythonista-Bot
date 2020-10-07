@@ -34,6 +34,8 @@ class Evaluation(core.Cog):
         self.eval_endpoint: str = core.CONFIG.get('SNEKBOX', 'url')
 
     @commands.command()
+    @commands.max_concurrency(1, per=commands.BucketType.user, wait=False)
+    @commands.cooldown(rate=1, per=10.0, type=commands.BucketType.user)
     async def eval(self, ctx: core.Context, *, code_body: core.CodeblockConverter) -> None:
         """Evaluates your code in the form of a Discord message.
 
@@ -42,15 +44,36 @@ class Evaluation(core.Cog):
         code_body: :class:`converters.CodeblockConverter`
             This will attempt to convert your current passed parameter into proper Python code.
         """
-        async with self.bot.session.post(self.eval_endpoint, json={'input': code_body[1]}) as eval_response:
-            if eval_response.status != 200:
-                # TODO: error logging? Error handler and webhook post. Global or local?
-                raise core.InvalidEval(eval_response.status, 'There was an issue running this eval command.')
+        async with ctx.typing():
 
-            eval_data = await eval_response.json()
+            async with self.bot.session.post(self.eval_endpoint, json={'input': code_body[1]}) as eval_response:
+                if eval_response.status != 200:
+                    # TODO: error logging? Error handler and webhook post. Global or local?
+                    raise core.InvalidEval(eval_response.status, 'There was an issue running this eval command.')
 
-        stdout = eval_data['stdout']
-        await ctx.send(formatters.to_codeblock(stdout, escape_md=False))
+                eval_data = await eval_response.json()
+
+
+            stdout = eval_data['stdout']
+
+            if len(stdout) > 500:
+                codeblock = await self.bot.mb_client.post(stdout, syntax="py")
+            else:
+                codeblock = formatters.to_codeblock(stdout, escape_md=False)
+
+            await ctx.send(f"Hey {ctx.author.display_name}, here is your eval output:\n{codeblock}")
+
+
+    @eval.error
+    async def eval_error_handler(self, ctx: core.Context, error: Exception) -> None:
+        """Eval command error handler."""
+        error = getattr(error, "original", error)
+
+        if isinstance(error, (commands.MaxConcurrencyReached, commands.CommandOnCooldown)):
+            # let's silently suppress these error, don't want to spam the reaction / message delete
+            return
+        elif isinstance(error, core.InvalidEval):
+            await ctx.send(f"Eval failed with status code: {error.status_code}.")
 
 
 def setup(bot):

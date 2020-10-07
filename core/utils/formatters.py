@@ -46,4 +46,6 @@ def to_codeblock(content, language='py', replace_existing=True, escape_md=True, 
     if escape_md:
         content = escape_markdown(content)
 
+    content = content or '\N{ZWSP}'
+
     return f'```{language}\n{content}\n```'
