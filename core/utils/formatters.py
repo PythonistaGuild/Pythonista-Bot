@@ -20,8 +20,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-__version__ = '0.0.1a'
+from discord.utils import escape_markdown
 
-from . import utils
-from .bot import Bot
-from .core import *
+__all__ = ("to_codeblock", )
+
+def to_codeblock(content, language='py', replace_existing=True, escape_md=True, new="'''"):
+    """
+    Quick function to put our content into a Discord accepted codeblock.
+    """
+    if replace_existing:
+        content = content.replace('```', new)
+    if escape_md:
+        content = escape_markdown(content)
+    return f'```{language}\n{content}\n```'
