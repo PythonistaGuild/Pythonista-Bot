@@ -36,7 +36,7 @@ class Bot(commands.Bot):
 
     async def on_ready(self) -> None:
         """ On Bot ready - cache is built. """
-        print(f"Online. Logged in as {self.user.name} || {self.user.id}")
+        print(f'Online. Logged in as {self.user.name} || {self.user.id}')
 
     async def close(self) -> None:
         """ Closes the Bot. It will also close the internal :class:`aiohttp.ClientSession`. """

@@ -22,7 +22,9 @@ SOFTWARE.
 """
 from discord.utils import escape_markdown
 
-__all__ = ("to_codeblock", )
+
+__all__ = ('to_codeblock', )
+
 
 def to_codeblock(content, language='py', replace_existing=True, escape_md=True, new="'''"):
     """
