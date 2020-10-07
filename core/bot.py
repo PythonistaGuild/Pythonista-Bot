@@ -21,13 +21,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import aiohttp
+import discord
 from discord.ext import commands
 
 
 class Bot(commands.Bot):
 
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or('>>'))
+        # Default prefix for now for testing, we can change this later...
+        super().__init__(command_prefix=commands.when_mentioned_or('>>'), intents=discord.Intents.all())
 
     async def __ainit__(self) -> None:
         self.session = aiohttp.ClientSession()
