@@ -24,9 +24,9 @@ import collections
 
 from discord.ext import commands
 
-__all__ = ("Codeblock", "CodeblockConverter")
+__all__ = ('Codeblock', 'CodeblockConverter')
 
-Codeblock = collections.namedtuple("Codeblock", "language content")
+Codeblock = collections.namedtuple('Codeblock', 'language content')
 
 
 class CodeblockConverter(commands.Converter):
@@ -36,7 +36,7 @@ class CodeblockConverter(commands.Converter):
     :attr:`Codeblock.language` will be ``None`` if the input was not a complete codeblock.
     """
     async def convert(self, ctx, argument):
-        if not argument.startswith("`"):
+        if not argument.startswith('`'):
             return Codeblock(None, argument)
 
         # store a small deque of the previous characters.
@@ -50,17 +50,17 @@ class CodeblockConverter(commands.Converter):
         for character in argument:
             if character == "`" and not within_code and not within_language:
                 backticks += 1
-            if previous_characters and previous_characters[-1] == "`" and character != "`" or within_code and "".join(previous_characters) != "`" * backticks:
+            if previous_characters and previous_characters[-1] == '`' and character != '`' or within_code and ''.join(previous_characters) != '`' * backticks:
                 within_code = True
                 code.append(character)
-            if character == "\n":
+            if character == '\n':
                 within_language = False
                 within_code = True
-            elif "".join(previous_characters) == "`" * 3 and character != "`":
+            elif "".join(previous_characters) == '`' * 3 and character != '`':
                 within_language = True
                 language.append(character)
             elif within_language:
-                if character != "\n":
+                if character != '\n':
                     language.append(character)
 
             previous_characters.append(character)
@@ -68,4 +68,4 @@ class CodeblockConverter(commands.Converter):
         if not code and not language:
             code[:] = previous_characters
 
-        return Codeblock("".join(language), "".join(code[len(language):-backticks]))
+        return Codeblock(''.join(language), ''.join(code[len(language):-backticks]))

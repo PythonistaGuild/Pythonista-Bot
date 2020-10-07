@@ -20,45 +20,37 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-
 from discord.ext import commands
 
-from core.bot import Bot
+import core
+from core.utils import formatters
 
-from core.core import Cog, Context
-from utils.converters import CodeblockConverter
-from utils.formatters import to_codeblock
-
-class InvalidEval(commands.CommandError):
-    """ """
-
-class Evaluation(Cog):
-    """
-    Evaluation Cog. The aim of this is to provide a safe, isolated and available environment for Pythonistas to run their code.
+class Evaluation(core.Cog):
+    """Evaluation Cog. The aim of this is to provide a safe, isolated and available environment for Pythonistas to run their code.
     """
 
-    def __init__(self, bot: Bot) -> None:
+    def __init__(self, bot: core.Bot) -> None:
         self.bot = bot
-        self.eval_endpoint: str = ("http://localhost:8060/eval")
+        self.eval_endpoint: str = core.CONFIG.get('SNEKBOX', 'url')
 
     @commands.command()
-    async def eval(self, ctx: Context, *, code_body: CodeblockConverter):
-        """
-        Evaluates your code in the form of a Discord message.
+    async def eval(self, ctx: core.Context, *, code_body: core.CodeblockConverter) -> None:
+        """Evaluates your code in the form of a Discord message.
 
-        Attributes
-        ----------
-        code_body: :class:`converters.CodeblockConverter` -> :class:`collections.namedtuple`
+        Parameters
+        ------------
+        code_body: :class:`converters.CodeblockConverter`
             This will attempt to convert your current passed parameter into proper Python code.
         """
-        await ctx.send(code_body)
-        async with self.bot.session.post(self.eval_endpoint, json={"input": code_body[1]}) as eval_response:
+        async with self.bot.session.post(self.eval_endpoint, json={'input': code_body[1]}) as eval_response:
             if eval_response.status != 200:
-                raise InvalidEval(f"{eval_response.status} - There was an issue running this eval command.") #TODO: error logging? Webhook post?
+                # TODO: error logging? Error handler and webhook post. Global or local?
+                raise core.InvalidEval(eval_response.status, 'There was an issue running this eval command.')
+
             eval_data = await eval_response.json()
 
         stdout = eval_data['stdout']
-        return await ctx.send(to_codeblock(stdout, escape_md=False))
+        await ctx.send(formatters.to_codeblock(stdout, escape_md=False))
 
 
 def setup(bot):
