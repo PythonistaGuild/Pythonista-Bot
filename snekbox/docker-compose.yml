@@ -1,9 +1,0 @@
-version: '3'
-services:
-    snekbox:
-        image: pythondiscord/snekbox
-        container_name: snekbox
-        ports:
-            - '8060:8060/tcp'
-        ipc: none
-        privileged: true

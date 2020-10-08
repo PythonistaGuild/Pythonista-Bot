@@ -22,30 +22,16 @@ SOFTWARE.
 """
 from discord.utils import escape_markdown
 
+
 __all__ = ('to_codeblock', )
 
+
 def to_codeblock(content, language='py', replace_existing=True, escape_md=True, new="'''"):
-    """Helper utility to wrap `content` into a Discord style codeblock.
-
-    Parameters
-    ------------
-    content: :class:`str`
-        The content to wrap inside the codeblock.
-
-    language: :class:`str`
-        The syntax highlighting language to use for the codeblock. Defaults to 'py'.
-    replace_existing: :class:`bool`
-        If the function should replace the Discord style backticks (`) with what is specified in :param:`new`.
-    escape_md: :class:`bool`
-        If the function should escape Discord style Markdown with a backslash ('\').
-    new: :class:`str`
-        The replacing characters when :param:`replace_existing` is used.
+    """
+    Quick function to put our content into a Discord accepted codeblock.
     """
     if replace_existing:
         content = content.replace('```', new)
     if escape_md:
         content = escape_markdown(content)
-
-    content = content or '\N{ZWSP}'
-
     return f'```{language}\n{content}\n```'
