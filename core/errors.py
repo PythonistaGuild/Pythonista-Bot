@@ -20,10 +20,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-__version__ = '0.0.1a'
+from discord.ext import commands
 
-from . import utils
-from .bot import Bot
-from .converters import *
-from .core import *
-from .errors import *
+__all__ = ('InvalidEval', )
+
+
+class InvalidEval(commands.CommandError):
+    """ Eval Command has returned a non-200 error code. """
+
+    __slots__ = ('error_code', 'error_message')
+
+    def __init__(self, error_code: int, error_message: str):
+        self.error_code = error_code
+        self.error_message = error_message
+        super().__init__()
+
+    def __repr__(self) -> str:
+        return f'<InvalidEval error_code={self.error_code} error_message={self.error_message}>'
+
+    def __str__(self) -> str:
+        return self.error_message
