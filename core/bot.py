@@ -26,6 +26,7 @@ from discord.ext import commands
 
 from .core import CONFIG
 
+
 class Bot(commands.Bot):
 
     def __init__(self):
