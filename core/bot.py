@@ -25,11 +25,12 @@ import discord
 from discord.ext import commands
 import mystbin
 
+from .core import CONFIG
+
 class Bot(commands.Bot):
 
     def __init__(self):
-        # Default prefix for now for testing, we can change this later...
-        super().__init__(command_prefix=commands.when_mentioned_or('>>'), intents=discord.Intents.all())
+        super().__init__(command_prefix=commands.when_mentioned_or(CONFIG.get('BOT', 'prefix')), intents=discord.Intents.all())
 
     async def __ainit__(self) -> None:
         self.session = aiohttp.ClientSession()
