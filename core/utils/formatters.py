@@ -34,4 +34,5 @@ def to_codeblock(content, language='py', replace_existing=True, escape_md=True, 
         content = content.replace('```', new)
     if escape_md:
         content = escape_markdown(content)
+    content = content or "<<Eval returned no output.>>"
     return f'```{language}\n{content}\n```'
