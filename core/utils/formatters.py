@@ -26,9 +26,21 @@ from discord.utils import escape_markdown
 __all__ = ('to_codeblock', )
 
 
-def to_codeblock(content, language='py', replace_existing=True, escape_md=True, new="'''"):
-    """
-    Quick function to put our content into a Discord accepted codeblock.
+def to_codeblock(content, language='py', *, replace_existing=True, escape_md=True, new="'''"):
+    """Quick function to put our content into a Discord accepted codeblock.
+
+    Parameters
+    -----------
+    content: :class:`str`
+        The content of the codeblock.
+    language: :class:`str`
+        The language to pass to the codeblock for syntax highlighting.
+    replace_existing: :class:`bool`
+        Toggle to replace an 'inner' codeblock's triple backticks with the string is passed to :param:`new`
+    escape_md: :class:`bool`
+        Toggle to escape the inner markdown of the content.
+    new: :class:`str`
+        The string to replace the inner codeblock's triple backticks with.
     """
     if replace_existing:
         content = content.replace('```', new)
