@@ -20,29 +20,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import aiohttp
-import discord
-from discord.ext import commands
-import mystbin
-
-from .core import CONFIG
+from .meta import CONSTANTS
 
 
-class Bot(commands.Bot):
+__all__ = ('Roles', )
 
-    def __init__(self):
-        intents = discord.Intents.all()
-        super().__init__(command_prefix=commands.when_mentioned_or(CONFIG['BOT']['prefix']), intents=intents)
 
-    async def __ainit__(self) -> None:
-        self.session = aiohttp.ClientSession()
-        self.mb_client = mystbin.MystbinClient(session=self.session)
+class Roles(CONSTANTS):
 
-    async def on_ready(self) -> None:
-        """ On Bot ready - cache is built. """
-        print(f'Online. Logged in as {self.user.name} || {self.user.id}')
+    # Human
+    ADMIN: int = 490952483238313995
+    MODERATOR: int = 578255729295884308
+    KNOWLEDGEABLE: int = 490994825315745795
+    PYTHONISTA_DEVELOPER: int = 763106310098911263
+    HELPER: int = 649520971069390858
+    CONTRIBUTOR: int = 763106223457304607
 
-    async def close(self) -> None:
-        """ Closes the Bot. It will also close the internal :class:`aiohttp.ClientSession`. """
-        await self.session.close()
-        await super().close()
+    # Bots
+    ADMIN_BOT: int = 490952487122108441
+    GUILD_BOT: int = 570452583932493825
+    TEST_BOT: int = 490954992384081930

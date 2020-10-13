@@ -32,8 +32,7 @@ loop.run_until_complete(bot.__ainit__())
 
 
 modules = [f'{p.parent}.{p.stem}' for p in pathlib.Path('modules').glob('*.py')]
-# Load modules...
+# Load modules here...
 
 
-bot.run(core.CONFIG.get('BOT', 'token'))
-
+bot.run(core.CONFIG['BOT']['token'])

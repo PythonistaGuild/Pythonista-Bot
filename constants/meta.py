@@ -20,29 +20,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import aiohttp
-import discord
-from discord.ext import commands
-import mystbin
-
-from .core import CONFIG
+from core import CONFIG
 
 
-class Bot(commands.Bot):
+class ConstantsMeta(type):
 
-    def __init__(self):
-        intents = discord.Intents.all()
-        super().__init__(command_prefix=commands.when_mentioned_or(CONFIG['BOT']['prefix']), intents=intents)
+    def __new__(mcs, name, bases, attrs):
+        if name == 'CONSTANTS':
+            return super().__new__(mcs, name, bases, attrs)
 
-    async def __ainit__(self) -> None:
-        self.session = aiohttp.ClientSession()
-        self.mb_client = mystbin.MystbinClient(session=self.session)
+        try:
+            section = CONFIG[name.upper()]
+        except KeyError:
+            return super().__new__(mcs, name, bases, attrs)
 
-    async def on_ready(self) -> None:
-        """ On Bot ready - cache is built. """
-        print(f'Online. Logged in as {self.user.name} || {self.user.id}')
+        for option, value in section.items():
+            if option in attrs:
+                attrs[option] = value
 
-    async def close(self) -> None:
-        """ Closes the Bot. It will also close the internal :class:`aiohttp.ClientSession`. """
-        await self.session.close()
-        await super().close()
+        return super().__new__(mcs, name, bases, attrs)
+
+    def __setattr__(self, attr, nv):
+        raise RuntimeError(f'Constant <{attr}> cannot be assigned to.')
+
+    def __delattr__(self, attr):
+        raise RuntimeError(f'Constant <{attr}> cannot be deleted.')
+
+
+class CONSTANTS(metaclass=ConstantsMeta):
+    pass
