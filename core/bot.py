@@ -30,7 +30,8 @@ from .core import CONFIG
 class Bot(commands.Bot):
 
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or(CONFIG.get('BOT', 'prefix')), intents=discord.Intents.all())
+        intents = discord.Intents.all()
+        super().__init__(command_prefix=commands.when_mentioned_or(CONFIG['BOT']['prefix']), intents=intents)
 
     async def __ainit__(self) -> None:
         self.session = aiohttp.ClientSession()

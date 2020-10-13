@@ -20,16 +20,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import configparser
-
+import toml
 from discord.ext import commands
 
 
 __all__ = ('CONFIG', 'Cog', 'Context')
 
 
-CONFIG = configparser.RawConfigParser()
-CONFIG.read('config.ini')
+CONFIG = toml.load('config.toml')
 
 
 class Cog(commands.Cog):
