@@ -1,0 +1,7 @@
+[BOT]
+token = ''
+webhook_url = ''
+prefix = '>>'
+
+[DATABASE]
+password = ''
