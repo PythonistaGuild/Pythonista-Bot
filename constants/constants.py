@@ -23,7 +23,7 @@ SOFTWARE.
 from .meta import CONSTANTS
 
 
-__all__ = ('Roles', )
+__all__ = ('Roles', 'Colours')
 
 
 class Roles(CONSTANTS):
