@@ -32,7 +32,8 @@ def is_role_or_higher(role_id: int):
 
         # This should never be a problem, but just in case...
         if not role:
-            raise commands.RoleNotFound(f'Role with ID <{role_id}> does not exist.')
+            # TODO: Change this to a custom exception.
+            raise commands.CheckFailure(f'Role with ID <{role_id}> does not exist.')
 
         ignored = (constants.Roles.NITRO_BOOSTER, constants.Roles.MUTED)
         roles = [r for r in ctx.author.roles if r.id not in ignored and ctx.author.top_role >= r]
@@ -40,5 +41,6 @@ def is_role_or_higher(role_id: int):
         if roles:
             return True
 
-        raise commands.MissingRole(f'{ctx.author} is not in or higher than role <{role.name}(ID: {role.id})>.')
+        # TODO: Change this to a custom exception.
+        raise commands.CheckFailure(f'{ctx.author} is not in or higher than role <{role.name}(ID: {role.id})>.')
     return commands.check(predicate)
