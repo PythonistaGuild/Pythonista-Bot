@@ -25,3 +25,4 @@ __version__ = '0.0.1a'
 from . import utils
 from .bot import Bot
 from .core import *
+from .riot import *
