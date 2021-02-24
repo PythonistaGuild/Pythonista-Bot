@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2020 PythonistaGuild
+Copyright (c) 2021 PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,4 +25,5 @@ __version__ = '0.0.1a'
 from . import utils
 from .bot import Bot
 from .core import *
+from .database import Database
 from .riot import *

@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2020 PythonistaGuild
+Copyright (c) 2021 PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,8 @@ import core
 
 loop = asyncio.get_event_loop()
 bot = core.Bot()
+
+loop.run_until_complete(core.Database.__ainit__())
 loop.run_until_complete(bot.__ainit__())
 
 
