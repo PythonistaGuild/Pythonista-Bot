@@ -23,7 +23,7 @@ SOFTWARE.
 from .meta import CONSTANTS
 
 
-__all__ = ('Roles', 'Colours')
+__all__ = ('Roles', 'Colours', 'League')
 
 
 class Roles(CONSTANTS):
@@ -50,3 +50,32 @@ class Colours(CONSTANTS):
     PYTHONISTA_BG: hex = 0x18344D
     PYTHON_YELLOW: hex = 0xFFDE57
     PYTHON_BLUE: hex = 0x4584B6
+
+
+class League(CONSTANTS):
+
+    # Endpoints
+    API: str = 'https://{region}.api.riotgames.com/{endpoint}/{query}'
+    SUMMONER_BY_ID: str = 'lol/summoner/v4/summoners'
+    SUMMONER_BY_NAME: str = 'lol/summoner/v4/summoners/by-name'
+    RANKED_BY_SUMMONER_ID: str = 'lol/league/v4/entries/by-summoner'
+    MATCHES_BY_ACCOUNT_ID: str = 'lol/match/v4/matchlists/by-account'
+    MATCH_BY_ID: str = 'lol/match/v4/matches'
+
+    # Assets
+    DD_VERSIONS_URL: str = 'https://ddragon.leagueoflegends.com/api/versions.json'
+    DD_CDN_URL: str = 'https://ddragon.leagueoflegends.com/cdn/dragontail-{version}.tgz'
+    DD_CHAMPIONS_URL: str = 'http://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/champion.json'
+
+    # Regions
+    BR: str = 'br1'  # Brazil
+    EUNE: str = 'eun1'  # Europe Nordic and East
+    EUW: str = 'euw1'  # Europe West
+    LAN: str = 'la1'  # Latin America North
+    LAS: str = 'la2'  # Latin America South
+    NA: str = 'na1'  # North America
+    OCE: str = 'oc1'  # Oceanic
+    RU: str = 'ru'  # Russia
+    TR: str = 'tr1'  # Turkey
+    JP: str = 'jp1'  # Japan
+    KR: str = 'kr'  # Korea
