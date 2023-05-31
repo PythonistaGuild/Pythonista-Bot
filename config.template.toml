@@ -1,14 +1,17 @@
-[BOT]
-token = ''
-webhook_url = ''
 prefix = '>>'
+[TOKENS]
+bot = ''
+idevision = ''
+mystbin = ''
 
 [DATABASE]
-user = 'pythonista'
-password = 'somepassword'
-host = 'localhost'
-port = 5432
-database = 'pythonista'
+dsn = ''
 
-[API_TOKENS]
-riot = ''
+# 50 = CRITICAL
+# 40 = ERROR
+# 30 = WARNING
+# 20 = INFO
+# 10 = DEBUG
+[LOGGING]
+webhook_url = ""
+level = 20

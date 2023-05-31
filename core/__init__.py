@@ -23,6 +23,4 @@ SOFTWARE.
 __version__ = "0.0.1a"
 
 from . import utils as utils
-from ..bot import Bot as Bot
 from .core import *
-from .riot import *

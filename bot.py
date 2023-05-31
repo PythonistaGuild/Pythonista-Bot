@@ -31,6 +31,7 @@ import discord
 from discord.ext import commands
 
 from core import CONFIG
+from core.context import Context
 from core.utils.logging import LogHandler
 from modules import EXTENSIONS
 
@@ -48,10 +49,13 @@ class Bot(commands.Bot):
 
     def __init__(self):
         super().__init__(
-            command_prefix=commands.when_mentioned_or(CONFIG["BOT"]["prefix"]),
+            command_prefix=commands.when_mentioned_or(CONFIG["prefix"]),
             intents=discord.Intents.all(),
         )
         self._previous_websocket_events: deque[Any] = deque(maxlen=10)
+
+    async def get_context(self, message: discord.Message | discord.Interaction) -> Context:
+        return await super().get_context(message, cls=Context)
 
     async def on_ready(self) -> None:
         """On Bot ready - cache is built."""
@@ -87,11 +91,7 @@ class Bot(commands.Bot):
 
 async def main() -> None:
     async with Bot() as bot, aiohttp.ClientSession() as session, asyncpg.create_pool(
-        user=CONFIG["DATABASE"]["user"],
-        host=CONFIG["DATABASE"]["host"],
-        database=CONFIG["DATABASE"]["database"],
-        password=CONFIG["DATABASE"]["password"],
-        port=CONFIG["DATABASE"]["port"],
+        dsn=CONFIG["DATABASE"]["dsn"]
     ) as pool, LogHandler() as handler:
         bot.session = session
         bot.pool = pool
@@ -106,4 +106,4 @@ async def main() -> None:
                 extension.name,
             )
 
-        await bot.start(CONFIG["BOT"]["token"])
+        await bot.start(CONFIG["TOKENS"]["bot"])

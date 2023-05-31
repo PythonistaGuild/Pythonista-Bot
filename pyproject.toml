@@ -19,6 +19,22 @@ black = "*"
 isort = "*"
 "asyncpg-stubs" = "*"
 
+[tool.black]
+line-length = 125
+
+[tool.isort]
+profile = "black"
+lines_after_imports = 2
+line_length = 125
+combine_as_imports = true
+combine_star = true
+
+
+[tool.pyright]
+useLibraryCodeForTypes = true
+typeCheckingMode = "strict"
+pythonVersion = "3.11"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

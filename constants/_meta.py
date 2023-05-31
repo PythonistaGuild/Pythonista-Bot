@@ -20,16 +20,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, NoReturn
+
 from core import CONFIG
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
+    from types_.config import Database, Logging, Tokens
 
 
 class ConstantsMeta(type):
-    def __new__(mcs, name, bases, attrs):
+    def __new__(mcs, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> Self:
         if name == "CONSTANTS":
             return super().__new__(mcs, name, bases, attrs)
 
         try:
-            section = CONFIG[name.upper()]
+            section: Tokens | Database | Logging = CONFIG[name.upper()]  # type: ignore # dynamic code of static types
         except KeyError:
             return super().__new__(mcs, name, bases, attrs)
 
@@ -39,10 +48,10 @@ class ConstantsMeta(type):
 
         return super().__new__(mcs, name, bases, attrs)
 
-    def __setattr__(self, attr, nv):
+    def __setattr__(self, attr: str, nv: Any) -> NoReturn:
         raise RuntimeError(f"Constant <{attr}> cannot be assigned to.")
 
-    def __delattr__(self, attr):
+    def __delattr__(self, attr: str) -> NoReturn:
         raise RuntimeError(f"Constant <{attr}> cannot be deleted.")
 
 
