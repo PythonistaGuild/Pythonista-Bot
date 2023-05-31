@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "pythonista-bot"
+version = "0.1.0"
+description = "The bot that runs the Pythonista guild!"
+authors = ["Alex Nørgaard <Umbra@AbstractUmbra.dev>"]
+license = "MPL2.0"
+readme = "README.md"
+# packages = [{include = "pythonista_bot"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+"discord.py" = "*"
+aiohttp = "*"
+asyncpg = "*"
+toml = "*"
+
+[tool.poetry.group.dev.dependencies]
+black = "*"
+isort = "*"
+"asyncpg-stubs" = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

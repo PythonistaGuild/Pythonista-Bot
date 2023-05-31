@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2020 PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,20 +20,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import toml
 from discord.ext import commands
 
+if TYPE_CHECKING:
+    from types.config import Config
 
-__all__ = ('CONFIG', 'Cog', 'Context')
+    from ..bot import Bot
+
+__all__ = (
+    "CONFIG",
+    "Cog",
+    "Context",
+)
 
 
-CONFIG = toml.load('config.toml')
+CONFIG: Config = toml.load("config.toml")  # type: ignore # weird non-assertion
 
 
 class Cog(commands.Cog):
+    HELP_THUMBNAIL: str = "https://i.imgur.com/J2FKHNW.png"
 
-    HELP_THUMBNAIL: str = 'https://i.imgur.com/J2FKHNW.png'
 
-
-class Context(commands.Context):
+class Context(commands.Context[Bot]):
     pass

@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2020 PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,10 @@ SOFTWARE.
 """
 from .meta import CONSTANTS
 
-
-__all__ = ('Roles', 'Colours', 'League')
+__all__ = ("Roles", "Colours", "League")
 
 
 class Roles(CONSTANTS):
-
     # Human
     ADMIN: int = 490952483238313995
     MODERATOR: int = 578255729295884308
@@ -45,7 +43,6 @@ class Roles(CONSTANTS):
 
 
 class Colours(CONSTANTS):
-
     # Branding
     PYTHONISTA_BG: hex = 0x18344D
     PYTHON_YELLOW: hex = 0xFFDE57
@@ -53,29 +50,30 @@ class Colours(CONSTANTS):
 
 
 class League(CONSTANTS):
-
     # Endpoints
-    API: str = 'https://{region}.api.riotgames.com/{endpoint}/{query}'
-    SUMMONER_BY_ID: str = 'lol/summoner/v4/summoners'
-    SUMMONER_BY_NAME: str = 'lol/summoner/v4/summoners/by-name'
-    RANKED_BY_SUMMONER_ID: str = 'lol/league/v4/entries/by-summoner'
-    MATCHES_BY_ACCOUNT_ID: str = 'lol/match/v4/matchlists/by-account'
-    MATCH_BY_ID: str = 'lol/match/v4/matches'
+    API: str = "https://{region}.api.riotgames.com/{endpoint}/{query}"
+    SUMMONER_BY_ID: str = "lol/summoner/v4/summoners"
+    SUMMONER_BY_NAME: str = "lol/summoner/v4/summoners/by-name"
+    RANKED_BY_SUMMONER_ID: str = "lol/league/v4/entries/by-summoner"
+    MATCHES_BY_ACCOUNT_ID: str = "lol/match/v4/matchlists/by-account"
+    MATCH_BY_ID: str = "lol/match/v4/matches"
 
     # Assets
-    DD_VERSIONS_URL: str = 'https://ddragon.leagueoflegends.com/api/versions.json'
-    DD_CDN_URL: str = 'https://ddragon.leagueoflegends.com/cdn/dragontail-{version}.tgz'
-    DD_CHAMPIONS_URL: str = 'http://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/champion.json'
+    DD_VERSIONS_URL: str = "https://ddragon.leagueoflegends.com/api/versions.json"
+    DD_CDN_URL: str = "https://ddragon.leagueoflegends.com/cdn/dragontail-{version}.tgz"
+    DD_CHAMPIONS_URL: str = (
+        "http://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/champion.json"
+    )
 
     # Regions
-    BR: str = 'br1'  # Brazil
-    EUNE: str = 'eun1'  # Europe Nordic and East
-    EUW: str = 'euw1'  # Europe West
-    LAN: str = 'la1'  # Latin America North
-    LAS: str = 'la2'  # Latin America South
-    NA: str = 'na1'  # North America
-    OCE: str = 'oc1'  # Oceanic
-    RU: str = 'ru'  # Russia
-    TR: str = 'tr1'  # Turkey
-    JP: str = 'jp1'  # Japan
-    KR: str = 'kr'  # Korea
+    BR: str = "br1"  # Brazil
+    EUNE: str = "eun1"  # Europe Nordic and East
+    EUW: str = "euw1"  # Europe West
+    LAN: str = "la1"  # Latin America North
+    LAS: str = "la2"  # Latin America South
+    NA: str = "na1"  # North America
+    OCE: str = "oc1"  # Oceanic
+    RU: str = "ru"  # Russia
+    TR: str = "tr1"  # Turkey
+    JP: str = "jp1"  # Japan
+    KR: str = "kr"  # Korea

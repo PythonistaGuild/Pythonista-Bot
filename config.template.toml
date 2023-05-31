@@ -7,7 +7,7 @@ prefix = '>>'
 user = 'pythonista'
 password = 'somepassword'
 host = 'localhost'
-port = '5432'
+port = 5432
 database = 'pythonista'
 
 [API_TOKENS]

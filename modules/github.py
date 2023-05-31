@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2020 PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,21 +26,22 @@ import discord
 
 import core
 
+GITHUB_ISSUE_URL = "https://github.com/{}/issues/{}"
+LIB_ISSUE_REGEX = re.compile(
+    r"(?P<lib>[a-z]+)?##(?P<number>[0-9]+)", flags=re.IGNORECASE
+)
 
-GITHUB_ISSUE_URL = 'https://github.com/{}/issues/{}'
-LIB_ISSUE_REGEX = re.compile(r'(?P<lib>[a-z]+)?##(?P<number>[0-9]+)', flags=re.IGNORECASE)
-
-aliases = [(('wavelink', 'wave', 'wl'), 'PythonistaGuild/Wavelink'),
-           (('discordpy', 'discord', 'dpy'), 'Rapptz/discord.py'),
-           (('twitchio', 'tio'), 'TwitchIO/TwitchIO')
-           ]
+aliases = [
+    (("wavelink", "wave", "wl"), "PythonistaGuild/Wavelink"),
+    (("discordpy", "discord", "dpy"), "Rapptz/discord.py"),
+    (("twitchio", "tio"), "TwitchIO/TwitchIO"),
+]
 LIB_REPO_MAPPING = {key: value for keys, value in aliases for key in keys}
 
 
 class GitHub(core.Cog):
-
-    def __init__(self, bot: core.Bot):
-        self.bot = bot
+    def __init__(self, bot: core.Bot) -> None:
+        self.bot: core.Bot = bot
 
     @core.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -50,11 +51,13 @@ class GitHub(core.Cog):
         # Check if we can find a valid issue format: lib##number | ##number
         match = LIB_ISSUE_REGEX.search(message.content)
         if match:
-            lib = LIB_REPO_MAPPING.get(match.group('lib'), 'PythonistaGuild/Pythonista-Bot')
-            issue = match.group('number')
+            lib = LIB_REPO_MAPPING.get(
+                match.group("lib"), "PythonistaGuild/Pythonista-Bot"
+            )
+            issue = match.group("number")
 
             await message.channel.send(GITHUB_ISSUE_URL.format(lib, issue))
 
 
-def setup(bot: core.Bot):
-    bot.add_cog(GitHub(bot))
+async def setup(bot: core.Bot) -> None:
+    await bot.add_cog(GitHub(bot))

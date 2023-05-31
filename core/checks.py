@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2020 PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,14 +33,21 @@ def is_role_or_higher(role_id: int):
         # This should never be a problem, but just in case...
         if not role:
             # TODO: Change this to a custom exception.
-            raise commands.CheckFailure(f'Role with ID <{role_id}> does not exist.')
+            raise commands.CheckFailure(f"Role with ID <{role_id}> does not exist.")
 
         ignored = (constants.Roles.NITRO_BOOSTER, constants.Roles.MUTED)
-        roles = [r for r in ctx.author.roles if r.id not in ignored and ctx.author.top_role >= r]
+        roles = [
+            r
+            for r in ctx.author.roles
+            if r.id not in ignored and ctx.author.top_role >= r
+        ]
 
         if roles:
             return True
 
         # TODO: Change this to a custom exception.
-        raise commands.CheckFailure(f'{ctx.author} is not in or higher than role <{role.name}(ID: {role.id})>.')
+        raise commands.CheckFailure(
+            f"{ctx.author} is not in or higher than role <{role.name}(ID: {role.id})>."
+        )
+
     return commands.check(predicate)

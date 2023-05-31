@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2020 PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,16 +22,21 @@ SOFTWARE.
 """
 from discord.utils import escape_markdown
 
+__all__ = ("to_codeblock",)
 
-__all__ = ('to_codeblock', )
 
-
-def to_codeblock(content, language='py', replace_existing=True, escape_md=True, new="'''"):
+def to_codeblock(
+    content: str,
+    language: str = "py",
+    replace_existing: bool = True,
+    escape_md: bool = True,
+    new: str = "'''",
+):
     """
     Quick function to put our content into a Discord accepted codeblock.
     """
     if replace_existing:
-        content = content.replace('```', new)
+        content = content.replace("```", new)
     if escape_md:
         content = escape_markdown(content)
-    return f'```{language}\n{content}\n```'
+    return f"```{language}\n{content}\n```"
