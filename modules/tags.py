@@ -23,5 +23,5 @@ SOFTWARE.
 import core
 
 
-def setup(bot: core.Bot):
+async def setup(bot: core.Bot) -> None:
     pass
