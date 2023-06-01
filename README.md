@@ -9,6 +9,11 @@ Primary Discord Bot for the Pythonista Guild!
 
 You must make a valid copy of [the config file](./config.template.toml) named `config.toml`, fill in the blanks, and then...
 
+### Optional
+- [ ] Docker / Snekbox capability
+This will allow for public evals. To disable the functionality entirely, ensure the `[SNEKBOX]` key is not present in the config file.
+
+
 ## Running the bot
 
 In the future we'll provide a systemd unit, pm2 config and maybe a Dockerfile for running the bot, but for now you can use your ideal terminal and:-
