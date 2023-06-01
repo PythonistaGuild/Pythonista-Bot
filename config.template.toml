@@ -15,3 +15,6 @@ dsn = ''
 [LOGGING]
 webhook_url = ""
 level = 20
+
+[SNEKBOX] # optional
+url = 'http://localhost:8060' # default url

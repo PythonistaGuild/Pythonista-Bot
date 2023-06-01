@@ -1,0 +1,10 @@
+services:
+  snekbox:
+    container_name: snekbox-eval
+    image: ghcr.io/python-discord/snekbox
+    ipc: "none"
+    ports:
+      - "127.0.0.1:8060:8060"
+    privileged: true
+
+version: "3"

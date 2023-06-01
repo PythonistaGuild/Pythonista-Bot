@@ -22,12 +22,14 @@ SOFTWARE.
 """
 import json
 import pathlib
+from asyncio import Queue
 from collections import deque
 from typing import Any
 
 import aiohttp
 import asyncpg
 import discord
+import mystbin
 from discord.ext import commands
 
 from core import CONFIG
@@ -40,11 +42,16 @@ class Bot(commands.Bot):
     session: aiohttp.ClientSession
     pool: asyncpg.Pool[asyncpg.Record]
     log_handler: LogHandler
+    mb_client: mystbin.Client
+    logging_queue: Queue[str]
 
     __slots__ = (
         "session",
         "pool",
         "log_handler",
+        "mb_client",
+        "logging_queue",
+        "_previous_websocket_events",
     )
 
     def __init__(self):
@@ -93,9 +100,12 @@ async def main() -> None:
     async with Bot() as bot, aiohttp.ClientSession() as session, asyncpg.create_pool(
         dsn=CONFIG["DATABASE"]["dsn"]
     ) as pool, LogHandler() as handler:
+        bot.logging_queue = Queue()
         bot.session = session
         bot.pool = pool
         bot.log_handler = handler
+
+        bot.mb_client = mystbin.Client(token=CONFIG["TOKENS"]["mystbin"], session=session)
 
         await bot.load_extension("jishaku")
         for extension in EXTENSIONS:

@@ -1,4 +1,5 @@
-from typing import TypedDict
+from typing import NotRequired, TypedDict
+
 
 __all__ = ("Config",)
 
@@ -18,8 +19,13 @@ class Logging(TypedDict):
     level: int
 
 
+class Snekbox(TypedDict):
+    url: str
+
+
 class Config(TypedDict):
     prefix: str
     TOKENS: Tokens
     DATABASE: Database
     LOGGING: Logging
+    SNEKBOX: NotRequired[Snekbox]

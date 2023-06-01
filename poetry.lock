@@ -598,6 +598,24 @@ files = [
 ]
 
 [[package]]
+name = "mystbin-py"
+version = "5.1.0"
+description = "A small simple wrapper around the mystb.in API."
+optional = false
+python-versions = ">=3.9,<4.0"
+files = [
+    {file = "mystbin_py-5.1.0-py3-none-any.whl", hash = "sha256:eaf4220f88f942a2a505dbddd11995918f386ae1841849390f59196550bd95d0"},
+    {file = "mystbin_py-5.1.0.tar.gz", hash = "sha256:c9f05c7920140a06359b5a8f25fd628b06b90ff25ea3fa502a61afa1093e4439"},
+]
+
+[package.dependencies]
+aiohttp = ">=3.7.4,<4.0.0"
+
+[package.extras]
+docs = ["furo", "sphinx (>=4.0.0,<5.0.0)", "sphinxcontrib-trio"]
+requests = ["requests (>=2.24.0,<3.0.0)"]
+
+[[package]]
 name = "packaging"
 version = "23.1"
 description = "Core utilities for Python packages"
@@ -746,4 +764,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "dcde928234584b705e07f71f4762e7cf3205fa3ce321566912f377f500831f29"
+content-hash = "6913ec5ccb6ff0f9943a3deb8e6d4191ff3fd4fab6ec99920007ddaa52e5d12e"
