@@ -114,7 +114,7 @@ class GitHub(core.Cog):
 
         github_dict = {
             "path": file_path,
-            "min": _minBoundary if _minBoundary > 0 else highlighted_line,      # Do not display negative numbers if >0
+            "min": _minBoundary if _minBoundary > 0 else highlighted_line,      # Do not display negative numbers if <0
             "max": _maxBoundary,
             "msg": msg
         }
