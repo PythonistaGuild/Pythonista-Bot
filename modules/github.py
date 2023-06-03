@@ -22,6 +22,7 @@ SOFTWARE.
 """
 from __future__ import annotations
 
+import asyncio
 import re
 from typing import TYPE_CHECKING
 
@@ -51,6 +52,7 @@ class GitHub(core.Cog):
     def __init__(self, bot: Bot) -> None:
         self.bot: Bot = bot
         self.code_highlight_emoji = "📃"
+        self.highlight_timeout = 10
 
     def _strip_content_path(self, url: str) -> str:
         file_path = url[len(GITHUB_BASE_URL):]
@@ -59,11 +61,12 @@ class GitHub(core.Cog):
     async def format_highlight_block(self, url: str, line_adjustment: int = 10):
         try:
             highlighted_line = int(url.split("#L")[1])  # seperate the #L{n} highlight
-        except:
-            return None
+        except Exception as err:
+            if isinstance(err, IndexError):
+                return None
 
         file_path = self._strip_content_path(url)
-        raw_url = GITHUB_RAW_CONTENT_URL + file_path.replace("blob/", "") # Convert it to a raw user content URL
+        raw_url = GITHUB_RAW_CONTENT_URL + file_path.replace("blob/", "")  # Convert it to a raw user content URL
 
         code = ""
         async with aiohttp.ClientSession() as session:
@@ -106,7 +109,8 @@ class GitHub(core.Cog):
 
                 msg += highlighted_msg_format
             else:
-                display_str = "{}  {}\n" if line_list.get(key) is not None else "" # if we hit the end of the file, just write an empty string
+                display_str = "{}  {}\n" if line_list.get(
+                    key) is not None else ""  # if we hit the end of the file, just write an empty string
                 msg += display_str.format(currLineNum, line_list.get(key))
             key += 1
 
@@ -114,7 +118,7 @@ class GitHub(core.Cog):
 
         github_dict = {
             "path": file_path,
-            "min": _minBoundary if _minBoundary > 0 else highlighted_line,      # Do not display negative numbers if <0
+            "min": _minBoundary if _minBoundary > 0 else highlighted_line,  # Do not display negative numbers if <0
             "max": _maxBoundary,
             "msg": msg
         }
@@ -133,34 +137,31 @@ class GitHub(core.Cog):
 
             await message.channel.send(GITHUB_ISSUE_URL.format(lib, issue))
 
-        codeSegment = await self.format_highlight_block(message.content)
+        code_segment = await self.format_highlight_block(message.content)
 
-        if codeSegment is None:
+        if code_segment is None:
             return
 
         await message.add_reaction(self.code_highlight_emoji)
 
-        path = codeSegment['path']
-        _min = codeSegment['min']
-        _max = codeSegment['max']
-        code_fmt = codeSegment['msg']
+        path = code_segment['path']
+        _min = code_segment['min']
+        _max = code_segment['max']
+        code_fmt = code_segment['msg']
 
         def check(reaction, user):
             return reaction.emoji == self.code_highlight_emoji and user != self.bot.user \
                 and message.id == reaction.message.id
 
-        await self.bot.wait_for("reaction_add", check=check)
+        try:
+            await self.bot.wait_for("reaction_add", check=check, timeout=self.highlight_timeout)
+            await message.channel.send(
+                content="Showing lines `{}` - `{}` in: `{}`...\n{}".format(_min, _max, path, code_fmt),
+                suppress_embeds=True
+            )
 
-        code_display_msg = await message.channel.send(
-            content="Showing lines `{}` - `{}` in: `{}`...\n{}".format(_min, _max, path, code_fmt),
-            suppress_embeds=True
-        )
-
-        await self.bot.wait_for("reaction_remove", check=check)
-        await code_display_msg.delete()
-
-        # clean up reactions
-        await message.clear_reactions()
+        except asyncio.TimeoutError:
+            await message.clear_reactions()
 
 
 async def setup(bot: Bot) -> None:
