@@ -68,7 +68,6 @@ jobs:
         uses: jakebailey/pyright-action@v1
         with:
           warnings: false
-          ignore-external: true
           no-comments: ${{ matrix.python-version != '3.x' }}
 
       - name: Lint
