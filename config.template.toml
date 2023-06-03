@@ -5,7 +5,7 @@ idevision = ''
 mystbin = ''
 
 [DATABASE]
-dsn = ''
+dsn = 'postgres://pythonistabot:pythonistabot@database:5432/pythonistabot' # assumed default
 
 # 50 = CRITICAL
 # 40 = ERROR
@@ -17,4 +17,4 @@ webhook_url = ""
 level = 20
 
 [SNEKBOX] # optional
-url = 'http://localhost:8060' # default url
+url = 'http://snekbox:8060' # default url
