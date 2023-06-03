@@ -58,7 +58,7 @@ jobs:
         if: ${{ steps.cached-pip-wheels.outputs.cache-hit != 'true' }}
         id: install-deps
         run: |
-          poetry install --without=dev --no-interaction
+          poetry install --no-interaction
 
       - name: Activate venv @ ${{ matrix.python-version }}
         run: |

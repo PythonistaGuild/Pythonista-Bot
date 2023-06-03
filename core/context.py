@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     "Context",
+    "GuildContext",
     "Interaction",
 )
 
@@ -19,3 +20,8 @@ Interaction: TypeAlias = discord.Interaction["Bot"]
 
 class Context(commands.Context["Bot"]):
     pass
+
+
+class GuildContext(Context):
+    guild: discord.Guild  # type: ignore # type lie due to narrowing
+    author: discord.Member  # type: ignore # type lie due to narrowing

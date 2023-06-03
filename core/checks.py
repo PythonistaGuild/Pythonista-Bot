@@ -20,14 +20,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from discord.ext import commands
 
 import constants
-import core
+from core.context import GuildContext
 
 
-def is_role_or_higher(role_id: int):
-    def predicate(ctx: core.Context):
+if TYPE_CHECKING:
+    from discord.ext.commands._types import Check  # type: ignore # why would this need stubs
+
+
+def is_role_or_higher(role_id: int) -> Check[Any]:
+    def predicate(ctx: GuildContext) -> bool:
         role = ctx.guild.get_role(role_id)
 
         # This should never be a problem, but just in case...
@@ -36,18 +44,12 @@ def is_role_or_higher(role_id: int):
             raise commands.CheckFailure(f"Role with ID <{role_id}> does not exist.")
 
         ignored = (constants.Roles.NITRO_BOOSTER, constants.Roles.MUTED)
-        roles = [
-            r
-            for r in ctx.author.roles
-            if r.id not in ignored and ctx.author.top_role >= r
-        ]
+        roles = [r for r in ctx.author.roles if r.id not in ignored and ctx.author.top_role >= r]
 
         if roles:
             return True
 
         # TODO: Change this to a custom exception.
-        raise commands.CheckFailure(
-            f"{ctx.author} is not in or higher than role <{role.name}(ID: {role.id})>."
-        )
+        raise commands.CheckFailure(f"{ctx.author} is not in or higher than role <{role.name}(ID: {role.id})>.")
 
     return commands.check(predicate)
