@@ -6,6 +6,7 @@ services:
     container_name: pythonista-bot
     depends_on:
       - database
+    restart: always
 
   database:
     container_name: pythonista-bot-db
@@ -37,6 +38,7 @@ services:
     ports:
       - "127.0.0.1:8060:8060"
     privileged: true
+    restart: always
 
 version: "3"
 volumes:
