@@ -26,10 +26,10 @@ import asyncio
 import re
 from typing import TYPE_CHECKING
 
-import aiohttp
 import discord
 
 import core
+
 
 if TYPE_CHECKING:
     from bot import Bot
@@ -55,10 +55,10 @@ class GitHub(core.Cog):
         self.highlight_timeout = 10
 
     def _strip_content_path(self, url: str) -> str:
-        file_path = url[len(GITHUB_BASE_URL):]
+        file_path = url[len(GITHUB_BASE_URL) :]
         return file_path
 
-    async def format_highlight_block(self, url: str, line_adjustment: int = 10):
+    async def format_highlight_block(self, url: str, line_adjustment: int = 10) -> dict[str, str | int] | None:
         try:
             highlighted_line = int(url.split("#L")[1])  # seperate the #L{n} highlight
         except IndexError:
@@ -76,7 +76,7 @@ class GitHub(core.Cog):
 
         code = code.splitlines()
 
-        code_block_dict = {"lines": {}}
+        code_block_dict: dict[str, dict[int, str]] = {"lines": {}}
         j = 0
         for i in code:
             # populate the dict
@@ -91,8 +91,8 @@ class GitHub(core.Cog):
             return None
 
         bound_adj = line_adjustment  # adjustment for upper and lower bound display
-        _minBoundary = (highlighted_line - 1 - bound_adj)
-        _maxBoundary = (highlighted_line - 1 + bound_adj)
+        _minBoundary = highlighted_line - 1 - bound_adj
+        _maxBoundary = highlighted_line - 1 + bound_adj
 
         # loop through all the lines, and adjust the formatting
         msg = "```ansi\n"
@@ -101,14 +101,13 @@ class GitHub(core.Cog):
             currLineNum = str(key + 1)
             # insert a space if there is no following char before the first character...
             if key + 1 == highlighted_line:
-                highlighted_msg_format = "\u001b[0;37m\u001b[4;31m{}  {}\u001b[0;0m\n".format(
-                    currLineNum, line_list[key]
-                )
+                highlighted_msg_format = "\u001b[0;37m\u001b[4;31m{}  {}\u001b[0;0m\n".format(currLineNum, line_list[key])
 
                 msg += highlighted_msg_format
             else:
-                display_str = "{}  {}\n" if line_list.get(
-                    key) is not None else ""  # if we hit the end of the file, just write an empty string
+                display_str = (
+                    "{}  {}\n" if line_list.get(key) is not None else ""
+                )  # if we hit the end of the file, just write an empty string
                 msg += display_str.format(currLineNum, line_list.get(key))
             key += 1
 
@@ -118,7 +117,7 @@ class GitHub(core.Cog):
             "path": file_path,
             "min": _minBoundary if _minBoundary > 0 else highlighted_line,  # Do not display negative numbers if <0
             "max": _maxBoundary,
-            "msg": msg
+            "msg": msg,
         }
         return github_dict
 
@@ -142,20 +141,20 @@ class GitHub(core.Cog):
 
         await message.add_reaction(self.code_highlight_emoji)
 
-        path = code_segment['path']
-        _min = code_segment['min']
-        _max = code_segment['max']
-        code_fmt = code_segment['msg']
+        path = code_segment["path"]
+        _min = code_segment["min"]
+        _max = code_segment["max"]
+        code_fmt = code_segment["msg"]
 
-        def check(reaction, user):
-            return reaction.emoji == self.code_highlight_emoji and user != self.bot.user \
-                and message.id == reaction.message.id
+        def check(reaction: discord.Reaction, user: discord.User) -> bool:
+            return (
+                reaction.emoji == self.code_highlight_emoji and user != self.bot.user and message.id == reaction.message.id
+            )
 
         try:
             await self.bot.wait_for("reaction_add", check=check, timeout=self.highlight_timeout)
             await message.channel.send(
-                content="Showing lines `{}` - `{}` in: `{}`...\n{}".format(_min, _max, path, code_fmt),
-                suppress_embeds=True
+                content="Showing lines `{}` - `{}` in: `{}`...\n{}".format(_min, _max, path, code_fmt), suppress_embeds=True
             )
         except asyncio.TimeoutError:
             return
