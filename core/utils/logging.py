@@ -46,7 +46,7 @@ class LogHandler:
 
         self.log.setLevel(logging.INFO)
         handler = RotatingFileHandler(
-            filename=self.logging_path / "Mipha.log",
+            filename=self.logging_path / "PythonistaBot.log",
             encoding="utf-8",
             mode="w",
             maxBytes=self.max_bytes,
