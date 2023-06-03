@@ -61,9 +61,8 @@ class GitHub(core.Cog):
     async def format_highlight_block(self, url: str, line_adjustment: int = 10):
         try:
             highlighted_line = int(url.split("#L")[1])  # seperate the #L{n} highlight
-        except Exception as err:
-            if isinstance(err, IndexError):
-                return None
+        except IndexError:
+            return
 
         file_path = self._strip_content_path(url)
         raw_url = GITHUB_RAW_CONTENT_URL + file_path.replace("blob/", "")  # Convert it to a raw user content URL
@@ -159,9 +158,8 @@ class GitHub(core.Cog):
                 content="Showing lines `{}` - `{}` in: `{}`...\n{}".format(_min, _max, path, code_fmt),
                 suppress_embeds=True
             )
-
         except asyncio.TimeoutError:
-            await message.clear_reactions()
+            return
 
 
 async def setup(bot: Bot) -> None:
