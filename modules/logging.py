@@ -22,10 +22,13 @@ SOFTWARE.
 """
 from __future__ import annotations
 
+import datetime
+import textwrap
 from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands, tasks
+from discord.utils import format_dt
 
 import core
 
@@ -37,13 +40,19 @@ if TYPE_CHECKING:
 class Logging(commands.Cog):
     def __init__(self, bot: Bot) -> None:
         self.bot: Bot = bot
-        self.webhook = discord.Webhook.from_url(core.CONFIG["LOGGING"]["webhook_url"], client=bot)
+        self.webhook = discord.Webhook.from_url(core.CONFIG["LOGGING"]["webhook_url"], session=bot.session, client=bot)
 
     @tasks.loop(seconds=0)
     async def logging_loop(self) -> None:
         to_log = await self.bot.logging_queue.get()
+        attributes = {"INFO": "\U00002139\U0000fe0f", "WARNING": "\U000026a0\U0000fe0f"}
 
-        await self.webhook.send(to_log, username="PythonistaBot Logging")
+        emoji = attributes.get(to_log.levelname, "\N{CROSS MARK}")
+        dt = datetime.datetime.utcfromtimestamp(to_log.created)
+
+        message = textwrap.shorten(f"{emoji} {format_dt(dt)}\n{to_log.message}", width=1990)
+
+        await self.webhook.send(message, username="PythonistaBot Logging")
 
 
 async def setup(bot: Bot) -> None:

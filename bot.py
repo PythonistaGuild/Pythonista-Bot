@@ -20,11 +20,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from __future__ import annotations
+
+import asyncio
 import json
 import pathlib
 from asyncio import Queue
 from collections import deque
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import aiohttp
 import asyncpg
@@ -38,12 +41,16 @@ from core.utils.logging import LogHandler
 from modules import EXTENSIONS
 
 
+if TYPE_CHECKING:
+    from logging import LogRecord
+
+
 class Bot(commands.Bot):
     session: aiohttp.ClientSession
     pool: asyncpg.Pool[asyncpg.Record]
     log_handler: LogHandler
     mb_client: mystbin.Client
-    logging_queue: Queue[str]
+    logging_queue: Queue[LogRecord]
 
     __slots__ = (
         "session",
@@ -67,14 +74,11 @@ class Bot(commands.Bot):
     async def on_ready(self) -> None:
         """On Bot ready - cache is built."""
         assert self.user
-        print(f"Online. Logged in as {self.user.name} || {self.user.id}")
+        self.log_handler.info("Online. Logged in as %s || %s", self.user.name, self.user.id)
 
     async def on_socket_response(self, message: Any) -> None:
         """Quick override to log websocket events."""
         self._previous_websocket_events.append(message)
-
-    async def setup_hook(self) -> None:
-        self.session = aiohttp.ClientSession()
 
     async def start(self, token: str, *, reconnect: bool = True) -> None:
         try:
@@ -99,7 +103,7 @@ class Bot(commands.Bot):
 async def main() -> None:
     async with Bot() as bot, aiohttp.ClientSession() as session, asyncpg.create_pool(
         dsn=CONFIG["DATABASE"]["dsn"]
-    ) as pool, LogHandler() as handler:
+    ) as pool, LogHandler(bot=bot) as handler:
         bot.logging_queue = Queue()
         bot.session = session
         bot.pool = pool
@@ -117,3 +121,6 @@ async def main() -> None:
             )
 
         await bot.start(CONFIG["TOKENS"]["bot"])
+
+
+asyncio.run(main())

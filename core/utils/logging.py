@@ -3,26 +3,39 @@ from __future__ import annotations
 import logging
 import pathlib
 from logging.handlers import RotatingFileHandler
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING, Any
 
-from discord.utils import (
-    _ColourFormatter as ColourFormatter,  # type: ignore # shh, I need it
-)
-from discord.utils import stream_supports_colour
+from discord.utils import _ColourFormatter as ColourFormatter, stream_supports_colour  # type: ignore # shh, I need it
+
 
 if TYPE_CHECKING:
-    from logging import _ExcInfoType  # type: ignore # shh, I need it
-
     from typing_extensions import Self
+
+    from bot import Bot
+
+
+class QueueEmitHandler(logging.Handler):
+    def __init__(self, bot: Bot, /) -> None:
+        self.bot: Bot = bot
+        super().__init__(logging.INFO)
+
+    def emit(self, record: logging.LogRecord) -> None:
+        self.bot.logging_queue.put_nowait(record)
 
 
 class LogHandler:
-    def __init__(self, *, stream: bool = True) -> None:
+    def __init__(self, *, bot: Bot, stream: bool = True) -> None:
         self.log: logging.Logger = logging.getLogger()
         self.max_bytes: int = 32 * 1024 * 1024
         self.logging_path = pathlib.Path("./logs/")
         self.logging_path.mkdir(exist_ok=True)
         self.stream: bool = stream
+        self.bot: Bot = bot
+        self.debug = self.log.debug
+        self.info = self.log.info
+        self.warning = self.log.warning
+        self.error = self.log.error
+        self.critical = self.log.critical
 
     async def __aenter__(self) -> Self:
         return self.__enter__()
@@ -40,9 +53,7 @@ class LogHandler:
             backupCount=5,
         )
         dt_fmt = "%Y-%m-%d %H:%M:%S"
-        fmt = logging.Formatter(
-            "[{asctime}] [{levelname:<7}] {name}: {message}", dt_fmt, style="{"
-        )
+        fmt = logging.Formatter("[{asctime}] [{levelname:<7}] {name}: {message}", dt_fmt, style="{")
         handler.setFormatter(fmt)
         self.log.addHandler(handler)
 
@@ -51,6 +62,7 @@ class LogHandler:
             if stream_supports_colour(stream_handler):
                 stream_handler.setFormatter(ColourFormatter())
             self.log.addHandler(stream_handler)
+            self.log.addHandler(QueueEmitHandler(self.bot))
 
         return self
 
@@ -62,93 +74,3 @@ class LogHandler:
         for hdlr in handlers:
             hdlr.close()
             self.log.removeHandler(hdlr)
-
-    def debug(
-        self,
-        message: object,
-        *args: Any,
-        exc_info: _ExcInfoType,
-        stack_info: bool = False,
-        stack_level: int = 1,
-        extra: Mapping[str, Any] | None = None,
-    ) -> None:
-        self.log.debug(
-            msg=message,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stack_level,
-            extra=extra,
-        )
-
-    def info(
-        self,
-        message: object,
-        *args: Any,
-        exc_info: _ExcInfoType,
-        stack_info: bool = False,
-        stack_level: int = 1,
-        extra: Mapping[str, Any] | None = None,
-    ) -> None:
-        self.log.info(
-            msg=message,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stack_level,
-            extra=extra,
-        )
-
-    def warning(
-        self,
-        message: object,
-        *args: Any,
-        exc_info: _ExcInfoType,
-        stack_info: bool = False,
-        stack_level: int = 1,
-        extra: Mapping[str, Any] | None = None,
-    ) -> None:
-        self.log.warning(
-            msg=message,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stack_level,
-            extra=extra,
-        )
-
-    def error(
-        self,
-        message: object,
-        *args: Any,
-        exc_info: _ExcInfoType,
-        stack_info: bool = False,
-        stack_level: int = 1,
-        extra: Mapping[str, Any] | None = None,
-    ) -> None:
-        self.log.warning(
-            msg=message,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stack_level,
-            extra=extra,
-        )
-
-    def critical(
-        self,
-        message: object,
-        *args: Any,
-        exc_info: _ExcInfoType,
-        stack_info: bool = False,
-        stack_level: int = 1,
-        extra: Mapping[str, Any] | None = None,
-    ) -> None:
-        self.log.critical(
-            msg=message,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stack_level,
-            extra=extra,
-        )

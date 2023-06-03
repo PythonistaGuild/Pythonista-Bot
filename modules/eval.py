@@ -47,6 +47,15 @@ class Evaluation(core.Cog):
         self.bot: Bot = bot
         self.eval_endpoint: str = endpoint_url
 
+    async def perform_eval(self, code: Codeblock) -> str:
+        async with self.bot.session.post(self.eval_endpoint, json={"input": code.content[1]}) as eval_response:
+            if eval_response.status != 200:
+                raise InvalidEval(eval_response.status, "There was an issue running this eval command.")
+
+            eval_data = await eval_response.json()
+
+            return eval_data["stdout"]
+
     @commands.command()
     @commands.max_concurrency(1, per=commands.BucketType.user, wait=False)
     @commands.cooldown(rate=1, per=10.0, type=commands.BucketType.user)
@@ -58,21 +67,20 @@ class Evaluation(core.Cog):
         code_body: :class:`Codeblock`
             This will attempt to convert your current passed parameter into proper Python code.
         """
+        reaction = "\U00002705"
         async with ctx.typing():
-            async with self.bot.session.post(self.eval_endpoint, json={"input": code.content[1]}) as eval_response:
-                if eval_response.status != 200:
-                    # TODO: error logging? Error handler and webhook post. Global or local?
-                    raise InvalidEval(eval_response.status, "There was an issue running this eval command.")
+            try:
+                output = await self.perform_eval(code)
+            except InvalidEval:
+                reaction = "\U0000274c"
+                return await ctx.message.add_reaction(reaction)
 
-                eval_data = await eval_response.json()
-
-            stdout = eval_data["stdout"]
-
-            if len(stdout) > 500:
-                codeblock = await self.bot.mb_client.create_paste(content=stdout, filename="eval.py")
+            if len(output) > 1000:
+                codeblock = await self.bot.mb_client.create_paste(content=output, filename="eval.py")
             else:
-                codeblock = formatters.to_codeblock(stdout, escape_md=False)
+                codeblock = formatters.to_codeblock(output, escape_md=False)
 
+            await ctx.message.add_reaction(reaction)
             await ctx.send(f"Hey {ctx.author.display_name}, here is your eval output:\n{codeblock}")
 
     @eval.error
