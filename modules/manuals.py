@@ -1,0 +1,314 @@
+"""MIT License
+
+Copyright (c) 2020 - Current PythonistaGuild
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+import aiohttp
+import discord
+import yarl
+from discord.enums import Enum
+from discord.ext import commands
+from discord.ext.commands.view import StringView
+
+import constants
+import core
+from core.paginator import TextPager
+
+
+class LibEnum(Enum):
+    wavelink = ("https://wavelink.readthedocs.io/en/latest", constants.Colours.PYTHONISTA_BG, "wavelink")
+    twitchio = ("https://twitchio.dev/en/latest/", constants.Colours.PYTHON_YELLOW, "twitchio")
+    discordpy = ("https://discordpy.readthedocs.io/en/stable", 2644621, "discord.py-2")
+    python = ("https://docs.python.org/3", constants.Colours.PYTHON_BLUE, None)
+    aiohttp = (None, 0xFF0000, "aiohttp")
+
+
+lib_names = {
+    "twitchio": LibEnum.twitchio,
+    "tio": LibEnum.twitchio,
+    "wavelink": LibEnum.wavelink,
+    "wl": LibEnum.wavelink,
+    "discordpy": LibEnum.discordpy,
+    "dpy": LibEnum.discordpy,
+    "python": LibEnum.python,
+    "py": LibEnum.python,
+    "aiohttp": LibEnum.aiohttp,
+}
+
+
+class Manuals(commands.Cog):
+    """RTFM/RTFS commands"""
+
+    target = yarl.URL("https://idevision.net/api/public/")
+
+    def __init__(self, bot: core.Bot) -> None:
+        self.bot = bot
+
+    async def cog_load(self) -> None:
+        self.session = aiohttp.ClientSession()
+
+    async def cog_unload(self) -> None:
+        await self.session.close()
+
+    @staticmethod
+    def _cooldown_bucket(ctx: core.Context) -> commands.Cooldown | None:
+        if ctx.author_is_mod():
+            return None
+
+        return commands.Cooldown(2, 5)
+
+    def _smart_guess_lib(self, ctx: core.Context) -> LibEnum | None:
+        if ctx.channel.id == constants.Channels.HELP_CHANNEL:
+            return None  # there's not much hope here, stay quick
+
+        if isinstance(ctx.channel, discord.Thread) and ctx.channel.parent_id == constants.Channels.HELP_FORUM:
+            tags = set(x.name for x in ctx.channel.applied_tags)
+
+            if "twitchio-help" in tags:
+                return LibEnum.twitchio
+            elif "wavelink-help" in tags:
+                return LibEnum.wavelink
+            elif "discord.py-help" in tags:
+                return LibEnum.discordpy
+            elif "python-help" in tags:
+                return LibEnum.python
+
+            return None
+
+        if ctx.channel.id == constants.Channels.WAVELINK_DEV:
+            return LibEnum.wavelink
+        elif ctx.channel.id == constants.Channels.TWITCHIO_DEV:
+            return LibEnum.twitchio
+
+        return None  # cry
+
+    async def context_reply(
+        self,
+        ctx: core.Context,
+        content: str | None = discord.utils.MISSING,
+        embed: discord.Embed | None = discord.utils.MISSING,
+        reference: discord.MessageReference | None = None,
+    ) -> discord.Message:
+        if ctx.message.reference and not reference:
+            reference = ctx.message.reference
+
+        return await ctx.send(content=content, embed=embed, reference=reference)
+
+    @commands.command(
+        "rtfm",
+        brief="Searches documentation",
+        short_doc="Searches relevant documentation for the given input.",
+        signature="[library]? [query]",
+    )
+    @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
+    async def rtfm(self, ctx: core.Context, *, query: str) -> None:
+        """
+        Searches relevant documentation.
+        On its own it will do its best to figure out the most relevant documentation,
+        but you can always specify by prefixing the query with the library you wish to use.
+        The following libraries are supported (you can use either the full name or the shorthand):
+        ```
+        - wavelink   | wl
+        - twitchio   | tio
+        - python     | py
+        - discordpy  | dpy
+        ```
+
+        The following flags are available for this command:
+        ```
+        - --labels (Include labels in search results)
+        - --clear (Clearly labels labels with a `label:` prefix. If --labels has not be set it will be implicitly set)
+        """
+        if not query:
+            lib = self._smart_guess_lib(ctx)
+            if not lib:
+                await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
+                return
+
+            await self.context_reply(ctx, lib.value)
+            return
+
+        labels = False
+        clear_labels = False
+
+        if "--labels" in query:
+            labels = True
+            query = query.replace("--labels", "")
+
+        if "--clear" in query:
+            labels = clear_labels = True  # implicitly set --labels
+            query = query.replace("--clear", "")
+
+        view = StringView(query)
+        maybe_lib = view.get_word()
+        view.skip_ws()
+        final_query = view.read_rest()
+        lib: LibEnum | None = None
+
+        if maybe_lib in lib_names:
+            lib = lib_names[maybe_lib]
+        else:
+            final_query = query  # ignore the stringview stuff then
+
+        if lib is None:
+            lib = self._smart_guess_lib(ctx)
+
+        if lib is None:
+            await ctx.reply("Sorry, I couldn't find a library that matched. Try again with a different library?")
+            return
+
+        if not final_query:
+            await self.context_reply(ctx, content=lib.value[0])
+            return
+
+        url = self.target.with_path("/api/public/rtfm.sphinx").with_query(
+            {
+                "query": final_query,
+                "location": lib.value[0],
+                "show-labels": str(labels),
+                "label-labels": str(clear_labels),
+            }
+        )
+
+        headers = {
+            "User-Agent": f"PythonistaBot discord bot (via {ctx.author})",
+            "Authorization": core.CONFIG["TOKENS"]["idevision"],
+        }
+        async with self.session.get(url, headers=headers) as resp:
+            if resp.status != 200:
+                await ctx.send(f"The api returned an irregular status ({resp.status}) ({await resp.text()})")
+                return
+
+            matches = await resp.json()
+            if not matches["nodes"]:
+                await ctx.send("Could not find anything. Sorry.")
+                return
+
+        e = discord.Embed(colour=lib.value[1])
+        e.title = f"{lib.name.title()}: {final_query}"
+        e.description = "\n".join(f"[`{key}`]({url})" for key, url in matches["nodes"].items())
+        e.set_author(name=f"Query Time: {float(matches['query_time']):.2f}")
+        await ctx.send(embed=e)
+
+    @commands.command(
+        name="rtfs",
+        brief="Searches source files",
+        short_doc="Searches relevant library source for the given input.",
+        signature="[library]? [query]",
+    )
+    @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
+    async def rtfs(self, ctx: core.Context, *, query: str) -> None:
+        """
+        Searches relevant library source code.
+        On its own it will do its best to figure out the most relevant library,
+        but you can always specify by prefixing the query with the library you wish to use.
+        The following libraries are supported (you can use either the full name or the shorthand):
+        ```
+        - wavelink   | wl
+        - twitchio   | tio
+        - discordpy  | dpy
+        - aiohttp    |
+        ```
+
+        The following flags are available for this command:
+        ```
+        - --source (Sends source code instead of links to the github repository)
+        """
+        if not query:
+            lib = self._smart_guess_lib(ctx)
+            if not lib:
+                await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
+                return
+
+            await self.context_reply(ctx, lib.value)
+            return
+
+        source = False
+
+        if "--source" in query:
+            source = True
+            query = query.replace("--source", "")
+
+        view = StringView(query)
+        maybe_lib = view.get_word()
+        view.skip_ws()
+        final_query = view.read_rest()
+        lib: LibEnum | None = None
+
+        if maybe_lib in lib_names:
+            lib = lib_names[maybe_lib]
+        else:
+            final_query = query  # ignore the stringview stuff then
+
+        if lib is None:
+            lib = self._smart_guess_lib(ctx)
+
+        if lib is None:
+            await ctx.reply("Sorry, I couldn't find a library that matched. Try again with a different library?")
+            return
+
+        if not final_query:
+            await self.context_reply(ctx, content=lib.value[0])
+            return
+
+        url = self.target.with_path("/api/public/rtfs").with_query(
+            {
+                "query": final_query,
+                "library": lib.value[2],
+                "format": "links" if not source else "source",
+            }
+        )
+
+        headers = {
+            "User-Agent": f"PythonistaBot discord bot (via {ctx.author})",
+            "Authorization": core.CONFIG["TOKENS"]["idevision"],
+        }
+        async with self.session.get(url, headers=headers) as resp:
+            if resp.status != 200:
+                await ctx.send(f"The api returned an irregular status ({resp.status}) ({await resp.text()})")
+                return
+
+            matches = await resp.json()
+            if not matches["nodes"]:
+                await ctx.send("Could not find anything. Sorry.")
+                return
+
+        nodes = matches["nodes"]
+
+        if not source:
+            out = [f"[{name}]({url})" for name, url in nodes.items()]
+
+            await ctx.send(
+                embed=discord.Embed(
+                    description="\n".join(out), title=f"{lib.name.title()}: {final_query}", colour=lib.value[1]
+                )
+                .set_footer(text=f"Is the api behind on commits? Use {discord.utils.escape_mentions(ctx.prefix)}rtfs-reload")  # type: ignore
+                .set_author(name=f"query Time: {float(matches['query_time']):.03f} • commit {matches['commit'][:6]}")
+            )
+
+        else:
+            n = next(iter(nodes.items()))
+            await ctx.reply(f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}", mention_author=False)
+            pages = TextPager(ctx, n[1], prefix="```py")
+            await pages.paginate()
+
+
+async def setup(bot: core.Bot) -> None:
+    await bot.add_cog(Manuals(bot))

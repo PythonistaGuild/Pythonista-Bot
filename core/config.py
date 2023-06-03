@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2021-Present PythonistaGuild
+Copyright (c) 2020 - Current PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,9 +20,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-__version__ = "0.0.1a"
+import toml
 
-from . import errors as errors, utils as utils
-from .converters import *
-from .core import *
-from .context import *
+__all__ = ("CONFIG",)
+
+with open("config.toml", "r") as fp:
+    CONFIG = toml.load(fp)
