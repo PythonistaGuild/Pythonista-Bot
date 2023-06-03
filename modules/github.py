@@ -68,12 +68,11 @@ class GitHub(core.Cog):
         raw_url = GITHUB_RAW_CONTENT_URL + file_path.replace("blob/", "")  # Convert it to a raw user content URL
 
         code = ""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(raw_url) as r:
-                if r.status == 404:
-                    return
+        async with self.bot.session.get(raw_url) as resp:
+            if resp.status == 404:
+                return
 
-                code += await r.text()
+            code += await resp.text()
 
         code = code.splitlines()
 
