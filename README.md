@@ -18,7 +18,7 @@ This will allow for public evals. To disable the functionality entirely, ensure 
 
 In the future we'll provide a systemd unit, pm2 config and maybe a Dockerfile for running the bot, but for now you can use your ideal terminal and:-
 ```shell
-python bot.py
+python launcher.py
 ```
 
 ### Docker
