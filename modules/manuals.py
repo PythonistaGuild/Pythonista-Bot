@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2020 - Current PythonistaGuild
+Copyright (c) 2021 - Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import aiohttp
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import discord
 import yarl
 from discord.enums import Enum
 from discord.ext import commands
-from discord.ext.commands.view import StringView
+from discord.ext.commands.view import StringView  # type: ignore # why does this need a stub
 
 import constants
 import core
+from core.context import Context
 from core.paginator import TextPager
+
+
+if TYPE_CHECKING:
+    from bot import Bot
 
 
 class LibEnum(Enum):
@@ -58,23 +66,19 @@ class Manuals(commands.Cog):
 
     target = yarl.URL("https://idevision.net/api/public/")
 
-    def __init__(self, bot: core.Bot) -> None:
-        self.bot = bot
-
-    async def cog_load(self) -> None:
-        self.session = aiohttp.ClientSession()
-
-    async def cog_unload(self) -> None:
-        await self.session.close()
+    def __init__(self, bot: Bot) -> None:
+        self.bot: Bot = bot
 
     @staticmethod
-    def _cooldown_bucket(ctx: core.Context) -> commands.Cooldown | None:
+    def _cooldown_bucket(ctx: Context) -> commands.Cooldown | None:
         if ctx.author_is_mod():
             return None
 
         return commands.Cooldown(2, 5)
 
-    def _smart_guess_lib(self, ctx: core.Context) -> LibEnum | None:
+    def _smart_guess_lib(self, ctx: Context) -> LibEnum | None:
+        assert ctx.channel
+
         if ctx.channel.id == constants.Channels.HELP_CHANNEL:
             return None  # there's not much hope here, stay quick
 
@@ -97,19 +101,7 @@ class Manuals(commands.Cog):
         elif ctx.channel.id == constants.Channels.TWITCHIO_DEV:
             return LibEnum.twitchio
 
-        return None  # cry
-
-    async def context_reply(
-        self,
-        ctx: core.Context,
-        content: str | None = discord.utils.MISSING,
-        embed: discord.Embed | None = discord.utils.MISSING,
-        reference: discord.MessageReference | None = None,
-    ) -> discord.Message:
-        if ctx.message.reference and not reference:
-            reference = ctx.message.reference
-
-        return await ctx.send(content=content, embed=embed, reference=reference)
+        return None
 
     @commands.command(
         "rtfm",
@@ -118,7 +110,7 @@ class Manuals(commands.Cog):
         signature="[library]? [query]",
     )
     @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
-    async def rtfm(self, ctx: core.Context, *, query: str) -> None:
+    async def rtfm(self, ctx: Context, *, query: str) -> None:
         """
         Searches relevant documentation.
         On its own it will do its best to figure out the most relevant documentation,
@@ -142,7 +134,7 @@ class Manuals(commands.Cog):
                 await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
                 return
 
-            await self.context_reply(ctx, lib.value)
+            await ctx.reply(str(lib.value))
             return
 
         labels = False
@@ -175,13 +167,13 @@ class Manuals(commands.Cog):
             return
 
         if not final_query:
-            await self.context_reply(ctx, content=lib.value[0])
+            await ctx.reply(str(lib.value[0]))
             return
 
         url = self.target.with_path("/api/public/rtfm.sphinx").with_query(
             {
                 "query": final_query,
-                "location": lib.value[0],
+                "location": str(lib.value[0]),
                 "show-labels": str(labels),
                 "label-labels": str(clear_labels),
             }
@@ -191,7 +183,7 @@ class Manuals(commands.Cog):
             "User-Agent": f"PythonistaBot discord bot (via {ctx.author})",
             "Authorization": core.CONFIG["TOKENS"]["idevision"],
         }
-        async with self.session.get(url, headers=headers) as resp:
+        async with self.bot.session.get(url, headers=headers) as resp:
             if resp.status != 200:
                 await ctx.send(f"The api returned an irregular status ({resp.status}) ({await resp.text()})")
                 return
@@ -214,7 +206,7 @@ class Manuals(commands.Cog):
         signature="[library]? [query]",
     )
     @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
-    async def rtfs(self, ctx: core.Context, *, query: str) -> None:
+    async def rtfs(self, ctx: Context, *, query: str) -> None:
         """
         Searches relevant library source code.
         On its own it will do its best to figure out the most relevant library,
@@ -237,7 +229,7 @@ class Manuals(commands.Cog):
                 await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
                 return
 
-            await self.context_reply(ctx, lib.value)
+            await ctx.reply(str(lib.value))
             return
 
         source = False
@@ -265,13 +257,13 @@ class Manuals(commands.Cog):
             return
 
         if not final_query:
-            await self.context_reply(ctx, content=lib.value[0])
+            await ctx.reply(str(lib.value[0]))
             return
 
         url = self.target.with_path("/api/public/rtfs").with_query(
             {
                 "query": final_query,
-                "library": lib.value[2],
+                "library": str(lib.value[2]),
                 "format": "links" if not source else "source",
             }
         )
@@ -280,7 +272,7 @@ class Manuals(commands.Cog):
             "User-Agent": f"PythonistaBot discord bot (via {ctx.author})",
             "Authorization": core.CONFIG["TOKENS"]["idevision"],
         }
-        async with self.session.get(url, headers=headers) as resp:
+        async with self.bot.session.get(url, headers=headers) as resp:
             if resp.status != 200:
                 await ctx.send(f"The api returned an irregular status ({resp.status}) ({await resp.text()})")
                 return
@@ -310,5 +302,5 @@ class Manuals(commands.Cog):
             await pages.paginate()
 
 
-async def setup(bot: core.Bot) -> None:
+async def setup(bot: Bot) -> None:
     await bot.add_cog(Manuals(bot))

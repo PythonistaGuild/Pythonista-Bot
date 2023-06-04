@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2020 - Current PythonistaGuild
+Copyright (c) 2021 - Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import discord
 from discord.ext import commands
 
 import core
 from constants import Channels
+from core.context import Context
+
+
+if TYPE_CHECKING:
+    from bot import Bot
 
 FORUM_BLURB = f"""
 Welcome to the help forum!
@@ -43,8 +52,8 @@ Once your issue has been solved type `{core.CONFIG['prefix']}solved` to close th
 class Help(commands.Cog):
     """Commands relating to the help channels/forum of Pythonista."""
 
-    def __init__(self, bot: core.Bot) -> None:
-        self.bot = bot
+    def __init__(self, bot: Bot) -> None:
+        self.bot: Bot = bot
 
     @commands.Cog.listener("on_thread_create")
     async def forum_post_created(self, thread: discord.Thread) -> None:
@@ -60,7 +69,7 @@ class Help(commands.Cog):
         await thread.send(FORUM_BLURB)
 
     @commands.command("solved", brief="Closes a forum post", short_doc="Closes a forum post in the help channels")
-    async def solved(self, ctx: core.Context) -> None:
+    async def solved(self, ctx: Context) -> None:
         """
         Marks a forum post as solved.
         This will archive the post, lock it, and add the solved tag.
@@ -92,5 +101,5 @@ class Help(commands.Cog):
         )
 
 
-async def setup(bot: core.Bot) -> None:
+async def setup(bot: Bot) -> None:
     await bot.add_cog(Help(bot))
