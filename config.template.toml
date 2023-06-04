@@ -18,3 +18,6 @@ level = 20
 
 [SNEKBOX] # optional
 url = 'http://snekbox:8060' # default url
+
+[GITHUB] # optional
+bot_secret = ""

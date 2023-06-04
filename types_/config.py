@@ -8,6 +8,7 @@ class Tokens(TypedDict):
     bot: str
     idevision: str
     mystbin: str
+    github_bot: str
 
 
 class Database(TypedDict):
