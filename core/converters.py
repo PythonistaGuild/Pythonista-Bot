@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2021 - Present PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -82,4 +82,4 @@ class CodeblockConverter(commands.Converter[Codeblock]):
         if not code and not language:
             code[:] = previous_characters
 
-        return Codeblock("".join(language), "".join(code[len(language): -backticks]))
+        return Codeblock("".join(language), "".join(code[len(language) : -backticks]))

@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2021 - Present PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ import logging
 from discord.ext import commands
 
 import core
+from core.errors import InvalidEval
 from core.utils import formatters
 
 
@@ -45,7 +46,6 @@ class Evaluation(core.Cog):
 
     async def perform_eval(self, code: core.Codeblock) -> str:
         async with self.bot.session.post(self.eval_endpoint, json={"input": code.content[1]}) as eval_response:
-
             if eval_response.status != 200:
                 raise InvalidEval(eval_response.status, "There was an issue running this eval command.")
 
@@ -57,10 +57,7 @@ class Evaluation(core.Cog):
     @commands.max_concurrency(1, per=commands.BucketType.user, wait=False)
     @commands.cooldown(rate=1, per=10.0, type=commands.BucketType.user)
     async def eval(
-            self,
-            ctx: core.Context,
-            *,
-            code: core.Codeblock = commands.param(converter=core.CodeblockConverter)
+        self, ctx: core.Context, *, code: core.Codeblock = commands.param(converter=core.CodeblockConverter)
     ) -> None:
         """Evaluates your code in the form of a Discord message.
 
@@ -102,7 +99,6 @@ class Evaluation(core.Cog):
 
 
 async def setup(bot: core.Bot) -> None:
-
     if key := core.CONFIG.get("SNEKBOX"):
         await bot.add_cog(Evaluation(bot, key["url"]))
 

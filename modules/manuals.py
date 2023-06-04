@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2021 - Present PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ from discord.ext.commands.view import StringView  # type: ignore # why does this
 import constants
 import core
 from core.utils.paginator import TextPager
+
 
 class LibEnum(Enum):
     wavelink = ("https://wavelink.readthedocs.io/en/latest", constants.Colours.PYTHONISTA_BG, "wavelink")
@@ -94,14 +95,14 @@ class Manuals(commands.Cog):
             return LibEnum.twitchio
 
         return None
-    
+
     async def context_reply(
         self,
         ctx: core.Context,
         content: str | None = discord.utils.MISSING,
         embed: discord.Embed | None = discord.utils.MISSING,
         reference: discord.MessageReference | None = None,
-        mention_author: bool = True
+        mention_author: bool = True,
     ) -> discord.Message:
         if ctx.message.reference and not reference:
             reference = ctx.message.reference
@@ -298,7 +299,7 @@ class Manuals(commands.Cog):
             out = [f"[{name}]({url})" for name, url in nodes.items()]
 
             author: str = f"query Time: {float(matches['query_time']):.03f} • commit {matches['commit'][:6]}"
-            footer: str = f"Is the api behind on commits? Use {discord.utils.escape_mentions(ctx.prefix)}rtfs-reload" # type: ignore
+            footer: str = f"Is the api behind on commits? Use {discord.utils.escape_mentions(ctx.prefix)}rtfs-reload"  # type: ignore
 
             embed: discord.Embed = discord.Embed(title=f"{lib.name.title()}: {final_query}", colour=lib.value[1])
             embed.description = "\n".join(out)
@@ -309,7 +310,9 @@ class Manuals(commands.Cog):
 
         else:
             n = next(iter(nodes.items()))
-            await self.context_reply(ctx, f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}", mention_author=False)
+            await self.context_reply(
+                ctx, f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}", mention_author=False
+            )
 
             pages = TextPager(ctx, n[1], prefix="```py")
             await pages.paginate()

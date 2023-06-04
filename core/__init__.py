@@ -23,8 +23,8 @@ SOFTWARE.
 __version__ = "0.0.1a"
 
 from . import utils as utils
-from .bot import Bot
+from .bot import Bot as Bot
+from .context import *
 from .converters import *
 from .core import *
-from .context import *
 from .errors import *

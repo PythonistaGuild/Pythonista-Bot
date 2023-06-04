@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2021 - Present PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,18 @@ SOFTWARE.
 """
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import discord
 from discord.ext import commands
 
 import core
 from constants import Channels
+from core.context import Context
+
+
+if TYPE_CHECKING:
+    from discord.ext.commands._types import Check  # type: ignore # why does this need a stub?
 
 
 FORUM_BLURB = f"""
@@ -41,6 +48,23 @@ A good question should include:
 
 Once your issue has been solved type `{core.CONFIG['prefix']}solved` to close the thread.
 """.strip()
+
+
+def is_forum_thread() -> Check[Context]:
+    def predicate(ctx: Context) -> bool:
+        channel = ctx.channel
+        if not channel.guild:
+            return False
+
+        if not isinstance(channel, discord.Thread):
+            return False
+
+        if channel.parent_id != Channels.HELP_FORUM:
+            return False
+
+        return True
+
+    return commands.check(predicate)
 
 
 class Help(commands.Cog):
@@ -62,16 +86,16 @@ class Help(commands.Cog):
 
         await thread.send(FORUM_BLURB)
 
+    @is_forum_thread()
     @commands.command("solved", brief="Closes a forum post", short_doc="Closes a forum post in the help channels")
-    async def solved(self, ctx: core.Context) -> None:
+    async def solved(self, ctx: core.GuildContext) -> None:
         """
         Marks a forum post as solved.
         This will archive the post, lock it, and add the solved tag.
         You must be a moderator or the post OP to solve a post.
         """
-        if not ctx.guild or not isinstance(ctx.channel, discord.Thread) or ctx.channel.parent_id != Channels.HELP_FORUM:
-            await ctx.reply("This doesn't seem to be the help forum...")
-            return
+        assert isinstance(ctx.channel, discord.Thread)  # guarded by the check
+        assert isinstance(ctx.channel.parent, discord.ForumChannel)  # guarded by the check
 
         if not ctx.author_is_mod() or ctx.author != ctx.channel.owner:
             await ctx.send("You can only mark your own posts as solved")
@@ -84,14 +108,20 @@ class Help(commands.Cog):
         except discord.HTTPException:
             pass
 
+        tag = ctx.channel.parent.get_tag(1006769269201195059)
+        if not tag:
+            return
+
         await ctx.channel.edit(
             locked=True,
             archived=True,
-            applied_tags=ctx.channel.applied_tags + [ctx.channel.parent.get_tag(1006769269201195059)],
-            reason=f"Marked as solved by {ctx.author}"
-        )  # type: ignore
+            applied_tags=ctx.channel.applied_tags + [tag],
+            reason=f"Marked as solved by {ctx.author}",
+        )
 
-        channel: discord.TextChannel = ctx.guild.get_channel(Channels.FORUM_LOGS)  # type: ignore
+        channel = ctx.guild.get_channel(Channels.FORUM_LOGS)
+        assert isinstance(channel, discord.TextChannel)  # we know the ID.
+
         if not channel:
             return
 

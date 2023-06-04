@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2021 - Present PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,6 @@ class GithubError(commands.CommandError):
 
 
 class Moderation(commands.Cog):
-
     def __init__(self, bot: core.Bot, /) -> None:
         self.bot = bot
         self._req_lock = asyncio.Lock()
@@ -68,7 +67,6 @@ class Moderation(commands.Cog):
         data: dict[str, Any] | None = None,
         headers: dict[str, Any] | None = None,
     ) -> Any:
-
         api_key = core.CONFIG["TOKENS"].get("github_bot")
         if not api_key:
             return
@@ -143,9 +141,11 @@ class Moderation(commands.Cog):
             "\n".join(tokens), filename="tokens.txt", description="Tokens found within the Pythonista guild."
         )
 
-        msg: str = f"Hey {message.author.mention}, I found one or more Discord Bot tokens in your message " \
-                   f"and I've sent them off to be invalidated for you.\n" \
-                   f"You can find the token(s) [here]({url})."
+        msg: str = (
+            f"Hey {message.author.mention}, I found one or more Discord Bot tokens in your message "
+            f"and I've sent them off to be invalidated for you.\n"
+            f"You can find the token(s) [here]({url})."
+        )
         await message.reply(msg)
 
 

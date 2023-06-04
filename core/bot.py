@@ -32,15 +32,16 @@ import asyncpg
 import discord
 from discord.ext import commands
 
-from .core import CONFIG
 from .context import Context
+from .core import CONFIG
 from .utils import LogHandler
 
 
 if TYPE_CHECKING:
-    import mystbin
-    from queue import Queue
+    from asyncio import Queue
     from logging import LogRecord
+
+    import mystbin
 
 
 class Bot(commands.Bot):

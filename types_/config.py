@@ -16,7 +16,7 @@ class Database(TypedDict):
 
 
 class Logging(TypedDict):
-    webhook_url: str
+    webhook_url: NotRequired[str]
     level: int
 
 

@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2021 - Present PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,15 +20,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from __future__ import annotations
+
 import asyncio
+from abc import abstractmethod
 from typing import TYPE_CHECKING, Any
 
 import discord
 from discord import ui  # shortcut because I'm lazy
-from discord.ext.commands import CommandError, Paginator as _Paginator
+from discord.ext.commands import CommandError, Paginator as _Paginator  # type: ignore # why does this need a stub file?
 from discord.utils import MISSING
+
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 from core import Context
-from typing_extensions import Self
+
 
 __all__ = ("CannotPaginate", "Pager", "KVPager", "TextPager")
 
@@ -86,9 +94,10 @@ class Pager(ui.View):
         if stop:
             self.reaction_emojis.append(("\N{BLACK SQUARE FOR STOP}", self.stop_pages))  # type: ignore
 
-        if ctx.guild is not None:
+        if ctx.guild:
             self.permissions = self.channel.permissions_for(ctx.guild.me)
         else:
+            assert isinstance(self.channel, discord.abc.PrivateChannel)
             self.permissions = self.channel.permissions_for(ctx.me)
 
         if not self.permissions.embed_links:
@@ -97,7 +106,7 @@ class Pager(ui.View):
         if not self.permissions.send_messages:
             raise CannotPaginate("Bot cannot send messages.")
 
-    def setup_buttons(self):
+    def setup_buttons(self) -> None:
         self.clear_items()
         for emoji, button in self.reaction_emojis:
             btn = ui.Button[Self](emoji=emoji)
@@ -108,14 +117,15 @@ class Pager(ui.View):
         base = (page - 1) * self.per_page
         return self.entries[base : base + self.per_page]
 
+    @abstractmethod
     def get_content(self, entry: Any, page: int, *, first: bool = False) -> str:
-        return None
+        raise NotImplementedError
 
-    def get_embed(self, entries: list[Any], page: int, *, first: bool = False):
+    def get_embed(self, entries: list[Any], page: int, *, first: bool = False) -> discord.Embed:
         self.prepare_embed(entries, page, first=first)
         return self.embed
 
-    def prepare_embed(self, entries: list[Any], page: int, *, first: bool = False):
+    def prepare_embed(self, entries: list[Any], page: int, *, first: bool = False) -> None:
         p: list[Any] = []
         for index, entry in enumerate(entries, 1 + ((page - 1) * self.per_page)):
             if self.nocount:
@@ -162,28 +172,28 @@ class Pager(ui.View):
         if page != 0 and page <= self.maximum_pages:
             await self.show_page(page)
 
-    async def first_page(self, inter: discord.Interaction):
+    async def first_page(self, inter: discord.Interaction) -> None:
         await inter.response.defer()
         await self.show_page(1)
 
-    async def last_page(self, inter: discord.Interaction):
+    async def last_page(self, inter: discord.Interaction) -> None:
         await inter.response.defer()
         await self.show_page(self.maximum_pages)
 
-    async def next_page(self, inter: discord.Interaction):
+    async def next_page(self, inter: discord.Interaction) -> None:
         await inter.response.defer()
         await self.checked_show_page(self.current_page + 1)
 
-    async def previous_page(self, inter: discord.Interaction):
+    async def previous_page(self, inter: discord.Interaction) -> None:
         await inter.response.defer()
         await self.checked_show_page(self.current_page - 1)
 
-    async def show_current_page(self, inter: discord.Interaction):
+    async def show_current_page(self, inter: discord.Interaction) -> None:
         await inter.response.defer()
         if self.paginating:
             await self.show_page(self.current_page)
 
-    async def numbered_page(self, inter: discord.Interaction):
+    async def numbered_page(self, inter: discord.Interaction) -> None:
         await inter.response.defer()
         to_delete = [await self.channel.send("What page do you want to go to?")]
 
@@ -205,8 +215,8 @@ class Pager(ui.View):
                 await asyncio.sleep(5)
 
         try:
-            await self.channel.delete_messages(to_delete)
-        except Exception:
+            await self.channel.delete_messages(to_delete)  # type: ignore # we handle the attribute error or http since exception handling is free
+        except (AttributeError, discord.HTTPException):
             pass
 
     async def stop_pages(self, interaction: discord.Interaction | None = None):
@@ -302,7 +312,7 @@ class TextPager(Pager):
         return self.entries[page - 1]
 
     def get_embed(self, entries: list[str], page: int, *, first: bool = False) -> discord.Embed:
-        return None # type: ignore
+        return None  # type: ignore
 
     def get_content(self, entry: str, page: int, *, first: bool = False) -> str:
         if self.maximum_pages > 1:

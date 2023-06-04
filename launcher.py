@@ -21,7 +21,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import asyncio
-from typing import TYPE_CHECKING
 
 import aiohttp
 import asyncpg
@@ -36,7 +35,6 @@ async def main() -> None:
     async with core.Bot() as bot, aiohttp.ClientSession() as session, asyncpg.create_pool(
         dsn=core.CONFIG["DATABASE"]["dsn"]
     ) as pool, LogHandler(bot=bot) as handler:
-
         bot.logging_queue = asyncio.Queue()
         bot.session = session
         bot.pool = pool
@@ -60,4 +58,4 @@ async def main() -> None:
 try:
     asyncio.run(main())
 except KeyboardInterrupt:
-    print('Fix this later, but you killed bot with KeyboardInterrupt...')
+    print("Fix this later, but you killed bot with KeyboardInterrupt...")

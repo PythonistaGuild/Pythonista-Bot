@@ -1,6 +1,6 @@
 """MIT License
 
-Copyright (c) 2021 - Present PythonistaGuild
+Copyright (c) 2021-Present PythonistaGuild
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,13 +33,25 @@ import core
 
 
 class Logging(commands.Cog):
-
     def __init__(self, bot: core.Bot) -> None:
         self.bot = bot
-        self.webhook = discord.Webhook.from_url(core.CONFIG["LOGGING"]["webhook_url"], session=bot.session, client=bot)
+        if url := core.CONFIG["LOGGING"].get("webhook_url"):
+            self.webhook = discord.Webhook.from_url(url, session=bot.session, client=bot)
+        else:
+            self.webhook = None
+
+    async def cog_load(self) -> None:
+        if self.webhook:
+            self.logging_loop.start()
+
+    async def cog_unload(self) -> None:
+        if self.webhook:
+            self.logging_loop.cancel()
 
     @tasks.loop(seconds=0)
     async def logging_loop(self) -> None:
+        assert self.webhook
+
         to_log = await self.bot.logging_queue.get()
         attributes = {"INFO": "\U00002139\U0000fe0f", "WARNING": "\U000026a0\U0000fe0f"}
 

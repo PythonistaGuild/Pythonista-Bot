@@ -33,7 +33,6 @@ combine_star = true
 
 
 [tool.pyright]
-ignore = ["core/utils/paginator.py"] # TODO: Undo this when someone fixes the module lol
 useLibraryCodeForTypes = true
 typeCheckingMode = "strict"
 pythonVersion = "3.11"

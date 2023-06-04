@@ -21,4 +21,4 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from .formatters import *
-from .logging import LogHandler
+from .logging import LogHandler as LogHandler
