@@ -1,4 +1,6 @@
 prefix = '>>'
+owner_ids = [123, 456, 789] # user or role ids, optional
+
 [TOKENS]
 bot = ''
 idevision = ''

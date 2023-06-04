@@ -22,6 +22,7 @@ SOFTWARE.
 """
 from ._meta import CONSTANTS
 
+
 __all__ = (
     "Roles",
     "Colours",
