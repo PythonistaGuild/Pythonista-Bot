@@ -20,31 +20,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from __future__ import annotations
-
 import asyncio
 from typing import TYPE_CHECKING, Any
 
 import discord
 from discord import ui  # shortcut because I'm lazy
-from discord.ext import commands
+from discord.ext.commands import CommandError, Paginator as _Paginator
 from discord.utils import MISSING
-
 from core import Context
+from typing_extensions import Self
+
+__all__ = ("CannotPaginate", "Pager", "KVPager", "TextPager")
 
 
-if TYPE_CHECKING:
-    from typing_extensions import Self
-
-__all__ = (
-    "CannotPaginate",
-    "Pager",
-    "KVPager",
-    "TextPager",
-)
-
-
-class CannotPaginate(commands.CommandError):
+class CannotPaginate(CommandError):
     pass
 
 
@@ -120,7 +109,7 @@ class Pager(ui.View):
         return self.entries[base : base + self.per_page]
 
     def get_content(self, entry: Any, page: int, *, first: bool = False) -> str:
-        raise NotImplementedError
+        return None
 
     def get_embed(self, entries: list[Any], page: int, *, first: bool = False):
         self.prepare_embed(entries, page, first=first)
@@ -303,7 +292,7 @@ class TextPager(Pager):
     def __init__(
         self, ctx: Context, text: str, *, prefix: str = "```", suffix: str = "```", max_size: int = 2000, stop: bool = False
     ) -> None:
-        paginator = commands.Paginator(prefix=prefix, suffix=suffix, max_size=max_size - 200)
+        paginator = _Paginator(prefix=prefix, suffix=suffix, max_size=max_size - 200)
         for line in text.split("\n"):
             paginator.add_line(line)
 
@@ -313,7 +302,7 @@ class TextPager(Pager):
         return self.entries[page - 1]
 
     def get_embed(self, entries: list[str], page: int, *, first: bool = False) -> discord.Embed:
-        raise NotImplementedError
+        return None # type: ignore
 
     def get_content(self, entry: str, page: int, *, first: bool = False) -> str:
         if self.maximum_pages > 1:
