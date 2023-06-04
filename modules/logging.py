@@ -38,6 +38,7 @@ class Logging(commands.Cog):
         if url := core.CONFIG["LOGGING"].get("webhook_url"):
             self.webhook = discord.Webhook.from_url(url, session=bot.session, client=bot)
         else:
+            bot.log_handler.warning("Not enabling webhook logging due to config key not existing.")
             self.webhook = None
 
     async def cog_load(self) -> None:
