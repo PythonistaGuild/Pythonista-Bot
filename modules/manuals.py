@@ -33,7 +33,7 @@ from discord.ext.commands.view import StringView  # type: ignore # why does this
 import constants
 import core
 from core.context import Context
-from core.paginator import TextPager
+from core.utils.paginator import TextPager
 
 
 if TYPE_CHECKING:
