@@ -22,9 +22,10 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import TYPE_CHECKING, Any, NoReturn, cast
 
 from core import CONFIG
+
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -38,7 +39,7 @@ class ConstantsMeta(type):
             return super().__new__(mcs, name, bases, attrs)
 
         try:
-            section: Tokens | Database | Logging = CONFIG[name.upper()]  # type: ignore # dynamic code of static types
+            section = cast(Tokens | Database | Logging, CONFIG[name.upper()])
         except KeyError:
             return super().__new__(mcs, name, bases, attrs)
 
