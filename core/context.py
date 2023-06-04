@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeAlias
+from typing import Any, TYPE_CHECKING, TypeAlias
 
 import discord
 from discord.ext import commands
@@ -45,6 +45,13 @@ class Context(commands.Context["Bot"]):
 
         roles = member._roles  # type: ignore # we know this won't change for a while
         return roles.has(Roles.ADMIN) or roles.has(Roles.MODERATOR)
+
+    @discord.utils.copy_doc(commands.Context.reply) # type: ignore
+    async def reply(self, content: str | None = None, **kwargs: Any) -> discord.Message:
+        if "mention_author" not in kwargs:
+            kwargs["mention_author"] = False
+
+        return await super().reply(content, **kwargs)
 
 
 class GuildContext(Context):
