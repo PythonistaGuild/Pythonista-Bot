@@ -64,6 +64,7 @@ class Bot(commands.Bot):
         super().__init__(
             command_prefix=commands.when_mentioned_or(CONFIG["prefix"]),
             intents=discord.Intents.all(),
+            allowed_mentions=discord.AllowedMentions.none(),
         )
         self._previous_websocket_events: deque[Any] = deque(maxlen=10)
 

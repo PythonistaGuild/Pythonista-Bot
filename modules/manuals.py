@@ -96,19 +96,6 @@ class Manuals(commands.Cog):
 
         return None
 
-    async def context_reply(
-        self,
-        ctx: core.Context,
-        content: str | None = discord.utils.MISSING,
-        embed: discord.Embed | None = discord.utils.MISSING,
-        reference: discord.MessageReference | None = None,
-        mention_author: bool = True,
-    ) -> discord.Message:
-        if ctx.message.reference and not reference:
-            reference = ctx.message.reference
-
-        return await ctx.send(content=content, embed=embed, reference=reference, mention_author=mention_author)
-
     @commands.command(
         "rtfm",
         brief="Searches documentation",
@@ -141,7 +128,7 @@ class Manuals(commands.Cog):
                 await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
                 return
 
-            await self.context_reply(ctx, str(lib.value))
+            await ctx.reply(str(lib.value), reference=ctx.replied_message)
             return
 
         labels = False
@@ -174,7 +161,7 @@ class Manuals(commands.Cog):
             return
 
         if not final_query:
-            await self.context_reply(ctx, str(lib.value[0]))
+            await ctx.reply(str(lib.value[0]), reference=ctx.replied_message)
             return
 
         url = self.target.with_path("/api/public/rtfm.sphinx").with_query(
@@ -239,7 +226,7 @@ class Manuals(commands.Cog):
                 await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
                 return
 
-            await self.context_reply(ctx, str(lib.value))
+            await ctx.reply(str(lib.value), reference=ctx.replied_message)
             return
 
         source = False
@@ -310,9 +297,7 @@ class Manuals(commands.Cog):
 
         else:
             n = next(iter(nodes.items()))
-            await self.context_reply(
-                ctx, f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}", mention_author=False
-            )
+            await ctx.reply(f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}", reference=ctx.replied_message)
 
             pages = TextPager(ctx, n[1], prefix="```py")
             await pages.paginate()
