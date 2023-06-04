@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import datetime
 import textwrap
-from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands, tasks
@@ -33,13 +32,10 @@ from discord.utils import format_dt
 import core
 
 
-if TYPE_CHECKING:
-    from bot import Bot
-
-
 class Logging(commands.Cog):
-    def __init__(self, bot: Bot) -> None:
-        self.bot: Bot = bot
+
+    def __init__(self, bot: core.Bot) -> None:
+        self.bot = bot
         self.webhook = discord.Webhook.from_url(core.CONFIG["LOGGING"]["webhook_url"], session=bot.session, client=bot)
 
     @tasks.loop(seconds=0)
@@ -55,5 +51,5 @@ class Logging(commands.Cog):
         await self.webhook.send(message, username="PythonistaBot Logging")
 
 
-async def setup(bot: Bot) -> None:
+async def setup(bot: core.Bot) -> None:
     await bot.add_cog(Logging(bot))

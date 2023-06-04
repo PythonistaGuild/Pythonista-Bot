@@ -22,9 +22,9 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NoReturn, cast
+from typing import TYPE_CHECKING, Any, NoReturn, cast, Union
 
-from core import CONFIG
+import toml
 
 
 if TYPE_CHECKING:
@@ -33,13 +33,16 @@ if TYPE_CHECKING:
     from types_.config import Database, Logging, Tokens
 
 
+_config = toml.load("config.toml")
+
+
 class ConstantsMeta(type):
     def __new__(mcs, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> Self:
         if name == "CONSTANTS":
             return super().__new__(mcs, name, bases, attrs)
 
         try:
-            section = cast(Tokens | Database | Logging, CONFIG[name.upper()])
+            section = cast(Union["Tokens", "Database", "Logging"], _config[name.upper()])
         except KeyError:
             return super().__new__(mcs, name, bases, attrs)
 

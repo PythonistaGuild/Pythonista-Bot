@@ -20,8 +20,44 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import asyncio
+from typing import TYPE_CHECKING
+
+import aiohttp
+import asyncpg
+import mystbin
+
 import core
+from core.utils import LogHandler
+from modules import EXTENSIONS
 
 
-async def setup(bot: core.Bot) -> None:
-    pass
+async def main() -> None:
+    async with core.Bot() as bot, aiohttp.ClientSession() as session, asyncpg.create_pool(
+        dsn=core.CONFIG["DATABASE"]["dsn"]
+    ) as pool, LogHandler(bot=bot) as handler:
+
+        bot.logging_queue = asyncio.Queue()
+        bot.session = session
+        bot.pool = pool
+        bot.log_handler = handler
+
+        bot.mb_client = mystbin.Client(token=core.CONFIG["TOKENS"]["mystbin"], session=session)
+
+        await bot.load_extension("jishaku")
+        for extension in EXTENSIONS:
+            await bot.load_extension(extension.name)
+
+            bot.log_handler.log.info(
+                "Loaded %sextension: %s",
+                "module " if extension.ispkg else "",
+                extension.name,
+            )
+
+        await bot.start(core.CONFIG["TOKENS"]["bot"])
+
+
+try:
+    asyncio.run(main())
+except KeyboardInterrupt:
+    print('Fix this later, but you killed bot with KeyboardInterrupt...')

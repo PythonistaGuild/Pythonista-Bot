@@ -11,7 +11,7 @@ from discord.utils import _ColourFormatter as ColourFormatter, stream_supports_c
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from bot import Bot
+    from core import Bot
 
 
 class QueueEmitHandler(logging.Handler):

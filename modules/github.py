@@ -24,15 +24,11 @@ from __future__ import annotations
 
 import asyncio
 import re
-from typing import TYPE_CHECKING
 
 import discord
 
 import core
 
-
-if TYPE_CHECKING:
-    from bot import Bot
 
 GITHUB_ISSUE_URL = "https://github.com/{}/issues/{}"
 LIB_ISSUE_REGEX = re.compile(r"(?P<lib>[a-z]+)?##(?P<number>[0-9]+)", flags=re.IGNORECASE)
@@ -45,22 +41,25 @@ aliases = [
     (("discordpy", "discord", "dpy"), "Rapptz/discord.py"),
     (("twitchio", "tio"), "TwitchIO/TwitchIO"),
 ]
+
 LIB_REPO_MAPPING = {key: value for keys, value in aliases for key in keys}
 
 
 class GitHub(core.Cog):
-    def __init__(self, bot: Bot) -> None:
-        self.bot: Bot = bot
+
+    def __init__(self, bot: core.Bot) -> None:
+        self.bot = bot
         self.code_highlight_emoji = "📃"
         self.highlight_timeout = 10
 
     def _strip_content_path(self, url: str) -> str:
-        file_path = url[len(GITHUB_BASE_URL) :]
+        file_path = url[len(GITHUB_BASE_URL):]
         return file_path
 
     async def format_highlight_block(self, url: str, line_adjustment: int = 10) -> dict[str, str | int] | None:
+
         try:
-            highlighted_line = int(url.split("#L")[1])  # seperate the #L{n} highlight
+            highlighted_line = int(url.split("#L")[1])  # separate the #L{n} highlight
         except IndexError:
             return
 
@@ -75,8 +74,8 @@ class GitHub(core.Cog):
             code += await resp.text()
 
         code = code.splitlines()
-
         code_block_dict: dict[str, dict[int, str]] = {"lines": {}}
+
         j = 0
         for i in code:
             # populate the dict
@@ -84,41 +83,43 @@ class GitHub(core.Cog):
             j += 1
 
         code_block_dict["lines"][j] = "\n"
-
         line_list = code_block_dict["lines"]
 
         if highlighted_line - 1 not in line_list:
             return None
 
         bound_adj = line_adjustment  # adjustment for upper and lower bound display
-        _minBoundary = highlighted_line - 1 - bound_adj
-        _maxBoundary = highlighted_line - 1 + bound_adj
+        _min_boundary = highlighted_line - 1 - bound_adj
+        _max_boundary = highlighted_line - 1 + bound_adj
 
         # loop through all the lines, and adjust the formatting
         msg = "```ansi\n"
-        key = _minBoundary
-        while key <= _maxBoundary:
-            currLineNum = str(key + 1)
+        key = _min_boundary
+
+        while key <= _max_boundary:
+            curr_line_no: str = str(key + 1)
+
             # insert a space if there is no following char before the first character...
             if key + 1 == highlighted_line:
-                highlighted_msg_format = "\u001b[0;37m\u001b[4;31m{}  {}\u001b[0;0m\n".format(currLineNum, line_list[key])
-
+                highlighted_msg_format = f"\u001b[0;37m\u001b[4;31m{curr_line_no}  {line_list[key]}\u001b[0;0m\n"
                 msg += highlighted_msg_format
+
             else:
-                display_str = (
-                    "{}  {}\n" if line_list.get(key) is not None else ""
-                )  # if we hit the end of the file, just write an empty string
-                msg += display_str.format(currLineNum, line_list.get(key))
+                # if we hit the end of the file, just write an empty string
+                display_str = ("{}  {}\n" if line_list.get(key) is not None else "")
+                msg += display_str.format(curr_line_no, line_list.get(key))
+
             key += 1
 
         msg += "\n```"
 
         github_dict = {
             "path": file_path,
-            "min": _minBoundary if _minBoundary > 0 else highlighted_line,  # Do not display negative numbers if <0
-            "max": _maxBoundary,
+            "min": _min_boundary if _min_boundary > 0 else highlighted_line,  # Do not display negative numbers if <0
+            "max": _max_boundary,
             "msg": msg,
         }
+
         return github_dict
 
     @core.Cog.listener()
@@ -148,17 +149,20 @@ class GitHub(core.Cog):
 
         def check(reaction: discord.Reaction, user: discord.User) -> bool:
             return (
-                reaction.emoji == self.code_highlight_emoji and user != self.bot.user and message.id == reaction.message.id
+                reaction.emoji == self.code_highlight_emoji and
+                user != self.bot.user and
+                message.id == reaction.message.id
             )
 
         try:
             await self.bot.wait_for("reaction_add", check=check, timeout=self.highlight_timeout)
-            await message.channel.send(
-                content="Showing lines `{}` - `{}` in: `{}`...\n{}".format(_min, _max, path, code_fmt), suppress_embeds=True
-            )
+
+            msg: str = f"Showing lines `{_min}` - `{_max}` in: `{path}`...\n{code_fmt}"
+            await message.channel.send(msg, suppress_embeds=True)
+
         except asyncio.TimeoutError:
             return
 
 
-async def setup(bot: Bot) -> None:
+async def setup(bot: core.Bot) -> None:
     await bot.add_cog(GitHub(bot))

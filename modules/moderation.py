@@ -26,7 +26,7 @@ import asyncio
 import base64
 import binascii
 import re
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import discord
 import yarl
@@ -34,9 +34,6 @@ from discord.ext import commands
 
 import core
 
-
-if TYPE_CHECKING:
-    from bot import Bot
 
 TOKEN_RE = re.compile(r"[a-zA-Z0-9_-]{23,28}\.[a-zA-Z0-9_-]{6,7}\.[a-zA-Z0-9_-]{27}")
 
@@ -57,8 +54,9 @@ class GithubError(commands.CommandError):
 
 
 class Moderation(commands.Cog):
-    def __init__(self, bot: Bot, /) -> None:
-        self.bot: Bot = bot
+
+    def __init__(self, bot: core.Bot, /) -> None:
+        self.bot = bot
         self._req_lock = asyncio.Lock()
 
     async def github_request(
@@ -70,6 +68,7 @@ class Moderation(commands.Cog):
         data: dict[str, Any] | None = None,
         headers: dict[str, Any] | None = None,
     ) -> Any:
+
         api_key = core.CONFIG["TOKENS"].get("github_bot")
         if not api_key:
             return
@@ -89,14 +88,19 @@ class Moderation(commands.Cog):
             async with self.bot.session.request(method, req_url, params=params, json=data, headers=hdrs) as r:
                 remaining = r.headers.get("X-Ratelimit-Remaining")
                 js = await r.json()
+
                 if r.status == 429 or remaining == "0":
                     # wait before we release the lock
                     delta = discord.utils._parse_ratelimit_header(r)  # type: ignore # shh this is okay
+
                     await asyncio.sleep(delta)
                     self._req_lock.release()
+
                     return await self.github_request(method, url, params=params, data=data, headers=headers)
+
                 elif 300 > r.status >= 200:
                     return js
+
                 else:
                     raise GithubError(js["message"])
 
@@ -139,11 +143,11 @@ class Moderation(commands.Cog):
             "\n".join(tokens), filename="tokens.txt", description="Tokens found within the Pythonista guild."
         )
 
-        await message.reply(
-            f"Hey {message.author.mention}, I found one or more Discord Bot tokens in your message and I've sent them off to be invalidated for you.\n"
-            f"You can find the token(s) [here]({url})."
-        )
+        msg: str = f"Hey {message.author.mention}, I found one or more Discord Bot tokens in your message " \
+                   f"and I've sent them off to be invalidated for you.\n" \
+                   f"You can find the token(s) [here]({url})."
+        await message.reply(msg)
 
 
-async def setup(bot: Bot) -> None:
+async def setup(bot: core.Bot) -> None:
     await bot.add_cog(Moderation(bot))

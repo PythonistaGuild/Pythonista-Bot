@@ -22,8 +22,6 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import discord
 import yarl
 from discord.enums import Enum
@@ -32,12 +30,6 @@ from discord.ext.commands.view import StringView  # type: ignore # why does this
 
 import constants
 import core
-from core.context import Context
-from core.utils.paginator import TextPager
-
-
-if TYPE_CHECKING:
-    from bot import Bot
 
 
 class LibEnum(Enum):
@@ -66,17 +58,17 @@ class Manuals(commands.Cog):
 
     target = yarl.URL("https://idevision.net/api/public/")
 
-    def __init__(self, bot: Bot) -> None:
-        self.bot: Bot = bot
+    def __init__(self, bot: core.Bot) -> None:
+        self.bot = bot
 
     @staticmethod
-    def _cooldown_bucket(ctx: Context) -> commands.Cooldown | None:
+    def _cooldown_bucket(ctx: core.Context) -> commands.Cooldown | None:
         if ctx.author_is_mod():
             return None
 
         return commands.Cooldown(2, 5)
 
-    def _smart_guess_lib(self, ctx: Context) -> LibEnum | None:
+    def _smart_guess_lib(self, ctx: core.Context) -> LibEnum | None:
         assert ctx.channel
 
         if ctx.channel.id == constants.Channels.HELP_CHANNEL:
@@ -110,7 +102,7 @@ class Manuals(commands.Cog):
         signature="[library]? [query]",
     )
     @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
-    async def rtfm(self, ctx: Context, *, query: str) -> None:
+    async def rtfm(self, ctx: core.Context, *, query: str) -> None:
         """
         Searches relevant documentation.
         On its own it will do its best to figure out the most relevant documentation,
@@ -130,6 +122,7 @@ class Manuals(commands.Cog):
         """
         if not query:
             lib = self._smart_guess_lib(ctx)
+
             if not lib:
                 await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
                 return
@@ -183,6 +176,7 @@ class Manuals(commands.Cog):
             "User-Agent": f"PythonistaBot discord bot (via {ctx.author})",
             "Authorization": core.CONFIG["TOKENS"]["idevision"],
         }
+
         async with self.bot.session.get(url, headers=headers) as resp:
             if resp.status != 200:
                 await ctx.send(f"The api returned an irregular status ({resp.status}) ({await resp.text()})")
@@ -197,6 +191,7 @@ class Manuals(commands.Cog):
         e.title = f"{lib.name.title()}: {final_query}"
         e.description = "\n".join(f"[`{key}`]({url})" for key, url in matches["nodes"].items())
         e.set_author(name=f"Query Time: {float(matches['query_time']):.2f}")
+
         await ctx.send(embed=e)
 
     @commands.command(
@@ -206,7 +201,7 @@ class Manuals(commands.Cog):
         signature="[library]? [query]",
     )
     @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
-    async def rtfs(self, ctx: Context, *, query: str) -> None:
+    async def rtfs(self, ctx: core.Context, *, query: str) -> None:
         """
         Searches relevant library source code.
         On its own it will do its best to figure out the most relevant library,
@@ -225,6 +220,7 @@ class Manuals(commands.Cog):
         """
         if not query:
             lib = self._smart_guess_lib(ctx)
+
             if not lib:
                 await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
                 return
@@ -272,6 +268,7 @@ class Manuals(commands.Cog):
             "User-Agent": f"PythonistaBot discord bot (via {ctx.author})",
             "Authorization": core.CONFIG["TOKENS"]["idevision"],
         }
+
         async with self.bot.session.get(url, headers=headers) as resp:
             if resp.status != 200:
                 await ctx.send(f"The api returned an irregular status ({resp.status}) ({await resp.text()})")
@@ -287,20 +284,23 @@ class Manuals(commands.Cog):
         if not source:
             out = [f"[{name}]({url})" for name, url in nodes.items()]
 
-            await ctx.send(
-                embed=discord.Embed(
-                    description="\n".join(out), title=f"{lib.name.title()}: {final_query}", colour=lib.value[1]
-                )
-                .set_footer(text=f"Is the api behind on commits? Use {discord.utils.escape_mentions(ctx.prefix)}rtfs-reload")  # type: ignore
-                .set_author(name=f"query Time: {float(matches['query_time']):.03f} • commit {matches['commit'][:6]}")
-            )
+            author: str = f"query Time: {float(matches['query_time']):.03f} • commit {matches['commit'][:6]}"
+            footer: str = f"Is the api behind on commits? Use {discord.utils.escape_mentions(ctx.prefix)}rtfs-reload"
+
+            embed: discord.Embed = discord.Embed(title=f"{lib.name.title()}: {final_query}", colour=lib.value[1])
+            embed.description = "\n".join(out)
+            embed.set_author(name=author)
+            embed.set_footer(text=footer)
+
+            await ctx.send(embed=embed)
 
         else:
             n = next(iter(nodes.items()))
             await ctx.reply(f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}", mention_author=False)
+
             pages = TextPager(ctx, n[1], prefix="```py")
             await pages.paginate()
 
 
-async def setup(bot: Bot) -> None:
+async def setup(bot: core.Bot) -> None:
     await bot.add_cog(Manuals(bot))

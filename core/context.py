@@ -9,7 +9,8 @@ from constants import GUILD_ID, Roles
 
 
 if TYPE_CHECKING:
-    from bot import Bot
+    from .bot import Bot
+
 
 __all__ = (
     "Context",
@@ -17,14 +18,18 @@ __all__ = (
     "Interaction",
 )
 
+
 Interaction: TypeAlias = discord.Interaction["Bot"]
 
 
 class Context(commands.Context["Bot"]):
+
     def author_is_mod(self) -> bool:
         member: discord.Member
+
         if self.guild is None:  # dms
             guild = self.bot.get_guild(GUILD_ID)
+
             if not guild:
                 return False
 

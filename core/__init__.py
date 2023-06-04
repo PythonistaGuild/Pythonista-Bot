@@ -22,7 +22,9 @@ SOFTWARE.
 """
 __version__ = "0.0.1a"
 
-from . import errors as errors, utils as utils
+from . import utils as utils
+from .bot import Bot
 from .converters import *
 from .core import *
 from .context import *
+from .errors import *

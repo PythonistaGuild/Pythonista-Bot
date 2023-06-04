@@ -30,7 +30,7 @@ from discord import ui  # shortcut because I'm lazy
 from discord.ext import commands
 from discord.utils import MISSING
 
-from core.context import Context
+from core import Context
 
 
 if TYPE_CHECKING:

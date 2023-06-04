@@ -22,18 +22,12 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import discord
 from discord.ext import commands
 
 import core
 from constants import Channels
-from core.context import Context
 
-
-if TYPE_CHECKING:
-    from bot import Bot
 
 FORUM_BLURB = f"""
 Welcome to the help forum!
@@ -52,8 +46,8 @@ Once your issue has been solved type `{core.CONFIG['prefix']}solved` to close th
 class Help(commands.Cog):
     """Commands relating to the help channels/forum of Pythonista."""
 
-    def __init__(self, bot: Bot) -> None:
-        self.bot: Bot = bot
+    def __init__(self, bot: core.Bot) -> None:
+        self.bot = bot
 
     @commands.Cog.listener("on_thread_create")
     async def forum_post_created(self, thread: discord.Thread) -> None:
@@ -69,7 +63,7 @@ class Help(commands.Cog):
         await thread.send(FORUM_BLURB)
 
     @commands.command("solved", brief="Closes a forum post", short_doc="Closes a forum post in the help channels")
-    async def solved(self, ctx: Context) -> None:
+    async def solved(self, ctx: core.Context) -> None:
         """
         Marks a forum post as solved.
         This will archive the post, lock it, and add the solved tag.
@@ -87,19 +81,23 @@ class Help(commands.Cog):
             emoji = discord.utils.get(ctx.guild.emojis, id=578575442383208468)
             if emoji:
                 await ctx.message.add_reaction(emoji)
-        except:
+        except discord.HTTPException:
             pass
 
-        await ctx.channel.edit(locked=True, archived=True, applied_tags=ctx.channel.applied_tags + [ctx.channel.parent.get_tag(1006769269201195059)], reason=f"Marked as solved by {ctx.author}")  # type: ignore
+        await ctx.channel.edit(
+            locked=True,
+            archived=True,
+            applied_tags=ctx.channel.applied_tags + [ctx.channel.parent.get_tag(1006769269201195059)],
+            reason=f"Marked as solved by {ctx.author}"
+        )  # type: ignore
 
         channel: discord.TextChannel = ctx.guild.get_channel(Channels.FORUM_LOGS)  # type: ignore
         if not channel:
             return
 
-        await channel.send(
-            f"{ctx.author} ({ctx.author.id}) marked thread '{ctx.channel.name}' ({ctx.channel.id}) as solved."
-        )
+        msg: str = f"{ctx.author} ({ctx.author.id}) marked thread '{ctx.channel.name}' ({ctx.channel.id}) as solved."
+        await channel.send(msg)
 
 
-async def setup(bot: Bot) -> None:
+async def setup(bot: core.Bot) -> None:
     await bot.add_cog(Help(bot))

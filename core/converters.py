@@ -82,4 +82,4 @@ class CodeblockConverter(commands.Converter[Codeblock]):
         if not code and not language:
             code[:] = previous_characters
 
-        return Codeblock("".join(language), "".join(code[len(language) : -backticks]))
+        return Codeblock("".join(language), "".join(code[len(language): -backticks]))

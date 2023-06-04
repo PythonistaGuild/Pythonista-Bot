@@ -25,20 +25,17 @@ from __future__ import annotations
 import asyncio
 import json
 import pathlib
-from asyncio import Queue
 from collections import deque
 from typing import TYPE_CHECKING, Any
 
 import aiohttp
 import asyncpg
 import discord
-import mystbin
 from discord.ext import commands
 
-from core import CONFIG
-from core.context import Context
-from core.utils.logging import LogHandler
-from modules import EXTENSIONS
+from .core import CONFIG
+from .context import Context
+from .utils import LogHandler
 
 
 if TYPE_CHECKING:
@@ -85,6 +82,7 @@ class Bot(commands.Bot):
             await super().start(token=token, reconnect=reconnect)
         finally:
             path = pathlib.Path("logs/prev_events.log")
+
             with path.open("w+", encoding="utf-8") as f:
                 for event in self._previous_websocket_events:
                     try:
@@ -98,29 +96,3 @@ class Bot(commands.Bot):
         """Closes the Bot. It will also close the internal :class:`aiohttp.ClientSession`."""
         await self.session.close()
         await super().close()
-
-
-async def main() -> None:
-    async with Bot() as bot, aiohttp.ClientSession() as session, asyncpg.create_pool(
-        dsn=CONFIG["DATABASE"]["dsn"]
-    ) as pool, LogHandler(bot=bot) as handler:
-        bot.logging_queue = Queue()
-        bot.session = session
-        bot.pool = pool
-        bot.log_handler = handler
-
-        bot.mb_client = mystbin.Client(token=CONFIG["TOKENS"]["mystbin"], session=session)
-
-        await bot.load_extension("jishaku")
-        for extension in EXTENSIONS:
-            await bot.load_extension(extension.name)
-            bot.log_handler.log.info(
-                "Loaded %sextension: %s",
-                "module " if extension.ispkg else "",
-                extension.name,
-            )
-
-        await bot.start(CONFIG["TOKENS"]["bot"])
-
-
-asyncio.run(main())
