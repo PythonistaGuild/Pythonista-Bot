@@ -22,7 +22,6 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-import asyncio
 import json
 import pathlib
 from collections import deque
@@ -39,6 +38,8 @@ from .utils import LogHandler
 
 
 if TYPE_CHECKING:
+    import mystbin
+    from queue import Queue
     from logging import LogRecord
 
 
