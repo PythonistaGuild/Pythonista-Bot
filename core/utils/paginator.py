@@ -23,7 +23,6 @@ SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from abc import abstractmethod
 from typing import TYPE_CHECKING, Any
 
 import discord
@@ -117,9 +116,8 @@ class Pager(ui.View):
         base = (page - 1) * self.per_page
         return self.entries[base : base + self.per_page]
 
-    @abstractmethod
-    def get_content(self, entry: Any, page: int, *, first: bool = False) -> str:
-        raise NotImplementedError
+    def get_content(self, entry: Any, page: int, *, first: bool = False) -> str | None:
+        return None
 
     def get_embed(self, entries: list[Any], page: int, *, first: bool = False) -> discord.Embed:
         self.prepare_embed(entries, page, first=first)
