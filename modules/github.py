@@ -46,18 +46,16 @@ LIB_REPO_MAPPING = {key: value for keys, value in aliases for key in keys}
 
 
 class GitHub(core.Cog):
-
     def __init__(self, bot: core.Bot) -> None:
         self.bot = bot
         self.code_highlight_emoji = "📃"
         self.highlight_timeout = 10
 
     def _strip_content_path(self, url: str) -> str:
-        file_path = url[len(GITHUB_BASE_URL):]
+        file_path = url[len(GITHUB_BASE_URL) :]
         return file_path
 
     async def format_highlight_block(self, url: str, line_adjustment: int = 10) -> dict[str, str | int] | None:
-
         try:
             highlighted_line = int(url.split("#L")[1])  # separate the #L{n} highlight
         except IndexError:
@@ -106,7 +104,7 @@ class GitHub(core.Cog):
 
             else:
                 # if we hit the end of the file, just write an empty string
-                display_str = ("{}  {}\n" if line_list.get(key) is not None else "")
+                display_str = "{}  {}\n" if line_list.get(key) is not None else ""
                 msg += display_str.format(curr_line_no, line_list.get(key))
 
             key += 1
@@ -149,9 +147,7 @@ class GitHub(core.Cog):
 
         def check(reaction: discord.Reaction, user: discord.User) -> bool:
             return (
-                reaction.emoji == self.code_highlight_emoji and
-                user != self.bot.user and
-                message.id == reaction.message.id
+                reaction.emoji == self.code_highlight_emoji and user != self.bot.user and message.id == reaction.message.id
             )
 
         try:
