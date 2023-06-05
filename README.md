@@ -31,6 +31,12 @@ The default compose file assumes you want snekbox too, however you can comment o
 Make a copy of `.template.env` and name it to `.env`, edit the values as you see fit (the defaults will work too, and be okay so long as you don't expose this database to the internet).
 Then a simple `docker compose up` will bring your bot up!
 
+NOTE: If you want to enable the snekbox service for sandboxed open eval, do:
+```sh
+docker compose --profile snekbox up
+```
+which will enable all services and snekbox.
+
 (or `docker-compose` if you are not on the latest versions...)
 
 #### Notes
