@@ -68,7 +68,9 @@ class Bot(commands.Bot):
         )
         self._previous_websocket_events: deque[Any] = deque(maxlen=10)
 
-    async def get_context(self, message: discord.Message | discord.Interaction) -> Context:
+    async def get_context(
+        self, message: discord.Message | discord.Interaction, /, *, cls: type[commands.Context[commands.Bot]] | None = None
+    ) -> Context:
         return await super().get_context(message, cls=Context)
 
     async def on_ready(self) -> None:

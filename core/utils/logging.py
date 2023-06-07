@@ -45,6 +45,7 @@ class LogHandler:
     def __enter__(self: Self) -> Self:
         logging.getLogger("discord").setLevel(logging.INFO)
         logging.getLogger("discord.http").setLevel(logging.INFO)
+        logging.getLogger("discord.state").setLevel(logging.WARNING)
 
         self.log.setLevel(logging.INFO)
         handler = RotatingFileHandler(
