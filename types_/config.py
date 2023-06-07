@@ -26,6 +26,7 @@ class Snekbox(TypedDict):
 
 class Config(TypedDict):
     prefix: str
+    owner_ids: NotRequired[list[int]]
     TOKENS: Tokens
     DATABASE: Database
     LOGGING: Logging
