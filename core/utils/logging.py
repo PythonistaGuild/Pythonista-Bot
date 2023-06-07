@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from discord.utils import _ColourFormatter as ColourFormatter, stream_supports_colour  # type: ignore # shh, I need it
 
-from core import CONFIG
+import core
 
 
 if TYPE_CHECKING:
@@ -64,7 +64,7 @@ class LogHandler:
             if stream_supports_colour(stream_handler):
                 stream_handler.setFormatter(ColourFormatter())
             self.log.addHandler(stream_handler)
-        if CONFIG["LOGGING"].get("webhook_url"):
+        if core.CONFIG["LOGGING"].get("webhook_url"):
             self.log.addHandler(QueueEmitHandler(self.bot))
 
         return self
