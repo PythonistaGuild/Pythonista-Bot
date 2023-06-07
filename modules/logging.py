@@ -61,7 +61,11 @@ class Logging(commands.Cog):
 
         message = textwrap.shorten(f"{emoji} {format_dt(dt)}\n{to_log.message}", width=1990)
 
-        await self.webhook.send(message, username="PythonistaBot Logging")
+        await self.webhook.send(
+            message,
+            username="PythonistaBot Logging",
+            avatar_url=core.CONFIG["LOGGING"].get("webhook_avatar_url"),
+        )
 
 
 async def setup(bot: core.Bot) -> None:

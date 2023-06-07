@@ -16,6 +16,7 @@ dsn = 'postgres://pythonistabot:pythonistabot@database:5432/pythonistabot' # ass
 # 10 = DEBUG
 [LOGGING]
 webhook_url = ""  # optional
+webhook_avatar_url = "" # optional
 level = 20
 
 [SNEKBOX] # optional
