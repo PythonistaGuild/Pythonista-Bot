@@ -54,6 +54,7 @@ class Logging(commands.Cog):
         assert self.webhook
 
         to_log = await self.bot.logging_queue.get()
+
         attributes = {"INFO": "\U00002139\U0000fe0f", "WARNING": "\U000026a0\U0000fe0f"}
 
         emoji = attributes.get(to_log.levelname, "\N{CROSS MARK}")
@@ -61,10 +62,13 @@ class Logging(commands.Cog):
 
         message = textwrap.shorten(f"{emoji} {format_dt(dt)}\n{to_log.message}", width=1990)
 
+        embed = to_log.__dict__.get("embed") or discord.utils.MISSING
+
         await self.webhook.send(
             message,
             username="PythonistaBot Logging",
             avatar_url=core.CONFIG["LOGGING"].get("webhook_avatar_url"),
+            embed=embed,
         )
 
 

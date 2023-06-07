@@ -22,8 +22,12 @@ SOFTWARE.
 """
 from __future__ import annotations
 
+import datetime
 import json
 import pathlib
+import sys
+import textwrap
+import traceback
 from collections import deque
 from typing import TYPE_CHECKING, Any
 
@@ -81,6 +85,55 @@ class Bot(commands.Bot):
     async def on_socket_response(self, message: Any) -> None:
         """Quick override to log websocket events."""
         self._previous_websocket_events.append(message)
+
+    async def on_error(self, event_name: str, /, *args: Any, **kwargs: Any) -> None:
+        exc_type, exception, traceback_ = sys.exc_info()
+
+        if isinstance(exception, commands.CommandInvokeError):
+            return
+
+        embed = discord.Embed(title="Event Error", colour=discord.Colour.random())
+        embed.add_field(name="Event", value=event_name)
+
+        traceback_text = "".join(traceback.format_exception(exc_type, exception, traceback_))
+
+        embed.description = f"```py\n{traceback_text}\n```"
+        embed.timestamp = datetime.datetime.now(datetime.timezone.utc)
+
+        args_str = ["```py"]
+        for index, arg in enumerate(args):
+            args_str.append(f"[{index}]: {arg!r}")
+            args_str.append("```")
+            embed.add_field(name="Args", value="\n".join(args_str), inline=False)
+
+        self.log_handler.error("Event Error", extra={"embed": embed})
+
+    async def on_command_error(self, ctx: Context, error: commands.CommandError) -> None:  # type: ignore # weird narrowing
+        assert ctx.command  # wouldn't be here otherwise
+
+        if not isinstance(error, (commands.CommandInvokeError, commands.ConversionError)):
+            return
+
+        error = getattr(error, "original", error)
+        if isinstance(error, (discord.Forbidden, discord.NotFound)):
+            return
+
+        embed = discord.Embed(title="Command Error", colour=0xCC3366)
+        embed.add_field(name="Name", value=ctx.command.qualified_name)
+        embed.add_field(name="Author", value=f"{ctx.author} (ID: {ctx.author.id})")
+
+        fmt = f"Channel: {ctx.channel} (ID: {ctx.channel.id})"
+        if ctx.guild:
+            fmt = f"{fmt}\nGuild: {ctx.guild} (ID: {ctx.guild.id})"
+
+        embed.add_field(name="Location", value=fmt, inline=False)
+        embed.add_field(name="Content", value=textwrap.shorten(ctx.message.content, width=512))
+
+        exc = "".join(traceback.format_exception(type(error), error, error.__traceback__, chain=False))
+        embed.description = f"```py\n{exc}\n```"
+        embed.timestamp = discord.utils.utcnow()
+
+        self.log_handler.error("Command Error", extra={"embed": embed})
 
     async def start(self, token: str, *, reconnect: bool = True) -> None:
         try:

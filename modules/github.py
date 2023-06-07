@@ -32,6 +32,9 @@ import core
 
 GITHUB_ISSUE_URL = "https://github.com/{}/issues/{}"
 LIB_ISSUE_REGEX = re.compile(r"(?P<lib>[a-z]+)?##(?P<number>[0-9]+)", flags=re.IGNORECASE)
+GITHUB_CODE_REGION_REGEX = re.compile(
+    r"https?://github\.com/(?P<user>.*)/(?P<repo>.*)/blob/(?P<hash>[a-zA-Z0-9]+)/(?P<path>.*)(?:\#L)(?P<linestart>[0-9]+)(?:-L)?(?P<lineend>[0-9]+)?"
+)
 
 GITHUB_BASE_URL = "https://github.com/"
 GITHUB_RAW_CONTENT_URL = "https://raw.githubusercontent.com/"
@@ -56,8 +59,13 @@ class GitHub(core.Cog):
         return file_path
 
     async def format_highlight_block(self, url: str, line_adjustment: int = 10) -> dict[str, str | int] | None:
+        match = GITHUB_CODE_REGION_REGEX.search(url)
+
+        if not match:
+            return
+
         try:
-            highlighted_line = int(url.split("#L")[1])  # separate the #L{n} highlight
+            highlighted_line = int(match["linestart"])  # separate the #L{n} highlight
         except IndexError:
             return
 
