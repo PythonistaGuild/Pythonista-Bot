@@ -46,6 +46,7 @@ class LogHandler:
         logging.getLogger("discord").setLevel(logging.INFO)
         logging.getLogger("discord.http").setLevel(logging.INFO)
         logging.getLogger("discord.state").setLevel(logging.WARNING)
+        logging.getLogger("discord.gateway").setLevel(logging.WARNING)
 
         self.log.setLevel(logging.INFO)
         handler = RotatingFileHandler(
