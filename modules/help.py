@@ -50,6 +50,10 @@ Once your issue has been solved type `{core.CONFIG['prefix']}solved` to close th
 """.strip()
 
 
+class NotThreadOwner(commands.CheckFailure):
+    pass
+
+
 def is_forum_thread() -> Check[Context]:
     def predicate(ctx: Context) -> bool:
         channel = ctx.channel
@@ -63,6 +67,21 @@ def is_forum_thread() -> Check[Context]:
             return False
 
         return True
+
+    return commands.check(predicate)
+
+
+def can_close_thread() -> Check[Context]:
+    def predicate(ctx: core.GuildContext) -> bool:
+        assert isinstance(ctx.channel, discord.Thread)
+
+        if ctx.author_is_mod():
+            return True
+
+        if ctx.author == ctx.channel.owner:
+            return True
+
+        raise NotThreadOwner()
 
     return commands.check(predicate)
 
@@ -86,6 +105,7 @@ class Help(commands.Cog):
 
         await thread.send(FORUM_BLURB)
 
+    @can_close_thread()
     @is_forum_thread()
     @commands.command("solved", brief="Closes a forum post", short_doc="Closes a forum post in the help channels")
     async def solved(self, ctx: core.GuildContext) -> None:
@@ -96,10 +116,6 @@ class Help(commands.Cog):
         """
         assert isinstance(ctx.channel, discord.Thread)  # guarded by the check
         assert isinstance(ctx.channel.parent, discord.ForumChannel)  # guarded by the check
-
-        if not ctx.author_is_mod() or ctx.author != ctx.channel.owner:
-            await ctx.send("You can only mark your own posts as solved")
-            return
 
         try:
             emoji = discord.utils.get(ctx.guild.emojis, id=578575442383208468)
@@ -112,10 +128,14 @@ class Help(commands.Cog):
         if not tag:
             return
 
+        tags = ctx.channel.applied_tags
+        if not any(tag_.id == 1006769269201195059 for tag_ in tags):
+            tags.append(tag)
+
         await ctx.channel.edit(
             locked=True,
             archived=True,
-            applied_tags=ctx.channel.applied_tags + [tag],
+            applied_tags=tags[:5],
             reason=f"Marked as solved by {ctx.author}",
         )
 
@@ -127,6 +147,16 @@ class Help(commands.Cog):
 
         msg: str = f"{ctx.author} ({ctx.author.id}) marked thread '{ctx.channel.name}' ({ctx.channel.id}) as solved."
         await channel.send(msg)
+
+    @solved.error
+    async def solved_error(self, ctx: Context, error: commands.CommandError) -> None:
+        error = getattr(error, "original", error)
+
+        if isinstance(error, NotThreadOwner):
+            await ctx.send("Sorry, you must be the owner of this thread to close it!")
+
+        elif isinstance(error, commands.CheckFailure):
+            await ctx.send("Sorry, this doesn't appear to be a forum thread?")
 
 
 async def setup(bot: core.Bot) -> None:
