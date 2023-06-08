@@ -1,0 +1,24 @@
+jobs:
+  deploy:
+    name: Deploy bot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remote deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ~/projects/pythonista-bot/
+            git stash || true
+            git pull --force || true
+            docker compose up --build -d
+          username: ${{ secrets.SSH_USER }}
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
