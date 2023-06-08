@@ -128,10 +128,14 @@ class Help(commands.Cog):
         if not tag:
             return
 
+        tags = ctx.channel.applied_tags
+        if not any(tag_.id == 1006769269201195059 for tag_ in tags):
+            tags.append(tag)
+
         await ctx.channel.edit(
             locked=True,
             archived=True,
-            applied_tags=ctx.channel.applied_tags + [tag],
+            applied_tags=tags[:5],
             reason=f"Marked as solved by {ctx.author}",
         )
 
