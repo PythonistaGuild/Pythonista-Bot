@@ -20,7 +20,7 @@ webhook_avatar_url = "" # optional
 level = 20
 
 [SNEKBOX] # optional
-url = 'http://snekbox:8060' # default url
+url = 'http://snekbox:8060/eval' # default url
 
 [GITHUB] # optional
 bot_secret = ""

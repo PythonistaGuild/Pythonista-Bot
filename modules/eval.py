@@ -45,9 +45,10 @@ class Evaluation(core.Cog):
         self.eval_endpoint: str = endpoint_url
 
     async def perform_eval(self, code: core.Codeblock) -> str:
-        async with self.bot.session.post(self.eval_endpoint, json={"input": code.content[1]}) as eval_response:
+        async with self.bot.session.post(self.eval_endpoint, json={"input": code.content}) as eval_response:
             if eval_response.status != 200:
-                raise InvalidEval(eval_response.status, "There was an issue running this eval command.")
+                response_text = await eval_response.text()
+                raise InvalidEval(eval_response.status, response_text)
 
             eval_data = await eval_response.json()
 
@@ -66,15 +67,9 @@ class Evaluation(core.Cog):
         code_body: :class:`Codeblock`
             This will attempt to convert your current passed parameter into proper Python code.
         """
-        reaction = "\U00002705"
 
         async with ctx.typing():
-            try:
-                output = await self.perform_eval(code)
-            except InvalidEval:
-                reaction = "\U0000274c"
-
-                return await ctx.message.add_reaction(reaction)
+            output = await self.perform_eval(code)
 
             if len(output) > 1000:
                 codeblock = await self.bot.mb_client.create_paste(content=output, filename="eval.py")
@@ -82,7 +77,7 @@ class Evaluation(core.Cog):
             else:
                 codeblock = formatters.to_codeblock(output, escape_md=False)
 
-            await ctx.message.add_reaction(reaction)
+            await ctx.message.add_reaction("\U00002705")
             await ctx.send(f"Hey {ctx.author.display_name}, here is your eval output:\n{codeblock}")
 
     @eval.error
@@ -95,7 +90,10 @@ class Evaluation(core.Cog):
             return
 
         elif isinstance(error, core.InvalidEval):
-            await ctx.send(f"Eval failed with status code: {error.error_code}.")
+            await ctx.send(
+                f"Hey! Your eval job failed with status code: {error.error_code}. Error message is below:-\n{error}.\nDon't worry, the team here know!"
+            )
+            LOGGER.error("Eval Cog raised an error during eval:\n%s", str(error))
 
 
 async def setup(bot: core.Bot) -> None:
