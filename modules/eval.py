@@ -23,6 +23,7 @@ SOFTWARE.
 from __future__ import annotations
 
 import logging
+import textwrap
 
 from discord.ext import commands
 
@@ -32,6 +33,16 @@ from core.utils import formatters
 
 
 LOGGER = logging.getLogger(__name__)
+
+
+CODE = """
+def __user_code__():
+{user_code}
+
+__value__ = __user_code__()
+if __value__:
+    print(__value__)
+"""
 
 
 class Evaluation(core.Cog):
@@ -45,7 +56,9 @@ class Evaluation(core.Cog):
         self.eval_endpoint: str = endpoint_url
 
     async def perform_eval(self, code: core.Codeblock) -> str:
-        async with self.bot.session.post(self.eval_endpoint, json={"input": code.content}) as eval_response:
+        formatted = CODE.format(user_code=textwrap.indent(code.content.replace("\t", "    "), "    "))
+
+        async with self.bot.session.post(self.eval_endpoint, json={"input": formatted}) as eval_response:
             if eval_response.status != 200:
                 response_text = await eval_response.text()
                 raise InvalidEval(eval_response.status, response_text)
@@ -70,14 +83,18 @@ class Evaluation(core.Cog):
 
         async with ctx.typing():
             output = await self.perform_eval(code)
+            await ctx.message.add_reaction("\U00002705")
 
             if len(output) > 1000:
                 codeblock = await self.bot.mb_client.create_paste(content=output, filename="eval.py")
 
-            else:
+            elif output:
                 codeblock = formatters.to_codeblock(output, escape_md=False)
 
-            await ctx.message.add_reaction("\U00002705")
+            else:
+                await ctx.send(f"Hey {ctx.author.display_name}, your code ran successfully, and returned nothing")
+                return
+
             await ctx.send(f"Hey {ctx.author.display_name}, here is your eval output:\n{codeblock}")
 
     @eval.error
