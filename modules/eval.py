@@ -44,6 +44,7 @@ if __value__:
     print(__value__)
 """
 
+
 class Evaluation(core.Cog):
     """Evaluation Cog.
 
@@ -89,7 +90,7 @@ class Evaluation(core.Cog):
 
             elif output:
                 codeblock = formatters.to_codeblock(output, escape_md=False)
-            
+
             else:
                 await ctx.send(f"Hey {ctx.author.display_name}, your code ran successfully, and returned nothing")
                 return
