@@ -71,7 +71,6 @@ jobs:
           no-comments: ${{ matrix.python-version != '3.x' }}
 
       - name: Lint
-        if: ${{ always() && steps.install-deps.outcome == 'success' }}
         uses: github/super-linter/slim@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
