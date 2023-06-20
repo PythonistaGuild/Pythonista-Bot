@@ -33,7 +33,7 @@ import core
 GITHUB_ISSUE_URL = "https://github.com/{}/issues/{}"
 LIB_ISSUE_REGEX = re.compile(r"(?P<lib>[a-z]+)?##(?P<number>[0-9]+)", flags=re.IGNORECASE)
 GITHUB_CODE_REGION_REGEX = re.compile(
-    r"https?://github\.com/(?P<user>.*)/(?P<repo>.*)/blob/(?P<hash>[a-zA-Z0-9]+)/(?P<path>.*)(?:\#L)(?P<linestart>[0-9]+)(?:-L)?(?P<lineend>[0-9]+)?"
+    r"https?://github\.com/(?P<user>.*)/(?P<repo>.*)/blob/(?P<hash>[a-zA-Z0-9]+)/(?P<path>.*)/(?P<file>.*)(?:\#L)(?P<linestart>[0-9]+)(?:-L)?(?P<lineend>[0-9]+)?"
 )
 
 GITHUB_BASE_URL = "https://github.com/"
@@ -98,21 +98,29 @@ class GitHub(core.Cog):
         _min_boundary = highlighted_line - 1 - bound_adj
         _max_boundary = highlighted_line - 1 + bound_adj
 
-        # loop through all the lines, and adjust the formatting
-        msg = "```ansi\n"
+        # get the file extension to format nicely
+        file = match["file"]
+        extension = file.split(".")[1]
+
+        msg = f"```{extension}\n"
         key = _min_boundary
 
+        max_digit = len(str(_max_boundary))
+
+        # loop through all our lines
         while key <= _max_boundary:
             curr_line_no: str = str(key + 1)
+            spaced_line_no = f"%{max_digit}d" % int(curr_line_no)
 
             # insert a space if there is no following char before the first character...
             if key + 1 == highlighted_line:
-                highlighted_msg_format = f"\u001b[0;37m\u001b[4;31m{curr_line_no}  {line_list[key]}\u001b[0;0m\n"
+                highlighted_msg_format = f">{spaced_line_no}  {line_list[key]}\n"
                 msg += highlighted_msg_format
 
             else:
                 # if we hit the end of the file, just write an empty string
-                display_str = "{}  {}\n" if line_list.get(key) is not None else ""
+                display_str = " {}  {}\n" if line_list.get(key) is not None else ""
+                curr_line_no = spaced_line_no
                 msg += display_str.format(curr_line_no, line_list.get(key))
 
             key += 1
