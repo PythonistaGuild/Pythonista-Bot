@@ -82,6 +82,17 @@ class GitHub(core.Cog):
         code = code.splitlines()
         code_block_dict: dict[str, dict[int, str]] = {"lines": {}}
 
+        line_start = match["linestart"]
+        line_end = match["lineend"]
+
+        bulk = False  # are we highlighting a specific block of code?
+
+        line_start = int(line_start)
+        line_end = int(line_end) if line_end is not None else 0
+
+        if line_end != 0:
+            bulk = True
+
         j = 0
         for i in code:
             # populate the dict
@@ -94,13 +105,22 @@ class GitHub(core.Cog):
         if highlighted_line - 1 not in line_list:
             return None
 
-        bound_adj = line_adjustment  # adjustment for upper and lower bound display
-        _min_boundary = highlighted_line - 1 - bound_adj
-        _max_boundary = highlighted_line - 1 + bound_adj
+        bound_adj = line_adjustment  # adjustment for upper and lower bound display.
+        _min_boundary = highlighted_line - 1 - bound_adj if bulk is False else line_start - 1
+        _max_boundary = highlighted_line - 1 + bound_adj if bulk is False else line_end - 1
+
+        # is our minimum greater than our maximum?
+        if _min_boundary > _max_boundary:
+            # re-arrange the variables so we get the proper min - max scale
+            _min = _min_boundary
+            _max = _max_boundary
+
+            _min_boundary = _max
+            _max_boundary = _min
 
         # get the file extension to format nicely
         file = match["file"]
-        extension = file.split(".")[1]
+        extension = file.rsplit(".")[-1]
 
         msg = f"```{extension}\n"
         key = _min_boundary
@@ -127,10 +147,14 @@ class GitHub(core.Cog):
 
         msg += "\n```"
 
+        path = match["path"]
+        file_path = f"{path}/{file}"
+
         github_dict = {
             "path": file_path,
-            "min": _min_boundary if _min_boundary > 0 else highlighted_line,  # Do not display negative numbers if <0
-            "max": _max_boundary,
+            "min": (_min_boundary if _min_boundary > 0 else highlighted_line - 1)
+            + 1,  # Do not display negative numbers if <0
+            "max": _max_boundary + 1,
             "msg": msg,
         }
 
@@ -161,6 +185,14 @@ class GitHub(core.Cog):
         _max = code_segment["max"]
         code_fmt = code_segment["msg"]
 
+        max_message_size = 2002
+        segment_len = len(code_fmt)
+
+        # is our msg too big for the embed?
+        if segment_len > max_message_size:
+            # set the block msg to None in this case
+            code_fmt = None
+
         def check(reaction: discord.Reaction, user: discord.User) -> bool:
             return (
                 reaction.emoji == self.code_highlight_emoji and user != self.bot.user and message.id == reaction.message.id
@@ -169,7 +201,11 @@ class GitHub(core.Cog):
         try:
             await self.bot.wait_for("reaction_add", check=check, timeout=self.highlight_timeout)
 
-            msg: str = f"Showing lines `{_min}` - `{_max}` in: `{path}`...\n{code_fmt}"
+            if code_fmt is None:
+                await message.channel.send("You've selected too many lines for me to display!")
+                return
+
+            msg: str = f"Showing lines `{_min}-{_max}` in: `{path}`\n{code_fmt}"
             await message.channel.send(msg, suppress_embeds=True)
 
         except asyncio.TimeoutError:
