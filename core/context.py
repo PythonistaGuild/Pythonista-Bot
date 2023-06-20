@@ -24,18 +24,18 @@ Interaction: TypeAlias = discord.Interaction["Bot"]
 
 class Context(commands.Context["Bot"]):
     @discord.utils.cached_property
-    def replied_reference(self) -> discord.MessageReference | None:
+    def replied_reference(self) -> discord.MessageReference | discord.Message:
         ref = self.message.reference
         if ref and isinstance(ref.resolved, discord.Message):
-            return ref.resolved.to_reference()
-        return None
+            return ref.resolved.to_reference(fail_if_not_exists=False)
+        return self.message
 
     @discord.utils.cached_property
-    def replied_message(self) -> discord.Message | None:
+    def replied_message(self) -> discord.Message | discord.Message:
         ref = self.message.reference
         if ref and isinstance(ref.resolved, discord.Message):
             return ref.resolved
-        return None
+        return self.message
 
     def author_is_mod(self) -> bool:
         member: discord.Member
