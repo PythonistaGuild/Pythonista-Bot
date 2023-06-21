@@ -186,7 +186,7 @@ class GitHub(core.Cog):
         code_fmt = code_segment["msg"]
 
         max_message_size = 2002
-        segment_len = len(code_fmt)
+        segment_len = len(code_fmt)  # type: ignore
 
         # is our msg too big for the embed?
         if segment_len > max_message_size:
