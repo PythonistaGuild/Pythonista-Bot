@@ -23,11 +23,7 @@ SOFTWARE.
 from ._meta import CONSTANTS
 
 
-__all__ = (
-    "Roles",
-    "Colours",
-    "Channels",
-)
+__all__ = ("Roles", "Colours", "Channels", "ForumTags")
 
 
 class Roles(CONSTANTS):
@@ -61,3 +57,12 @@ class Colours(CONSTANTS):
     PYTHONISTA_BG: int = 0x18344D
     PYTHON_YELLOW: int = 0xFFDE57
     PYTHON_BLUE: int = 0x4584B6
+
+
+class ForumTags(CONSTANTS):
+    PYTHON = 1006716837041557574
+    TWITCHIO = 1006716863469867060
+    WAVELINK = 1006716892020473917
+    DISCORDPY = 1006716972802789457
+    OTHER = 1006717008613740596
+    RESOLVED = 1006769269201195059
