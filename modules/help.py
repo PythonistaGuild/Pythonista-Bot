@@ -28,7 +28,7 @@ import discord
 from discord.ext import commands
 
 import core
-from constants import Channels
+from constants import Channels, ForumTags
 from core.context import Context
 
 
@@ -36,18 +36,27 @@ if TYPE_CHECKING:
     from discord.ext.commands._types import Check  # type: ignore # why does this need a stub?
 
 
-FORUM_BLURB = f"""
+_FORUM_BLURB = f"""
 Welcome to the help forum!
 Please provide as much information as possible about your problem, and then wait for someone to help you.
 
-A good question should include:
+Please include:
 - your problem
 - your code
 - your traceback (if applicable)
 - what you've tried so far
+{{remarks}}
 
 Once your issue has been solved type `{core.CONFIG['prefix']}solved` to close the thread.
 """.strip()
+
+# fmt: off
+FORUM_BLURB_GENERIC  = _FORUM_BLURB.format(remarks="")
+FORUM_BLURB_PYTHON   = _FORUM_BLURB.format(remarks="- your Python version")
+FORUM_BLURB_TWITCHIO = _FORUM_BLURB.format(remarks="- your TwitchIO version")
+FORUM_BLURB_WAVELINK = _FORUM_BLURB.format(remarks="- your Wavelink version\n- your Discord.py version")
+FORUM_BLURB_DPY      = _FORUM_BLURB.format(remarks="- your Discord.py version")
+# fmt: on
 
 
 class NotThreadOwner(commands.CheckFailure):
@@ -103,7 +112,26 @@ class Help(commands.Cog):
 
         await channel.send(f"{thread.owner} ({thread.owner_id}) created thread '{thread.name}' ({thread.id}).")
 
-        await thread.send(FORUM_BLURB)
+        tags = {s.id for s in thread.applied_tags}
+        # we'll check for individual libs before the generic python tag
+        # wavelink and twitchio are first, before genericizing down to dpy and finally python
+
+        if ForumTags.TWITCHIO in tags:
+            blurb = FORUM_BLURB_TWITCHIO
+
+        elif ForumTags.WAVELINK in tags:
+            blurb = FORUM_BLURB_WAVELINK
+
+        elif ForumTags.DISCORDPY in tags:
+            blurb = FORUM_BLURB_DPY
+
+        elif ForumTags.PYTHON in tags:
+            blurb = FORUM_BLURB_PYTHON
+
+        else:
+            blurb = FORUM_BLURB_GENERIC
+
+        await thread.send(blurb)
 
     @can_close_thread()
     @is_forum_thread()
@@ -124,12 +152,12 @@ class Help(commands.Cog):
         except discord.HTTPException:
             pass
 
-        tag = ctx.channel.parent.get_tag(1006769269201195059)
+        tag = ctx.channel.parent.get_tag(ForumTags.RESOLVED)
         if not tag:
             return
 
         tags = ctx.channel.applied_tags
-        if not any(tag_.id == 1006769269201195059 for tag_ in tags):
+        if not any(tag_.id == ForumTags.RESOLVED for tag_ in tags):
             tags.append(tag)
 
         await ctx.channel.edit(
