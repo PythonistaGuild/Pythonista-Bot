@@ -110,7 +110,10 @@ class Help(commands.Cog):
         if not channel:
             return
 
-        await channel.send(f"{thread.owner} ({thread.owner_id}) created thread '{thread.name}' ({thread.id}).")
+        msg: str = (
+            f"{thread.owner} (ID: {thread.owner_id}) created thread: `{thread.name} (ID: {thread.id})` {thread.mention}"
+        )
+        await channel.send(msg)
 
         tags = {s.id for s in thread.applied_tags}
         # we'll check for individual libs before the generic python tag
@@ -173,7 +176,10 @@ class Help(commands.Cog):
         if not channel:
             return
 
-        msg: str = f"{ctx.author} ({ctx.author.id}) marked thread '{ctx.channel.name}' ({ctx.channel.id}) as solved."
+        msg: str = (
+            f"{ctx.author} (ID: {ctx.author.id}) marked thread: `{ctx.channel.name} (ID: {ctx.channel.id})` "
+            f"{ctx.channel.mention} as solved."
+        )
         await channel.send(msg)
 
     @solved.error
