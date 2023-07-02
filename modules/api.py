@@ -31,9 +31,9 @@ from discord.backoff import ExponentialBackoff
 
 import core
 from constants import (
-    PAPIWebsocketOPCodes,
     PAPIWebsocketCloseCodes,
     PAPIWebsocketNotificationTypes,
+    PAPIWebsocketOPCodes,
     PAPIWebsocketSubscriptions,
 )
 
