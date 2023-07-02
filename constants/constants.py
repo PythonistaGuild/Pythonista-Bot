@@ -94,7 +94,7 @@ class PAPIWebsocketOPCodes(CONSTANTS):
 
 
 class PAPIWebsocketSubscriptions(CONSTANTS):
-    DPY_MOD_LOG: str = "discord_py_mod_log"
+    DPY_MODLOG: str = "dpy_modlog"
 
 
 class PAPIWebsocketNotificationTypes(CONSTANTS):
