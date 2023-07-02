@@ -34,14 +34,14 @@ from constants import (
     PAPIWebsocketOPCodes,
     PAPIWebsocketCloseCodes,
     PAPIWebsocketNotificationTypes,
-    PAPIWebsocketSubscriptions
+    PAPIWebsocketSubscriptions,
 )
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-WS_URL: str = 'wss://api.pythonista.gg/v1/websocket'
+WS_URL: str = "wss://api.pythonista.gg/v1/websocket"
 
 
 class API(core.Cog):
@@ -78,7 +78,7 @@ class API(core.Cog):
         return self.websocket is not None and not self.websocket.closed
 
     async def connect(self) -> None:
-        token: str | None = core.CONFIG['TOKENS'].get('pythonista')
+        token: str | None = core.CONFIG["TOKENS"].get("pythonista")
 
         if not token:
             self.connection_task = None
@@ -88,21 +88,20 @@ class API(core.Cog):
             try:
                 self.keep_alive_task.cancel()
             except Exception as e:
-                LOGGER.debug(f'Failed to cancel Pythonista API Websocket keep alive. This is likely not a problem: {e}')
+                LOGGER.debug(f"Failed to cancel Pythonista API Websocket keep alive. This is likely not a problem: {e}")
 
-        headers: dict[str, str] = {'Authorization': token}
+        headers: dict[str, str] = {"Authorization": token}
 
         while True:
             async with aiohttp.ClientSession(headers=headers) as session:
-
                 try:
                     self.websocket = await session.ws_connect(url=WS_URL)  # type: ignore
                 except Exception as e:
                     if isinstance(e, aiohttp.WSServerHandshakeError) and e.status == 403:
-                        LOGGER.critical('Unable to connect to Pythonista API Websocket, due to an incorrect token.')
+                        LOGGER.critical("Unable to connect to Pythonista API Websocket, due to an incorrect token.")
                         return
                     else:
-                        LOGGER.debug(f'Unable to connect to Pythonista API Websocket: {e}.')
+                        LOGGER.debug(f"Unable to connect to Pythonista API Websocket: {e}.")
 
                 if self.is_connected():
                     session.detach()
@@ -120,8 +119,8 @@ class API(core.Cog):
         assert self.websocket
 
         initial: dict[str, Any] = {
-            'op': PAPIWebsocketOPCodes.SUBSCRIBE,
-            'subscriptions': [PAPIWebsocketSubscriptions.DPY_MOD_LOG]
+            "op": PAPIWebsocketOPCodes.SUBSCRIBE,
+            "subscriptions": [PAPIWebsocketSubscriptions.DPY_MOD_LOG],
         }
         await self.websocket.send_json(data=initial)
 
@@ -131,40 +130,40 @@ class API(core.Cog):
             closing: tuple[aiohttp.WSMsgType, aiohttp.WSMsgType, aiohttp.WSMsgType] = (
                 aiohttp.WSMsgType.CLOSED,
                 aiohttp.WSMsgType.CLOSING,
-                aiohttp.WSMsgType.CLOSE
+                aiohttp.WSMsgType.CLOSE,
             )
             if message.type in closing:  # pyright: ignore[reportUnknownMemberType]
-                LOGGER.debug(f'Received a CLOSING/CLOSED/CLOSE message type from Pythonista API.')
+                LOGGER.debug(f"Received a CLOSING/CLOSED/CLOSE message type from Pythonista API.")
 
                 self.connection_task = asyncio.create_task(self.connect())
                 return
 
             data: dict[str, Any] = message.json()
-            op: int | None = data.get('op')
+            op: int | None = data.get("op")
 
             if op == PAPIWebsocketOPCodes.HELLO:
                 LOGGER.info(f'Received HELLO from Pythonista API: `user={data["user_id"]}`')
 
             elif op == PAPIWebsocketOPCodes.EVENT:
-                subscription: str = data['subscription']
+                subscription: str = data["subscription"]
 
                 if subscription == PAPIWebsocketSubscriptions.DPY_MOD_LOG:
-                    self.bot.dispatch('papi_dpy_modlog', data['payload'])
+                    self.bot.dispatch("papi_dpy_modlog", data["payload"])
 
             elif op == PAPIWebsocketOPCodes.NOTIFICATION:
-                type_: str = data['type']
+                type_: str = data["type"]
 
                 if type_ == PAPIWebsocketNotificationTypes.SUBSCRIPTION_ADDED:
-                    subscribed: str = ', '.join(data['subscriptions'])
-                    LOGGER.info(f'Pythonista API added our subscription, currently subscribed: `{subscribed}`')
+                    subscribed: str = ", ".join(data["subscriptions"])
+                    LOGGER.info(f"Pythonista API added our subscription, currently subscribed: `{subscribed}`")
                 elif type_ == PAPIWebsocketNotificationTypes.SUBSCRIPTION_REMOVED:
-                    subscribed: str = ', '.join(data['subscriptions'])
-                    LOGGER.info(f'Pythonista API removed our subscription, currently subscribed: `{subscribed}`')
+                    subscribed: str = ", ".join(data["subscriptions"])
+                    LOGGER.info(f"Pythonista API removed our subscription, currently subscribed: `{subscribed}`")
                 elif type_ == PAPIWebsocketNotificationTypes.UNKNOWN_OP:
                     LOGGER.info(f'We sent an UNKNOWN OP to Pythonista API: `{data["received"]}`')
 
             else:
-                LOGGER.info('Received an UNKNOWN OP from Pythonista API.')
+                LOGGER.info("Received an UNKNOWN OP from Pythonista API.")
 
 
 async def setup(bot: core.Bot) -> None:

@@ -31,7 +31,7 @@ __all__ = (
     "PAPIWebsocketSubscriptions",
     "PAPIWebsocketCloseCodes",
     "PAPIWebsocketNotificationTypes",
-    "PAPIWebsocketOPCodes"
+    "PAPIWebsocketOPCodes",
 )
 
 
@@ -89,18 +89,18 @@ class PAPIWebsocketOPCodes(CONSTANTS):
     NOTIFICATION: int = 2
 
     # Sent to Pythonista API...
-    SUBSCRIBE: str = 'subscribe'
-    UNSUBSCRIBE: str = 'unsubscribe'
+    SUBSCRIBE: str = "subscribe"
+    UNSUBSCRIBE: str = "unsubscribe"
 
 
 class PAPIWebsocketSubscriptions(CONSTANTS):
-    DPY_MOD_LOG: str = 'discord_py_mod_log'
+    DPY_MOD_LOG: str = "discord_py_mod_log"
 
 
 class PAPIWebsocketNotificationTypes(CONSTANTS):
     # Subscriptions...
-    SUBSCRIPTION_ADDED: str = 'subscription_added'
-    SUBSCRIPTION_REMOVED: str = 'subscription_removed'
+    SUBSCRIPTION_ADDED: str = "subscription_added"
+    SUBSCRIPTION_REMOVED: str = "subscription_removed"
 
     # Failures...
-    UNKNOWN_OP: str = 'unknown_op'
+    UNKNOWN_OP: str = "unknown_op"
