@@ -9,6 +9,7 @@ class Tokens(TypedDict):
     idevision: str
     mystbin: str
     github_bot: str
+    pythonista: str
 
 
 class Database(TypedDict):
