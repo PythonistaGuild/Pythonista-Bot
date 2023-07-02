@@ -57,9 +57,7 @@ class API(core.Cog):
 
     @property
     def headers(self) -> dict[str, Any]:
-        return {
-            'Authorization': core.CONFIG['TOKENS']['pythonista']
-        }
+        return {"Authorization": core.CONFIG["TOKENS"]["pythonista"]}
 
     async def cog_load(self) -> None:
         self.session = aiohttp.ClientSession(headers=self.headers)
