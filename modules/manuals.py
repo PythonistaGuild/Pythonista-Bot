@@ -128,7 +128,7 @@ class Manuals(commands.Cog):
                 await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
                 return
 
-            await ctx.reply(str(lib.value), reference=ctx.replied_message)
+            await ctx.send(str(lib.value), reference=ctx.replied_message)
             return
 
         labels = False
@@ -161,7 +161,7 @@ class Manuals(commands.Cog):
             return
 
         if not final_query:
-            await ctx.reply(str(lib.value[0]), reference=ctx.replied_message)
+            await ctx.send(str(lib.value[0]), reference=ctx.replied_message)
             return
 
         url = self.target.with_path("/api/public/rtfm.sphinx").with_query(
@@ -226,7 +226,7 @@ class Manuals(commands.Cog):
                 await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
                 return
 
-            await ctx.reply(str(lib.value), reference=ctx.replied_message)
+            await ctx.send(str(lib.value), reference=ctx.replied_message)
             return
 
         source = False
@@ -297,7 +297,7 @@ class Manuals(commands.Cog):
 
         else:
             n = next(iter(nodes.items()))
-            await ctx.reply(f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}", reference=ctx.replied_message)
+            await ctx.send(f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}", reference=ctx.replied_message)
 
             pages = TextPager(ctx, n[1], prefix="```py")
             await pages.paginate()
