@@ -49,7 +49,7 @@ class API(core.Cog):
         self.bot = bot
 
         self.session: aiohttp.ClientSession | None = None
-        self.backoff: ExponentialBackoff = ExponentialBackoff()  # type: ignore
+        self.backoff: ExponentialBackoff[bool] = ExponentialBackoff()
         self.websocket: aiohttp.ClientWebSocketResponse | None = None
 
         self.connection_task: asyncio.Task[None] | None = None
@@ -68,7 +68,7 @@ class API(core.Cog):
             try:
                 self.connection_task.cancel()
             except Exception as e:
-                LOGGER.debug(f'Unable to cancel Pythonista API connection_task in "cog_unload": {e}')
+                LOGGER.error(f'Unable to cancel Pythonista API connection_task in "cog_unload": {e}')
 
         if self.is_connected():
             assert self.websocket
@@ -78,7 +78,7 @@ class API(core.Cog):
             try:
                 self.keep_alive_task.cancel()
             except Exception as e:
-                LOGGER.debug(f'Unable to cancel Pythonista API keep_alive_task in "cog_unload": {e}')
+                LOGGER.error(f'Unable to cancel Pythonista API keep_alive_task in "cog_unload": {e}')
 
     def dispatch(self, *, data: dict[str, Any]) -> None:
         subscription: str = data["subscription"]
@@ -98,7 +98,7 @@ class API(core.Cog):
             try:
                 self.keep_alive_task.cancel()
             except Exception as e:
-                LOGGER.debug(f"Failed to cancel Pythonista API Websocket keep alive. This is likely not a problem: {e}")
+                LOGGER.warning(f"Failed to cancel Pythonista API Websocket keep alive. This is likely not a problem: {e}")
 
         while True:
             try:
@@ -108,13 +108,13 @@ class API(core.Cog):
                     LOGGER.critical("Unable to connect to Pythonista API Websocket, due to an incorrect token.")
                     return
                 else:
-                    LOGGER.debug(f"Unable to connect to Pythonista API Websocket: {e}.")
+                    LOGGER.error(f"Unable to connect to Pythonista API Websocket: {e}.")
 
             if self.is_connected():
                 break
             else:
                 delay: float = self.backoff.delay()  # type: ignore
-                LOGGER.debug(f'Retrying Pythonista API Websocket connection in "{delay}" seconds.')
+                LOGGER.warning(f'Retrying Pythonista API Websocket connection in "{delay}" seconds.')
 
                 await asyncio.sleep(delay)
 
@@ -148,7 +148,7 @@ class API(core.Cog):
             op: int | None = data.get("op")
 
             if op == PAPIWebsocketOPCodes.HELLO:
-                LOGGER.info(f'Received HELLO from Pythonista API: user={data["user_id"]}')
+                LOGGER.debug(f'Received HELLO from Pythonista API: user={data["user_id"]}')
 
             elif op == PAPIWebsocketOPCodes.EVENT:
                 self.dispatch(data=data)
