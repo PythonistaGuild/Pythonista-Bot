@@ -27,7 +27,7 @@ import textwrap
 
 import discord
 from discord.ext import commands, tasks
-from discord.utils import format_dt
+from discord.utils import MISSING, format_dt
 
 import core
 
@@ -35,6 +35,9 @@ import core
 class Logging(commands.Cog):
     def __init__(self, bot: core.Bot) -> None:
         self.bot = bot
+
+        self.user: discord.User | None = MISSING  # none is for a failed fetch
+
         if url := core.CONFIG["LOGGING"].get("webhook_url"):
             self.webhook = discord.Webhook.from_url(url, session=bot.session, client=bot)
         else:
@@ -64,9 +67,32 @@ class Logging(commands.Cog):
 
         embed = to_log.__dict__.get("embed") or discord.utils.MISSING
 
+        avatar_url: str | None = core.CONFIG["LOGGING"].get("webhook_avatar_url")
+        avatar_name = "PythonistaBot Logging"
+
+        if not avatar_url and self.user is not None and "runner" in core.CONFIG["LOGGING"]:
+            runner_id: int = core.CONFIG["LOGGING"]["runner"]
+            user = self.user or self.bot.get_user(runner_id)
+
+            if user:
+                avatar_url = user.display_avatar.url
+                avatar_name = f"Logging: Dev: {user.display_name}"
+
+            else:
+                try:
+                    user = await self.bot.fetch_user(
+                        runner_id
+                    )  # dont particularly need to chunk the entire guild for the one user
+                    self.user = user
+                except:
+                    self.user = None  # This will tell us not to attempt again.
+                else:
+                    avatar_url = user.display_avatar.url
+                    avatar_name = f"Logging: Dev: {user.display_name}"
+
         await self.webhook.send(
             message,
-            username="PythonistaBot Logging",
+            username=avatar_name,
             avatar_url=core.CONFIG["LOGGING"].get("webhook_avatar_url"),
             embed=embed,
         )
