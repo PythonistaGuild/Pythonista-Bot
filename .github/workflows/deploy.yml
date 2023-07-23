@@ -19,6 +19,8 @@ jobs:
 name: Deploy
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Create and publish a Docker image"]
+    branches: [main]
+    types:
+      - completed
