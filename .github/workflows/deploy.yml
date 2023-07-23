@@ -10,9 +10,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/projects/pythonista-bot/
-            git stash || true
-            git pull --force || true
+            docker compose pull bot
             docker compose up --build -d
           username: ${{ secrets.SSH_USER }}
 
