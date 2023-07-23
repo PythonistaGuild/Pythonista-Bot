@@ -26,6 +26,7 @@ import asyncio
 import base64
 import binascii
 import re
+import logging
 from typing import Any
 
 import discord
@@ -34,9 +35,10 @@ from discord.ext import commands
 
 import core
 
+logger = logging.getLogger(__name__)
 
 TOKEN_RE = re.compile(r"[a-zA-Z0-9_-]{23,28}\.[a-zA-Z0-9_-]{6,7}\.[a-zA-Z0-9_-]{27}")
-
+BASE_BADBIN_RE = r"https://(?P<site>{domains})/(?P<slug>[a-zA-Z0-9]+)[.]?(?P<ext>[a-z]{{1,8}})?"
 
 def validate_token(token: str) -> bool:
     try:
@@ -57,6 +59,12 @@ class Moderation(commands.Cog):
     def __init__(self, bot: core.Bot, /) -> None:
         self.bot = bot
         self._req_lock = asyncio.Lock()
+
+        domains = core.CONFIG["BADBIN"]["domains"]
+        formatted = BASE_BADBIN_RE.format(domains="|".join(domains))
+
+        self.BADBIN_RE = re.compile(formatted)
+        logger.info("Badbin initialized with following domains: %s", ", ".join(domains))
 
     async def github_request(
         self,
@@ -147,6 +155,60 @@ class Moderation(commands.Cog):
             f"You can find the token(s) [here]({url})."
         )
         await message.reply(msg)
+
+    
+    async def pull_badbin_content(self, site: str, slug: str, *, fail_hard: bool = True) -> str:
+        async with self.bot.session.get(f"https://{site}/raw/{slug}") as f:
+            if 200 > f.status > 299:
+                if fail_hard:
+                    f.raise_for_status()
+                else:
+                    err = f"Could not read {slug} from {site}. Details: {f.status}\n\n{await f.read()}"
+                    logger.error(err)
+                    return err # if we don't fail hard, we'll return the error message in the new paste.
+            
+            return (await f.read()).decode()
+
+    async def post_mystbin_content(self, contents: list[tuple[str, str]]) -> tuple[str, str | None]:
+        hdrs = {}
+        if core.CONFIG["TOKENS"]["mystbin"]:
+            hdrs["Authorization"] = core.CONFIG["TOKENS"]["mystbin"]
+
+        async with self.bot.session.put(
+                "https://api.mystb.in/paste",
+                headers=hdrs,
+                json={"files": [{"filename": x[1], "content": x[0]} for x in contents]}
+        ) as resp:
+            if 200 > resp.status > 299:
+                resp.raise_for_status()
+
+            data = await resp.json()
+            return data["id"], data.get("notice") or None
+
+
+    @commands.Cog.listener("on_message")
+    async def find_badbins(self, message: discord.Message) -> None:
+        matches = self.BADBIN_RE.findall(message.content)
+
+        if matches:
+            contents: list[tuple[str, str]] = []
+
+            for match in matches:
+                site, slug, ext = match
+
+                if site is None or slug is None:
+                    continue
+
+                contents.append((await self.pull_badbin_content(site, slug), f"migrated.{ext or 'txt'}"))
+        
+            if contents:
+                key, notice = await self.post_mystbin_content(contents)
+                msg = f"I've detected a badbin and have uploaded your pastes here: https://mystb.in/{key}"
+
+                if notice:
+                    msg += "\nnotice: " + notice
+
+                await message.reply(msg, mention_author=False)
 
 
 async def setup(bot: core.Bot) -> None:

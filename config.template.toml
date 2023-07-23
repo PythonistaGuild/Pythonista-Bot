@@ -10,6 +10,9 @@ pythonista = ''
 [DATABASE]
 dsn = 'postgres://pythonistabot:pythonistabot@database:5432/pythonistabot' # assumed default
 
+[BADBIN]
+domains = ["pastebin.com", "hastebin.com"]
+
 # 50 = CRITICAL
 # 40 = ERROR
 # 30 = WARNING

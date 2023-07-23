@@ -26,6 +26,9 @@ class Snekbox(TypedDict):
     url: str
 
 
+class BadBin(TypedDict):
+    domains: list[str]
+
 class Config(TypedDict):
     prefix: str
     owner_ids: NotRequired[list[int]]
@@ -33,3 +36,4 @@ class Config(TypedDict):
     DATABASE: Database
     LOGGING: Logging
     SNEKBOX: NotRequired[Snekbox]
+    BADBIN: BadBin
