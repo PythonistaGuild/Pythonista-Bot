@@ -51,6 +51,6 @@ But if you wish to chat to us, feel free to open a discussion, an issue or even 
 Or chat to us on discord:-
 <div align="left">
     <a href="https://discord.gg/RAKc3HF">
-        <img src="https://discordapp.com/api/guilds/490948346773635102/widget.png?style=banner2" alt="Discord Server"/>
+        <img src="https://dogknife.zanderp25.com/files/images/pythonista-gh-banner.png" alt="Discord Server"/>
     </a>
 </div>
