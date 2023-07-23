@@ -29,6 +29,7 @@ class Snekbox(TypedDict):
 class BadBin(TypedDict):
     domains: list[str]
 
+
 class Config(TypedDict):
     prefix: str
     owner_ids: NotRequired[list[int]]
