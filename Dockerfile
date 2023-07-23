@@ -1,5 +1,9 @@
 FROM python:3.11-slim
 
+LABEL org.opencontainers.image.source=https://github.com/PythonistaGuild/Pythonista-Bot
+LABEL org.opencontainers.image.description="Pythonista Guild's Discord Bot"
+LABEL org.opencontainers.image.licenses=MIT
+
 ENV PYTHONUNBUFFERED=1 \
     # prevents python creating .pyc files
     PYTHONDONTWRITEBYTECODE=1 \
@@ -44,7 +48,7 @@ WORKDIR /app
 COPY poetry.lock pyproject.toml ./
 
 # install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
-RUN poetry install --without=dev
+RUN poetry install --only=main
 
 COPY . /app/
 ENTRYPOINT poetry run python -O launcher.py
