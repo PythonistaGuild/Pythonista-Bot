@@ -102,6 +102,7 @@ class Manuals(commands.Cog):
         brief="Searches documentation",
         short_doc="Searches relevant documentation for the given input.",
         signature="[library]? [query]",
+        aliases=["docs", "rtfd"],
     )
     @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
     async def rtfm(self, ctx: core.Context, *, query: str) -> None:
@@ -202,6 +203,7 @@ class Manuals(commands.Cog):
         brief="Searches source files",
         short_doc="Searches relevant library source for the given input.",
         signature="[library]? [query]",
+        aliases=["source"],
     )
     @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
     async def rtfs(self, ctx: core.Context, *, query: str) -> None:
