@@ -72,23 +72,14 @@ class Logging(commands.Cog):
 
         if not avatar_url and self.user is not None and "runner" in core.CONFIG["LOGGING"]:
             runner_id: int = core.CONFIG["LOGGING"]["runner"]
-            user = self.user or self.bot.get_user(runner_id)
+            try:
+                user = self.user or self.bot.get_or_fetch_user(runner_id)
+            except:
+                self.user = user = None  # This will tell us not to attempt again.
 
             if user:
                 avatar_url = user.display_avatar.url
                 avatar_name = f"Logging: Dev: {user.display_name}"
-
-            else:
-                try:
-                    user = await self.bot.fetch_user(
-                        runner_id
-                    )  # dont particularly need to chunk the entire guild for the one user
-                    self.user = user
-                except:
-                    self.user = None  # This will tell us not to attempt again.
-                else:
-                    avatar_url = user.display_avatar.url
-                    avatar_name = f"Logging: Dev: {user.display_name}"
 
         await self.webhook.send(
             message,
