@@ -70,10 +70,21 @@ class GithubError(commands.CommandError):
 
 
 class ModerationRespostView(discord.ui.View):
+    message: discord.Message | discord.WebhookMessage
+
     def __init__(self, *, timeout: float | None = 180, target_id: int, target_reason: str) -> None:
         super().__init__(timeout=timeout)
         self.target: discord.Object = discord.Object(id=target_id, type=discord.Member)
         self.target_reason: str = target_reason
+
+    def _disable_all_buttons(self) -> None:
+        for item in self.children:
+            if isinstance(item, (discord.ui.Button, discord.ui.Select)):
+                item.disabled = True
+
+    async def on_timeout(self) -> None:
+        self._disable_all_buttons()
+        await self.message.edit(view=self)
 
     @discord.ui.button(label="Ban", emoji="\U0001f528")
     async def ban_button(self, interaction: Interaction, button: discord.ui.Button[Self]) -> None:
@@ -231,9 +242,8 @@ class Moderation(commands.Cog):
         channel = guild.get_channel(Channels.DPY_MOD_LOGS)
         assert isinstance(channel, discord.TextChannel)  # This is static
 
-        view = ModerationRespostView(timeout=180, target_id=target_id, target_reason=moderation_reason)
-
-        await channel.send(embed=embed, view=view)
+        view = ModerationRespostView(timeout=900, target_id=target_id, target_reason=moderation_reason)
+        view.message = await channel.send(embed=embed, view=view)
 
 
 async def setup(bot: core.Bot) -> None:
