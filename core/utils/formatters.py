@@ -20,10 +20,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import random
+
+from discord import Colour
 from discord.utils import escape_markdown
 
 
-__all__ = ("to_codeblock",)
+__all__ = (
+    "to_codeblock",
+    "random_pastel_colour",
+)
 
 
 def to_codeblock(
@@ -41,3 +47,7 @@ def to_codeblock(
     if escape_md:
         content = escape_markdown(content)
     return f"```{language}\n{content}\n```"
+
+
+def random_pastel_colour() -> Colour:
+    return Colour.from_hsv(random.random(), 0.28, 0.97)

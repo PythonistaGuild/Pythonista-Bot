@@ -27,4 +27,5 @@ from .bot import Bot as Bot
 from .context import *
 from .converters import *
 from .core import *
+from .enums import *
 from .errors import *
