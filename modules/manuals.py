@@ -59,8 +59,9 @@ class Manuals(commands.Cog):
 
     target = yarl.URL("https://idevision.net/api/public/")
 
-    def __init__(self, bot: core.Bot) -> None:
+    def __init__(self, bot: core.Bot, *, idevision_auth: str | None) -> None:
         self.bot = bot
+        self._idevision_auth: str | None = idevision_auth
 
     @staticmethod
     def _cooldown_bucket(ctx: core.Context) -> commands.Cooldown | None:
@@ -101,6 +102,7 @@ class Manuals(commands.Cog):
         brief="Searches documentation",
         short_doc="Searches relevant documentation for the given input.",
         signature="[library]? [query]",
+        aliases=["docs", "rtfd"],
     )
     @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
     async def rtfm(self, ctx: core.Context, *, query: str) -> None:
@@ -175,8 +177,9 @@ class Manuals(commands.Cog):
 
         headers = {
             "User-Agent": f"PythonistaBot discord bot (via {ctx.author})",
-            "Authorization": core.CONFIG["TOKENS"]["idevision"],
         }
+        if self._idevision_auth:
+            headers["Authorization"] = self._idevision_auth
 
         async with self.bot.session.get(url, headers=headers) as resp:
             if resp.status != 200:
@@ -200,6 +203,7 @@ class Manuals(commands.Cog):
         brief="Searches source files",
         short_doc="Searches relevant library source for the given input.",
         signature="[library]? [query]",
+        aliases=["source"],
     )
     @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
     async def rtfs(self, ctx: core.Context, *, query: str) -> None:
@@ -267,8 +271,9 @@ class Manuals(commands.Cog):
 
         headers = {
             "User-Agent": f"PythonistaBot discord bot (via {ctx.author})",
-            "Authorization": core.CONFIG["TOKENS"]["idevision"],
         }
+        if self._idevision_auth:
+            headers["Authorization"] = self._idevision_auth
 
         async with self.bot.session.get(url, headers=headers) as resp:
             if resp.status != 200:
@@ -304,4 +309,5 @@ class Manuals(commands.Cog):
 
 
 async def setup(bot: core.Bot) -> None:
-    await bot.add_cog(Manuals(bot))
+    idevision_auth_key = core.CONFIG["TOKENS"].get("idevision")
+    await bot.add_cog(Manuals(bot, idevision_auth=idevision_auth_key))
