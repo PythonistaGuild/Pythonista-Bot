@@ -45,8 +45,9 @@ WS_URL: str = "wss://api.pythonista.gg/v1/websocket"
 
 
 class API(core.Cog):
-    def __init__(self, bot: core.Bot) -> None:
+    def __init__(self, bot: core.Bot, *, pythonista_api_key: str) -> None:
         self.bot = bot
+        self._auth: str = pythonista_api_key
 
         self.session: aiohttp.ClientSession | None = None
         self.backoff: ExponentialBackoff[bool] = ExponentialBackoff()
@@ -57,7 +58,7 @@ class API(core.Cog):
 
     @property
     def headers(self) -> dict[str, Any]:
-        return {"Authorization": core.CONFIG["TOKENS"]["pythonista"]}
+        return {"Authorization": self._auth}
 
     async def cog_load(self) -> None:
         self.session = aiohttp.ClientSession(headers=self.headers)
@@ -170,4 +171,9 @@ class API(core.Cog):
 
 
 async def setup(bot: core.Bot) -> None:
-    await bot.add_cog(API(bot))
+    pythonista_api_key = core.CONFIG["TOKENS"].get("pythonista")
+    if not pythonista_api_key:
+        LOGGER.warning("Not enabling %r due to missing config key.", __file__)
+        return
+
+    await bot.add_cog(API(bot, pythonista_api_key=pythonista_api_key))
