@@ -23,18 +23,19 @@ SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import discord
+from typing import TYPE_CHECKING
 from discord import ui  # shortcut because I'm lazy
 from discord.ext.commands import CommandError, Paginator as _Paginator  # type: ignore # why does this need a stub file?
 from discord.utils import MISSING
+from typing_extensions import Self
 
+from core import Context, Bot
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
-from core import Context
+    from discord.abc import MessageableChannel
 
 
 __all__ = ("CannotPaginate", "Pager", "KVPager", "TextPager")
@@ -61,19 +62,27 @@ class Pager(ui.View):
         author: discord.User | discord.Member | None = None,
         author_url: str | None = None,
         stop: bool = False,
+        reply_author_takes_paginator: bool = False,
     ):
         super().__init__()
-        self.bot = ctx.bot
-        self.stoppable = stop
-        self.ctx = ctx
-        self.delete_after = delete_after
-        self.entries = entries
-        self.embed_author = author, author_url
-        self.channel = ctx.channel
-        self.author = ctx.author
-        self.nocount = nocount
-        self.title = title
-        self.per_page = per_page
+        self.bot: Bot = ctx.bot
+        self.stoppable: bool = stop
+        self.ctx: Context = ctx
+        self.delete_after: bool = delete_after
+        self.entries: list[Any] = entries
+        self.embed_author: tuple[discord.User | discord.Member | None, str | None] = author, author_url
+        self.channel: MessageableChannel = ctx.channel
+        self.nocount: bool = nocount
+        self.title: str | None = title
+        self.per_page: int = per_page
+
+        if reply_author_takes_paginator:
+            if ctx.replied_reference:
+                self.author = ctx.replied_message.author
+            else:
+                self.author = ctx.author
+        else:
+            self.author = ctx.author
 
         pages, left_over = divmod(len(self.entries), self.per_page)
         if left_over:
@@ -298,13 +307,21 @@ class KVPager(Pager):
 
 class TextPager(Pager):
     def __init__(
-        self, ctx: Context, text: str, *, prefix: str = "```", suffix: str = "```", max_size: int = 2000, stop: bool = False
+        self,
+        ctx: Context,
+        text: str,
+        *,
+        prefix: str = "```",
+        suffix: str = "```",
+        max_size: int = 2000,
+        stop: bool = False,
+        **kwargs: Any,
     ) -> None:
         paginator = _Paginator(prefix=prefix, suffix=suffix, max_size=max_size - 200)
         for line in text.split("\n"):
             paginator.add_line(line)
 
-        super().__init__(ctx, entries=paginator.pages, per_page=1, show_entry_count=False, stop=stop)
+        super().__init__(ctx, entries=paginator.pages, per_page=1, show_entry_count=False, stop=stop, **kwargs)
 
     def get_page(self, page: int) -> Any:
         return self.entries[page - 1]
