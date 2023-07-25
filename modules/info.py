@@ -22,7 +22,7 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-import typing
+from typing import Union
 
 import discord
 from discord.ext import commands
@@ -41,8 +41,8 @@ class InformationEmbed(discord.Embed):
 
     def __init__(
         self,
-        author: typing.Union[discord.Member, discord.User],
-        entity: typing.Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild],
+        author: Union[discord.Member, discord.User],
+        entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild],
     ):
         super().__init__()
         created_at: str = f"{discord.utils.format_dt(entity.created_at)} ({discord.utils.format_dt(entity.created_at, 'R')})"
@@ -85,7 +85,7 @@ class Information(core.Cog):
         invoke_without_command=True,
     )
     async def info(
-        self, ctx: core.Context, entity: typing.Union[discord.Member, discord.User, discord.Role, discord.TextChannel]
+        self, ctx: core.Context, entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel]
     ):
         """Get information about a object
         Args:
