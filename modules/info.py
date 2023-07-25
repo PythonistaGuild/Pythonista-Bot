@@ -51,7 +51,7 @@ class InformationEmbed(discord.Embed):
         else:
             joined_at = ""
 
-        description: str | None = None
+        description = ""
         start: str = f"Name: {entity.name}\n\nID: {entity.id}\n\nCreated At: {created_at}{joined_at}"
         if isinstance(entity, discord.Member):
             description = start
@@ -60,11 +60,11 @@ class InformationEmbed(discord.Embed):
             description = start
             self.set_thumbnail(url=entity.display_avatar or None)
         elif isinstance(entity, discord.Role):
-            description = f"{start}\n\nHoisted: {entity.hoist}\n\nMentionable: {entity.mentionable}\n\n"
+            description += f"\n\nHoisted: {entity.hoist}\n\nMentionable: {entity.mentionable}\n\n"
         elif isinstance(entity, discord.TextChannel):
-            description = f"{start}\n\nCategory: {entity.category}\n\nNSFW: {entity.nsfw}"
+            description += f"\n\nCategory: {entity.category}\n\nNSFW: {entity.nsfw}"
         else:  # Change to elif when other types are added
-            description = f"{start}\n\nOwner: {entity.owner}"
+            description += f"\n\nOwner: {entity.owner}"
             self.set_thumbnail(url=entity.icon or None)
 
         self.description = description
@@ -84,9 +84,7 @@ class Information(core.Cog):
         aliases=["i", "info"],
         invoke_without_command=True,
     )
-    async def info(
-        self, ctx: core.Context, entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel]
-    ):
+    async def info(self, ctx: core.Context, entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel]):
         """Get information about a object
         Args:
             entity: The user, role, or TextChannel to get information about"""
