@@ -219,7 +219,9 @@ class Moderation(commands.Cog):
             return (await f.read()).decode()
 
     async def post_mystbin_content(self, contents: list[tuple[str, str]]) -> tuple[str, str | None]:
-        response = await self.bot.mb_client.create_paste(files=[mystbin.File(filename=a, content=b, attachment_url=None) for a, b in contents])
+        response = await self.bot.mb_client.create_paste(
+            files=[mystbin.File(filename=a, content=b, attachment_url=None) for a, b in contents]
+        )
         return response.id, response.notice or None
 
     @commands.Cog.listener("on_message")
