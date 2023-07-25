@@ -25,13 +25,14 @@ from __future__ import annotations
 import asyncio
 import base64
 import binascii
-import logging
 import datetime
+import logging
 import re
 from textwrap import shorten
 from typing import TYPE_CHECKING, Any, Self, TypeAlias
 
 import discord
+import mystbin
 import yarl
 from discord.ext import commands
 
@@ -218,20 +219,8 @@ class Moderation(commands.Cog):
             return (await f.read()).decode()
 
     async def post_mystbin_content(self, contents: list[tuple[str, str]]) -> tuple[str, str | None]:
-        hdrs = {}
-        if core.CONFIG["TOKENS"]["mystbin"]:
-            hdrs["Authorization"] = core.CONFIG["TOKENS"]["mystbin"]
-
-        async with self.bot.session.put(
-            "https://api.mystb.in/paste",
-            headers=hdrs,
-            json={"files": [{"filename": x[1], "content": x[0]} for x in contents]},
-        ) as resp:
-            if 200 > resp.status > 299:
-                resp.raise_for_status()
-
-            data = await resp.json()
-            return data["id"], data.get("notice") or None
+        response = await self.bot.mb_client.create_paste(files=[mystbin.File(filename=a, content=b) for a, b in contents])
+        return response.id, response.notice or None
 
     @commands.Cog.listener("on_message")
     async def find_badbins(self, message: discord.Message) -> None:
