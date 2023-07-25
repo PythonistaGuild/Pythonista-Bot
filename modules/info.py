@@ -22,20 +22,31 @@ SOFTWARE.
 """
 from __future__ import annotations
 
+import typing
+
 import discord
 from discord.ext import commands
-import core, typing
-#from typing import TYPE_CHECKING, Any
+
+import core
+
+
+# from typing import TYPE_CHECKING, Any
+
 
 class InformationEmbed(discord.Embed):
-    """A subclass of discord.Embed. 
-    
+    """A subclass of discord.Embed.
+
     This class allows to automatically get information within the class instead of recreating the embed each time
-    
+
     :param author: The embed author. Expects discord.Member or discord.User
     :param entity: The Member, User, Role, TextChannel, or Guild to get information about.
     """
-    def __init__(self, author: typing.Union[discord.Member, discord.User], entity: typing.Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild]):
+
+    def __init__(
+        self,
+        author: typing.Union[discord.Member, discord.User],
+        entity: typing.Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild],
+    ):
         super().__init__()
         created_at: str = f"{discord.utils.format_dt(entity.created_at)} ({discord.utils.format_dt(entity.created_at, 'R')})"
         if isinstance(entity, discord.Member) and entity.joined_at:
@@ -43,7 +54,6 @@ class InformationEmbed(discord.Embed):
         else:
             joined_at = ""
 
-        
         description: str | None = None
         start: str = f"Name: {entity.name}\n\nID: {entity.id}\n\nCreated At: {created_at}{joined_at}"
         if isinstance(entity, discord.Member):
@@ -56,42 +66,41 @@ class InformationEmbed(discord.Embed):
             description = f"{start}\n\nHoisted: {entity.hoist}\n\nMentionable: {entity.mentionable}\n\n"
         elif isinstance(entity, discord.TextChannel):
             description = f"{start}\n\nCategory: {entity.category}\n\nNSFW: {entity.nsfw}"
-        else: # Change to elif when other types are added
+        else:  # Change to elif when other types are added
             description = f"{start}\n\nOwner: {entity.owner}"
             self.set_thumbnail(url=entity.icon or None)
 
         self.description = description
         self.set_author(name=author.name, icon_url=author.display_avatar)
-        self.color = 0x7289da
-        
+        self.color = 0x7289DA
 
 
 class Information(core.Cog):
     """The Mystbin file modification commands. Allows users to upload files to mystbin."""
+
     def __init__(self, bot: core.Bot):
         self.bot = bot
 
     @commands.group(
         name="information",
         brief="Get information on a user, role, or channel",
-        aliases=['i', 'info'],
-        invoke_without_command=True
+        aliases=["i", "info"],
+        invoke_without_command=True,
     )
-    async def info(self, ctx: core.Context, entity: typing.Union[discord.Member, discord.User, discord.Role, discord.TextChannel]):
+    async def info(
+        self, ctx: core.Context, entity: typing.Union[discord.Member, discord.User, discord.Role, discord.TextChannel]
+    ):
         """Get information about a object
-            
-            :param entity: The user, role, or TextChannel to get information about"""
+
+        :param entity: The user, role, or TextChannel to get information about"""
         embed = InformationEmbed(ctx.author, entity)
         await ctx.send(embed=embed)
 
-    @info.command(
-        name="guild",
-        brief="Get the current guild's information."
-                )
+    @info.command(name="guild", brief="Get the current guild's information.")
     @commands.guild_only()
     async def guild_info(self, ctx: core.Context):
-        if ctx.guild == None:
-            raise commands.CheckFailure("This command must be ran in a guild.") # Make pyright stop throwing fits
+        if ctx.guild is None:
+            raise commands.CheckFailure("This command must be ran in a guild.")  # Make pyright stop throwing fits
         embed = InformationEmbed(ctx.author, ctx.guild)
         await ctx.reply(embed=embed)
 
