@@ -91,8 +91,8 @@ class Information(core.Cog):
         self, ctx: core.Context, entity: typing.Union[discord.Member, discord.User, discord.Role, discord.TextChannel]
     ):
         """Get information about a object
-
-        :param entity: The user, role, or TextChannel to get information about"""
+        Args:
+            entity: The user, role, or TextChannel to get information about"""
         embed = InformationEmbed(ctx.author, entity)
         await ctx.send(embed=embed)
 
