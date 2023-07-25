@@ -84,7 +84,7 @@ class Logging(commands.Cog):
         await self.webhook.send(
             message,
             username=actor_name,
-            avatar_url=core.CONFIG["LOGGING"].get("webhook_avatar_url"),
+            avatar_url=avatar_url,
             embed=embed,
         )
 
