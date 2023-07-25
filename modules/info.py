@@ -29,6 +29,7 @@ import core, typing
 
 class InformationEmbed(discord.Embed):
     def __init__(self, author: typing.Union[discord.Member, discord.User], entity: typing.Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild]):
+        super().__init__()
         created_at: str = f"{discord.utils.format_dt(entity.created_at)} ({discord.utils.format_dt(entity.created_at, 'R')})"
         if isinstance(entity, discord.Member) and entity.joined_at:
             joined_at = f"\nJoined At: {discord.utils.format_dt(entity.joined_at)} ({discord.utils.format_dt(entity.joined_at, 'R')})"
@@ -52,7 +53,7 @@ class InformationEmbed(discord.Embed):
         self.description = description
         self.set_author(name=author.name, icon_url=author.display_avatar)
         self.color = 0x7289da
-        super().__init__()
+        
 
 
 class Information(core.Cog):
