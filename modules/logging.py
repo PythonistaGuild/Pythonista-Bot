@@ -68,7 +68,7 @@ class Logging(commands.Cog):
         embed = to_log.__dict__.get("embed") or discord.utils.MISSING
 
         avatar_url: str | None = core.CONFIG["LOGGING"].get("webhook_avatar_url")
-        avatar_name = "PythonistaBot Logging"
+        actor_name = "PythonistaBot Logging"
 
         if not avatar_url and self.user is not None and "runner" in core.CONFIG["LOGGING"]:
             runner_id: int = core.CONFIG["LOGGING"]["runner"]
@@ -79,11 +79,11 @@ class Logging(commands.Cog):
 
             if user:
                 avatar_url = user.display_avatar.url
-                avatar_name = f"Logging: Dev: {user.display_name}"
+                actor_name = f"Logging: Dev: {user.display_name}"
 
         await self.webhook.send(
             message,
-            username=avatar_name,
+            username=actor_name,
             avatar_url=core.CONFIG["LOGGING"].get("webhook_avatar_url"),
             embed=embed,
         )
