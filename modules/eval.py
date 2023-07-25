@@ -22,8 +22,10 @@ SOFTWARE.
 """
 from __future__ import annotations
 
+import ast
 import logging
 import textwrap
+import traceback
 
 from discord.ext import commands
 
@@ -56,7 +58,24 @@ class Evaluation(core.Cog):
         self.eval_endpoint: str = endpoint_url
 
     async def perform_eval(self, code: core.Codeblock) -> str:
-        formatted = CODE.format(user_code=textwrap.indent(code.content.replace("\t", "    "), "    "))
+        source = code.content
+
+        try:
+            parsed = ast.parse(source, filename="<input>")
+        except SyntaxError as e:
+            return "".join(traceback.format_exception(type(e), e, e.__traceback__))
+
+        if isinstance(parsed.body[-1], ast.Expr):
+            expr: ast.Expr = parsed.body[-1]
+
+            lineno = expr.lineno - 1
+
+            co_mangled = source.splitlines()
+            co_mangled[lineno] = "return " + co_mangled[lineno]
+
+            source = "\n".join(co_mangled)
+
+        formatted = CODE.format(user_code=textwrap.indent(source.replace("\t", "    "), "    "))
 
         async with self.bot.session.post(self.eval_endpoint, json={"input": formatted}) as eval_response:
             if eval_response.status != 200:
