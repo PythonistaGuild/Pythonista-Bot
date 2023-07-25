@@ -41,8 +41,11 @@ class InformationEmbed(discord.Embed):
 
     def __init__(
         self,
+        *,
         author: Union[discord.Member, discord.User],
-        entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild],
+        entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild]
+        # author: Union[discord.Member, discord.User],
+        # entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild],
     ):
         super().__init__()
         created_at: str = f"{discord.utils.format_dt(entity.created_at)} ({discord.utils.format_dt(entity.created_at, 'R')})"
@@ -51,8 +54,8 @@ class InformationEmbed(discord.Embed):
         else:
             joined_at = ""
 
-        description = ""
         start: str = f"Name: {entity.name}\n\nID: {entity.id}\n\nCreated At: {created_at}{joined_at}"
+        description = start
         if isinstance(entity, discord.Member):
             description = start
             self.set_thumbnail(url=entity.guild_avatar or entity.display_avatar or None)
@@ -84,11 +87,13 @@ class Information(core.Cog):
         aliases=["i", "info"],
         invoke_without_command=True,
     )
-    async def info(self, ctx: core.Context, entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel]):
+    async def info(
+        self, ctx: core.Context, entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, None] = None
+    ):
         """Get information about a object
         Args:
             entity: The user, role, or TextChannel to get information about"""
-        embed = InformationEmbed(ctx.author, entity)
+        embed = InformationEmbed(author=ctx.author, entity=entity or ctx.author)
         await ctx.send(embed=embed)
 
     @info.command(name="guild", brief="Get the current guild's information.")
@@ -96,7 +101,7 @@ class Information(core.Cog):
     async def guild_info(self, ctx: core.Context):
         if ctx.guild is None:
             raise commands.CheckFailure("This command must be ran in a guild.")  # Make pyright stop throwing fits
-        embed = InformationEmbed(ctx.author, ctx.guild)
+        embed = InformationEmbed(author=ctx.author, entity=ctx.guild)
         await ctx.reply(embed=embed)
 
 
