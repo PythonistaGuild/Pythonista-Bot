@@ -80,7 +80,7 @@ class Information(core.Cog):
     async def info(self, ctx: core.Context, entity: typing.Union[discord.Member, discord.User, discord.Role, discord.TextChannel]):
         """Get information about a object
             
-            :param: entity: The user, role, or TextChannel to get information about"""
+            :param entity: The user, role, or TextChannel to get information about"""
         embed = InformationEmbed(ctx.author, entity)
         await ctx.send(embed=embed)
 
