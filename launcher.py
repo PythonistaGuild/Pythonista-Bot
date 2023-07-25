@@ -36,6 +36,8 @@ async def main() -> None:
         dsn=core.CONFIG["DATABASE"]["dsn"]
     ) as pool, LogHandler(bot=bot) as handler:
         bot.logging_queue = asyncio.Queue()
+        bot.strip_after_prefix=True
+        bot.case_insensitive=True
         bot.session = session
         bot.pool = pool
         bot.log_handler = handler
