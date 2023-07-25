@@ -20,6 +20,7 @@ class Logging(TypedDict):
     webhook_url: NotRequired[str]
     webhook_avatar_url: NotRequired[str]
     level: int
+    runner: NotRequired[int]
 
 
 class Snekbox(TypedDict):
