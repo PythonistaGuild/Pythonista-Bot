@@ -52,6 +52,7 @@ class InformationEmbed(discord.Embed):
         self.description = description
         self.set_author(name=author.name, icon_url=author.display_avatar)
         self.color = 0x7289da
+        super().__init__()
 
 
 class Information(core.Cog):
