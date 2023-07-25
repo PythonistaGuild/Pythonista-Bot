@@ -1,12 +1,12 @@
 services:
   bot:
-    build:
-      context: .
-      dockerfile: Dockerfile
     container_name: pythonista-bot
     depends_on:
       - database
-    restart: always
+    image: ghcr.io/pythonistaguild/pythonista-bot:latest
+    restart: unless-stopped
+    volumes:
+      - ./config.toml:/app/config.toml:ro
 
   database:
     container_name: pythonista-bot-db

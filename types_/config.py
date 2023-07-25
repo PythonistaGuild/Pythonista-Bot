@@ -1,11 +1,11 @@
-from typing import NotRequired, TypedDict
+from typing import NotRequired, Required, TypedDict
 
 
 __all__ = ("Config",)
 
 
-class Tokens(TypedDict):
-    bot: str
+class Tokens(TypedDict, total=False):
+    bot: Required[str]
     idevision: str
     mystbin: str
     github_bot: str

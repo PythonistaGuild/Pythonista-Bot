@@ -40,7 +40,8 @@ async def main() -> None:
         bot.pool = pool
         bot.log_handler = handler
 
-        bot.mb_client = mystbin.Client(token=core.CONFIG["TOKENS"]["mystbin"], session=session)
+        _mystbin_token = core.CONFIG["TOKENS"].get("mystbin")
+        bot.mb_client = mystbin.Client(token=_mystbin_token, session=session)
 
         await bot.load_extension("jishaku")
         for extension in EXTENSIONS:

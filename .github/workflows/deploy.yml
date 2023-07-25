@@ -11,14 +11,15 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/projects/pythonista-bot/
-            git stash || true
-            git pull --force || true
+            docker compose pull bot
             docker compose up --build -d
           username: ${{ secrets.SSH_USER }}
 
 name: Deploy
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Create and publish a Docker image"]
+    branches: [main]
+    types:
+      - completed

@@ -135,6 +135,38 @@ class Bot(commands.Bot):
 
         self.log_handler.error("Command Error", extra={"embed": embed})
 
+    async def get_or_fetch_user(
+        self,
+        target_id: int,
+        /,
+        *,
+        guild: discord.Guild | None = None,
+        cache: dict[int, discord.User | discord.Member] | None = None,
+    ) -> discord.User | discord.Member | None:
+        if guild:
+            user = guild.get_member(target_id)
+            if not user:
+                try:
+                    user = await guild.fetch_member(target_id)
+                except discord.HTTPException:
+                    return
+
+            if cache:
+                cache[target_id] = user
+            return user
+
+        user = self.get_user(target_id)
+        if not user:
+            try:
+                user = await self.fetch_user(target_id)
+            except discord.HTTPException:
+                return
+
+        if cache:
+            cache[target_id] = user
+
+        return user
+
     async def start(self, token: str, *, reconnect: bool = True) -> None:
         try:
             await super().start(token=token, reconnect=reconnect)

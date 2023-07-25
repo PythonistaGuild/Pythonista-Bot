@@ -3,9 +3,9 @@ owner_ids = [123, 456, 789] # user or role ids, optional
 
 [TOKENS]
 bot = ''
-idevision = ''
-mystbin = ''
-pythonista = ''
+idevision = ''  # optional key
+mystbin = ''  # optional key
+pythonista = ''  # optional key
 
 [DATABASE]
 dsn = 'postgres://pythonistabot:pythonistabot@database:5432/pythonistabot' # assumed default
