@@ -2,10 +2,13 @@
 name = "pythonista-bot"
 version = "0.1.0"
 description = "The bot that runs the Pythonista guild!"
-authors = ["Alex Nørgaard <Umbra@AbstractUmbra.dev>"]
+authors = [
+    "Alex Nørgaard <umbra@abstractumbra.dev>",
+    "IAmTomahawkx <iamtomahawkx@gmail.com>",
+    "EvieePy <29671945+evieepy@users.noreply.github.com>",
+]
 license = "MPL2.0"
 readme = "README.md"
-# packages = [{include = "pythonista_bot"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -13,7 +16,7 @@ python = "^3.11"
 aiohttp = "*"
 asyncpg = "*"
 toml = "*"
-"mystbin.py" = "*"
+"mystbin.py" = "^6"
 jishaku = "*"
 
 [tool.poetry.group.dev.dependencies]

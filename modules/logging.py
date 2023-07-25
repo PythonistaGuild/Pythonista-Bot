@@ -73,7 +73,7 @@ class Logging(commands.Cog):
         if not avatar_url and self.user is not None and "runner" in core.CONFIG["LOGGING"]:
             runner_id: int = core.CONFIG["LOGGING"]["runner"]
             try:
-                user = self.user or self.bot.get_or_fetch_user(runner_id)
+                user = self.user or await self.bot.get_or_fetch_user(runner_id)
             except:
                 self.user = user = None  # This will tell us not to attempt again.
 
