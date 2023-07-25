@@ -30,9 +30,6 @@ from discord.ext import commands
 import core
 
 
-# from typing import TYPE_CHECKING, Any
-
-
 class InformationEmbed(discord.Embed):
     """A subclass of discord.Embed.
 
