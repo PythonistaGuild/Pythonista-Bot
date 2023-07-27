@@ -92,10 +92,7 @@ class Information(core.Cog):
         await ctx.send(embed=embed)
 
     @info.command(name="guild", brief="Get the current guild's information.")
-    @commands.guild_only()
-    async def guild_info(self, ctx: core.Context):
-        if ctx.guild is None:
-            raise commands.CheckFailure("This command must be ran in a guild.")  # Make pyright stop throwing fits
+    async def guild_info(self, ctx: core.GuildContext):
         embed = InformationEmbed(author=ctx.author, entity=ctx.guild)
         await ctx.reply(embed=embed)
 
