@@ -97,7 +97,8 @@ class TypeView(ui.View):
         super().__init__(timeout=180)
         self.original_author = original_author
         self.add_item(TypeSelect(original_author=original_author, suggestion=suggestion, webhook=webhook))
-        self.message: discord.Message
+class TypeView(ui.View):
+    message: discord.Message | discord.WebhookMessage
 
     async def on_timeout(self):
         await self.message.delete()
@@ -114,11 +115,10 @@ class Suggestions(core.Cog):
         if not suggestion:
             return await ctx.reply("Re-execute the command. Make sure to give your suggestion this time!")
         view = TypeView(original_author=ctx.author, suggestion=suggestion, webhook=self.webhook)
-        message = await ctx.send(
+        view.message = await ctx.send(
             "Please select the type of suggestion this is. Your suggestion will not be sent until this step is completed.",
             view=view,
         )
-        view.message = message
 
 
 async def setup(bot: core.Bot):
