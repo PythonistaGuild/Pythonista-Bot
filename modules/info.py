@@ -44,8 +44,6 @@ class InformationEmbed(discord.Embed):
         *,
         author: Union[discord.Member, discord.User],
         entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild]
-        # author: Union[discord.Member, discord.User],
-        # entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild],
     ):
         super().__init__()
         created_at: str = f"{discord.utils.format_dt(entity.created_at)} ({discord.utils.format_dt(entity.created_at, 'R')})"
@@ -54,13 +52,10 @@ class InformationEmbed(discord.Embed):
         else:
             joined_at = ""
 
-        start: str = f"Name: {entity.name}\n\nID: {entity.id}\n\nCreated At: {created_at}{joined_at}"
-        description = start
+        description = f"Name: {entity.name}\n\nID: {entity.id}\n\nCreated At: {created_at}{joined_at}"
         if isinstance(entity, discord.Member):
-            description = start
             self.set_thumbnail(url=entity.guild_avatar or entity.display_avatar or None)
         elif isinstance(entity, discord.User):
-            description = start
             self.set_thumbnail(url=entity.display_avatar or None)
         elif isinstance(entity, discord.Role):
             description += f"\n\nHoisted: {entity.hoist}\n\nMentionable: {entity.mentionable}\n\n"
