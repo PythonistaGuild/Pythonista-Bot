@@ -21,44 +21,89 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import logging
 from datetime import datetime
+from typing import Union
+
 import discord
-from enum import Enum
-import core
+from discord import ui
 from discord.ext import commands
 
-class SuggestionEnum(Enum):
-    guild = 1
-    pythonistabot = 2
-    twitchio = 3
-    wavelink = 4
+import core
+
+
+LOGGER = logging.getLogger(__name__)
+
+
+class TypeSelect(ui.Select["TypeView"]):
+    def __init__(self, *, original_author: Union[discord.Member, discord.User], suggestion: str, webhook: discord.Webhook, message: discord.Message | None = None):
+        super().__init__()
+        self.original_author = original_author
+        self.suggestion = suggestion
+        self.webhook = webhook
+        self.message = message
+
+        self.add_option(label="Guild", value="1", description="This suggestion applies to the guild.")
+        self.add_option(label="Pythonistabot", value="2", description="This suggestion applies to Pythonistabot.")
+        self.add_option(label="TwitchIO", value="3", description="This suggestion applies to TwitchIO.")
+        self.add_option(label="Wavelink", value="4", description="This suggestion applies to Wavelink.")
+
+    async def callback(self, interaction: discord.Interaction):
+        if self.original_author != interaction.user:
+            return await interaction.response.send_message(
+                f"This menu is not for you. See `{core.CONFIG['prefix']}suggest` to make a suggestion!", ephemeral=True
+            )
+        author = self.original_author
+        if self.values[0] == "1":  # Guild Suggestion
+            suggestion_type = "the guild"
+        elif self.values[0] == "2":  # Pythonistabot Suggestion
+            suggestion_type = "Pythonistabot"
+        elif self.values[0] == "3":
+            suggestion_type = "TwitchIO"
+        else:
+            suggestion_type = "Wavelink"
+        await interaction.response.send_message("Your suggestion has been sent!")
+        embed = discord.Embed(
+            title=f"Suggestion for {suggestion_type}", description=self.suggestion, timestamp=datetime.now(), color=0x7289da
+        )
+        embed.set_author(name=author.name, icon_url=author.display_avatar)
+        embed.set_footer(text=f"Suggestion sent by {author} (ID: {author.id})")
+        await self.webhook.send(embed=embed, avatar_url=author.display_avatar, username=author.name)
+        if self.message:
+            await self.message.delete()
+
+
+class TypeView(ui.View):
+    def __init__(self, *, original_author: Union[discord.Member, discord.User], suggestion: str, webhook: discord.Webhook):
+        super().__init__(timeout=180)
+        self.original_author = original_author
+        self.add_item(TypeSelect(original_author=original_author, suggestion=suggestion, webhook=webhook))
+        self.message: discord.Message
+
+    async def on_timeout(self):
+        await self.message.delete()
+        await super().on_timeout()
 
 
 class Suggestions(core.Cog):
-    def __init__(self, bot: core.Bot):
+    def __init__(self, bot: core.Bot, url: str):
         self.bot = bot
+        self.webhook = discord.Webhook.from_url(url, session=self.bot.session)
 
-    async def cog_load(self):
-        if url := core.CONFIG["Suggestions"].get("suggestions_webhook_url"):
-            self.webhook = discord.Webhook.from_url(url, session=self.bot.session)
+    @commands.group(name="suggest", brief="Send a suggestion for the server, or a library.", invoke_without_command=True)
+    async def suggest(self, ctx: core.Context, *, suggestion: str | None = None):
+        if not suggestion:
+            return await ctx.reply("Re-execute the command. Make sure to give your suggestion this time!")
+        view = TypeView(original_author=ctx.author, suggestion=suggestion, webhook=self.webhook)
+        message = await ctx.send(
+            "Please select the type of suggestion this is. Your suggestion will not be sent until this step is completed.",
+            view=view,
+        )
+        view.message = message
 
-        else: # disable all commands in cog
-            for command in self.walk_commands():
-                command.update(enabled=False)
-
-    @commands.group(
-        name="suggest",
-        brief="Send a suggestion for the server, or a library.",
-        invoke_without_command=True
-    )
-    async def suggest(self, ctx: core.Context, suggestion_target: SuggestionEnum, *, suggestion: str):
-        embed = discord.Embed(
-            title=f"Suggestion for {suggestion_target.name}",
-            description=suggestion,
-            timestamp=datetime.now()
-            )
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
-        await self.webhook.send(embed=embed, avatar_url=ctx.author.display_avatar, username=ctx.author.name)
 
 async def setup(bot: core.Bot):
-    await bot.add_cog(Suggestions(bot))
+    if key := core.CONFIG.get("SUGGESTIONS"):
+        await bot.add_cog(Suggestions(bot, key["url"]))
+    else:
+        LOGGER.warning("Cannot load the SUGGESTIONS extension due to the `suggestions_webhook_url` config not existing.")

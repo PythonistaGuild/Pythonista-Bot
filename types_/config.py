@@ -30,8 +30,9 @@ class Snekbox(TypedDict):
 class BadBin(TypedDict):
     domains: list[str]
 
+
 class Suggestions(TypedDict):
-    suggestions_webhook_url: str
+    url: str
 
 
 class Config(TypedDict):
@@ -42,4 +43,4 @@ class Config(TypedDict):
     LOGGING: Logging
     SNEKBOX: NotRequired[Snekbox]
     BADBIN: BadBin
-    Suggestions: NotRequired[Suggestions]
+    SUGGESTIONS: NotRequired[Suggestions]
