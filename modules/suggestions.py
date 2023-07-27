@@ -51,9 +51,9 @@ class TypeSelect(ui.Select["TypeView"]):
         self.message = message
 
         self.add_option(label="Guild", value="1", description="This suggestion applies to the guild.")
-        self.add_option(label="Pythonistabot", value="2", description="This suggestion applies to Pythonistabot.")
-        self.add_option(label="TwitchIO", value="3", description="This suggestion applies to TwitchIO.")
-        self.add_option(label="Wavelink", value="4", description="This suggestion applies to Wavelink.")
+        self.add_option(label="Pythonistabot", value="2", description="This suggestion applies to Pythonistabot.", emoji='\U0001f916')
+        self.add_option(label="TwitchIO", value="3", description="This suggestion applies to TwitchIO.", emoji='<:twitchio_illegal:1014831894417915984>')
+        self.add_option(label="Wavelink", value="4", description="This suggestion applies to Wavelink.", emoji='<:wavelink:753851443093438545>')
 
     async def callback(self, interaction: discord.Interaction):
         if self.original_author != interaction.user:
