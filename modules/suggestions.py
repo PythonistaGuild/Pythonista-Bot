@@ -36,7 +36,14 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TypeSelect(ui.Select["TypeView"]):
-    def __init__(self, *, original_author: Union[discord.Member, discord.User], suggestion: str, webhook: discord.Webhook, message: discord.Message | None = None):
+    def __init__(
+        self,
+        *,
+        original_author: Union[discord.Member, discord.User],
+        suggestion: str,
+        webhook: discord.Webhook,
+        message: discord.Message | None = None,
+    ):
         super().__init__()
         self.original_author = original_author
         self.suggestion = suggestion
@@ -64,7 +71,7 @@ class TypeSelect(ui.Select["TypeView"]):
             suggestion_type = "Wavelink"
         await interaction.response.send_message("Your suggestion has been sent!")
         embed = discord.Embed(
-            title=f"Suggestion for {suggestion_type}", description=self.suggestion, timestamp=datetime.now(), color=0x7289da
+            title=f"Suggestion for {suggestion_type}", description=self.suggestion, timestamp=datetime.now(), color=0x7289DA
         )
         embed.set_author(name=author.name, icon_url=author.display_avatar)
         embed.set_footer(text=f"Suggestion sent by {author} (ID: {author.id})")
