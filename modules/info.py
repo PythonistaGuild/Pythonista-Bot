@@ -43,7 +43,7 @@ class InformationEmbed(discord.Embed):
         self,
         *,
         author: Union[discord.Member, discord.User],
-        entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild]
+        entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild],
     ):
         super().__init__()
         created_at: str = f"{discord.utils.format_dt(entity.created_at)} ({discord.utils.format_dt(entity.created_at, 'R')})"
