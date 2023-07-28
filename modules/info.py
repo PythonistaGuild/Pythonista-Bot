@@ -22,8 +22,6 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import Union
-
 import discord
 from discord.ext import commands
 
@@ -83,7 +81,7 @@ class Information(core.Cog):
         invoke_without_command=True,
     )
     async def info(
-        self, ctx: core.Context, entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, None] = None
+        self, ctx: core.Context, entity: discord.Member | discord.User | discord.Role | discord.TextChannel | None = None
     ):
         """Get information about a object
         Args:
