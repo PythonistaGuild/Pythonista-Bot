@@ -35,6 +35,11 @@ import core
 LOGGER = logging.getLogger(__name__)
 
 
+def get_suggestion_type(value: str) -> str:
+    options: dict[str, str] = {"1": "the guild", "2": "PythonistaBot", "3": "TwitchIO", "4": "Wavelink"}
+    return options[value]
+
+
 class TypeSelect(ui.Select["TypeView"]):
     def __init__(
         self,
@@ -42,7 +47,7 @@ class TypeSelect(ui.Select["TypeView"]):
         original_author: Union[discord.Member, discord.User],
         suggestion: str,
         webhook: discord.Webhook,
-        message: discord.Message | None = None,
+        message: discord.Message | discord.WebhookMessage | None = None,
     ):
         super().__init__()
         self.original_author = original_author
@@ -50,7 +55,7 @@ class TypeSelect(ui.Select["TypeView"]):
         self.webhook = webhook
         self.message = message
 
-        self.add_option(label="Guild", value="1", description="This suggestion applies to the guild.")
+        self.add_option(label="Guild", value="1", description="This suggestion applies to the guild.", emoji="\U0001f4c1")
         self.add_option(
             label="Pythonistabot", value="2", description="This suggestion applies to Pythonistabot.", emoji="\U0001f916"
         )
@@ -73,14 +78,7 @@ class TypeSelect(ui.Select["TypeView"]):
                 f"This menu is not for you. See `{core.CONFIG['prefix']}suggest` to make a suggestion!", ephemeral=True
             )
         author = self.original_author
-        if self.values[0] == "1":  # Guild Suggestion
-            suggestion_type = "the guild"
-        elif self.values[0] == "2":  # Pythonistabot Suggestion
-            suggestion_type = "Pythonistabot"
-        elif self.values[0] == "3":
-            suggestion_type = "TwitchIO"
-        else:
-            suggestion_type = "Wavelink"
+        suggestion_type = get_suggestion_type(self.values[0])
         await interaction.response.send_message("Your suggestion has been sent!")
         embed = discord.Embed(
             title=f"Suggestion for {suggestion_type}", description=self.suggestion, timestamp=datetime.now(), color=0x7289DA
@@ -95,10 +93,11 @@ class TypeSelect(ui.Select["TypeView"]):
 class TypeView(ui.View):
     def __init__(self, *, original_author: Union[discord.Member, discord.User], suggestion: str, webhook: discord.Webhook):
         super().__init__(timeout=180)
+        self.message: discord.Message | discord.WebhookMessage
         self.original_author = original_author
-        self.add_item(TypeSelect(original_author=original_author, suggestion=suggestion, webhook=webhook))
-class TypeView(ui.View):
-    message: discord.Message | discord.WebhookMessage
+        self.add_item(
+            TypeSelect(original_author=original_author, suggestion=suggestion, webhook=webhook, message=self.message)
+        )
 
     async def on_timeout(self):
         await self.message.delete()
