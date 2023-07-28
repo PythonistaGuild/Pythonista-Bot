@@ -91,9 +91,10 @@ class TypeSelect(ui.Select["TypeView"]):
 
 
 class TypeView(ui.View):
+    message: discord.Message | discord.WebhookMessage
+
     def __init__(self, *, original_author: Union[discord.Member, discord.User], suggestion: str, webhook: discord.Webhook):
         super().__init__(timeout=180)
-        self.message: discord.Message | discord.WebhookMessage
         self.original_author = original_author
         self.add_item(
             TypeSelect(original_author=original_author, suggestion=suggestion, webhook=webhook, message=self.message)
