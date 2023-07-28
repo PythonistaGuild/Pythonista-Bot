@@ -71,7 +71,7 @@ class InformationEmbed(discord.Embed):
 
 
 class Information(core.Cog):
-    """The Mystbin file modification commands. Allows users to upload files to mystbin."""
+    """Information commands which allows you to get information about users, the guild, roles, and channels."""
 
     def __init__(self, bot: core.Bot):
         self.bot = bot
