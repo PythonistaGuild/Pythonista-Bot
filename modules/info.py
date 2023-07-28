@@ -40,9 +40,9 @@ class InformationEmbed(discord.Embed):
     def __init__(
         self,
         *,
-        author: Union[discord.Member, discord.User],
-        entity: Union[discord.Member, discord.User, discord.Role, discord.TextChannel, discord.Guild],
-    ):
+        author: discord.Member | discord.User,
+        entity: discord.Member | discord.User | discord.Role | discord.TextChannel | discord.Guild,
+    ) -> None:
         super().__init__()
         created_at: str = f"{discord.utils.format_dt(entity.created_at)} ({discord.utils.format_dt(entity.created_at, 'R')})"
         if isinstance(entity, discord.Member) and entity.joined_at:
@@ -71,7 +71,7 @@ class InformationEmbed(discord.Embed):
 class Information(core.Cog):
     """The Mystbin file modification commands. Allows users to upload files to mystbin."""
 
-    def __init__(self, bot: core.Bot):
+    def __init__(self, bot: core.Bot) -> None:
         self.bot = bot
 
     @commands.group(
@@ -82,7 +82,7 @@ class Information(core.Cog):
     )
     async def info(
         self, ctx: core.Context, entity: discord.Member | discord.User | discord.Role | discord.TextChannel | None = None
-    ):
+    ) -> None:
         """Get information about a object
         Args:
             entity: The user, role, or TextChannel to get information about"""
@@ -95,5 +95,5 @@ class Information(core.Cog):
         await ctx.reply(embed=embed)
 
 
-async def setup(bot: core.Bot):
+async def setup(bot: core.Bot) -> None:
     await bot.add_cog(Information(bot))
