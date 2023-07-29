@@ -81,12 +81,12 @@ class Information(core.Cog):
         invoke_without_command=True,
     )
     async def info(
-        self, ctx: core.Context, entity: discord.Member | discord.User | discord.Role | discord.TextChannel | None = None
+        self, ctx: core.Context, entity: discord.Member | discord.User | discord.Role | discord.TextChannel = commands.Author
     ) -> None:
         """Get information about a object
         Args:
             entity: The user, role, or TextChannel to get information about"""
-        embed = InformationEmbed(author=ctx.author, entity=entity or ctx.author)
+        embed = InformationEmbed(author=ctx.author, entity=entity)
         await ctx.send(embed=embed)
 
     @info.command(name="guild", brief="Get the current guild's information.")
