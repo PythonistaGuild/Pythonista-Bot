@@ -32,7 +32,7 @@ class BadBin(TypedDict):
 
 
 class Suggestions(TypedDict):
-    url: str
+    webhook_url: str
 
 
 class Config(TypedDict):
