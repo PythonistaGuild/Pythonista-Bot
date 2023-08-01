@@ -184,7 +184,7 @@ class Manuals(commands.Cog):
         optional = await self.get_lib(ctx, query)
         if not optional:
             return
-        
+
         lib, final_query, tip = optional
 
         if not final_query:
@@ -257,7 +257,7 @@ class Manuals(commands.Cog):
         optional = await self.get_lib(ctx, query)
         if not optional:
             return
-        
+
         lib, final_query, tip = optional
 
         if not final_query:
