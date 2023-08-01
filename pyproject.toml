@@ -12,7 +12,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-"discord.py" = "*"
+"discord.py" = { git = "https://github.com/Rapptz/discord.py.git", rev = "e6a0dc5bc0ba8e739b0def446378088bea65d1df" }
 aiohttp = "*"
 asyncpg = "*"
 toml = "*"
