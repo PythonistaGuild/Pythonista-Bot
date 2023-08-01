@@ -70,10 +70,14 @@ class Information(core.Cog):
 
     def _member_info(self, member: discord.Member, /, *, embed: discord.Embed) -> discord.Embed:
         if member.joined_at:
-            embed.add_field(name="Member joined the guild on:", value=discord.utils.format_dt(member.joined_at, "F"))
+            joined_at_fmt = (
+                discord.utils.format_dt(member.joined_at, "F") + "\n" f"({discord.utils.format_dt(member.joined_at, 'R')})"
+            )
+            embed.add_field(name="Member joined the guild on:", value=joined_at_fmt)
 
-        roles = [role.mention for role in member.roles[1:]][:5]
-        embed.add_field(name="Member's top 5 roles:-", value="\n".join(roles), inline=False)
+        roles = [role.mention for role in member.roles[1:]]
+        roles.reverse()
+        embed.add_field(name="Member's top 5 roles:-", value="\n".join(roles[:5]), inline=False)
         embed.colour = member.colour or embed.colour
 
         return embed
@@ -82,7 +86,10 @@ class Information(core.Cog):
         embed = discord.Embed(title=f"Info on {user.display_name}!", colour=discord.Colour.random())
         embed.set_author(name=user.name)
         embed.set_image(url=user.display_avatar.url)
-        embed.add_field(name="Account was created on:", value=discord.utils.format_dt(user.created_at, "F"))
+        created_at_fmt = (
+            discord.utils.format_dt(user.created_at, "F") + "\n" f"({discord.utils.format_dt(user.created_at, 'R')})"
+        )
+        embed.add_field(name="Account was created on:", value=created_at_fmt)
 
         embed.timestamp = discord.utils.utcnow()
 
