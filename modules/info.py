@@ -44,6 +44,13 @@ class Information(core.Cog):
     def __init__(self, bot: core.Bot) -> None:
         self.bot: core.Bot = bot
 
+    async def cog_command_error(self, ctx: core.Context, error: commands.CommandError) -> None:  # type: ignore # bad lib types.
+        error = getattr(error, "original", error)
+
+        if isinstance(error, NoPermissions):
+            await ctx.send("Sorry, you don't have permissions to view details on this object.")
+            return
+
     def _embed_factory(self, entity: EntityT) -> discord.Embed:
         embed = discord.Embed(title=f"Info on {entity.name}!", colour=discord.Colour.random())
         embed.add_field(name="ID:", value=entity.id)
@@ -130,7 +137,11 @@ class Information(core.Cog):
         self,
         ctx: core.Context,
         *,
-        entity: discord.Member | discord.User | discord.Role | discord.abc.GuildChannel | discord.Guild,
+        entity: discord.Member
+        | discord.User
+        | discord.Role
+        | discord.abc.GuildChannel
+        | discord.Guild = commands.CurrentGuild,
     ) -> None:
         """Get information about a specific Pythonista related object.
 
