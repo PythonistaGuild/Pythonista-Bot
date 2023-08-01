@@ -101,16 +101,16 @@ class Manuals(commands.Cog):
 
         return None
 
-    async def get_lib(self, ctx: core.Context, query: str) -> tuple[LibEnum, str, str]:  # enum, query, notice
+    async def get_lib(self, ctx: core.Context, query: str) -> tuple[LibEnum, str, str] | None:  # enum, query, notice
         if not query:
             lib = self._smart_guess_lib(ctx)
 
             if not lib:
                 await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
-                raise NoReturn
+                return None
 
             await ctx.send(str(lib.value), reference=ctx.replied_message)
-            raise NoReturn
+            return None
 
         view = StringView(query)
         maybe_lib = view.get_word()
@@ -131,7 +131,7 @@ class Manuals(commands.Cog):
 
         if lib is None:
             await ctx.reply("Sorry, I couldn't find a library that matched. Try again with a different library?")
-            raise NoReturn
+            return None
 
         elif (
             maybe_lib
@@ -181,10 +181,11 @@ class Manuals(commands.Cog):
             labels = clear_labels = True  # implicitly set --labels
             query = query.replace("--clear", "")
 
-        try:
-            lib, final_query, tip = await self.get_lib(ctx, query)
-        except NoReturn:
+        optional = await self.get_lib(ctx, query)
+        if not optional:
             return
+        
+        lib, final_query, tip = optional
 
         if not final_query:
             await ctx.send(str(lib.value[0]) + tip, reference=ctx.replied_message)
@@ -253,10 +254,11 @@ class Manuals(commands.Cog):
             source = True
             query = query.replace("--source", "")
 
-        try:
-            lib, final_query, tip = await self.get_lib(ctx, query)
-        except NoReturn:
+        optional = await self.get_lib(ctx, query)
+        if not optional:
             return
+        
+        lib, final_query, tip = optional
 
         if not final_query:
             await ctx.reply(str(lib.value[0]) + tip)
