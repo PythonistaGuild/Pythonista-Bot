@@ -123,6 +123,6 @@ class Suggestions(core.Cog):
 
 async def setup(bot: core.Bot):
     if key := core.CONFIG.get("SUGGESTIONS"):
-        await bot.add_cog(Suggestions(bot, key["url"]))
+        await bot.add_cog(Suggestions(bot, key["webhook_url"]))
     else:
         LOGGER.warning("Cannot load the SUGGESTIONS extension due to the `suggestions_webhook_url` config not existing.")

@@ -25,7 +25,7 @@ runner = 123456789 # optional: sets the webhook avatar url (will be overridden b
 level = 20
 
 [SUGGESTIONS] # optional
-url = "" # Webhook URL - optional
+webhook_url = "" # optional
 
 [SNEKBOX] # optional
 url = 'http://snekbox:8060/eval' # default url
