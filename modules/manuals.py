@@ -33,10 +33,6 @@ import core
 from core.utils.paginator import TextPager
 
 
-class NoReturn(Exception):
-    pass
-
-
 class LibEnum(Enum):
     wavelink = ("https://wavelink.readthedocs.io/en/latest", constants.Colours.PYTHONISTA_BG, "wavelink")
     twitchio = ("https://twitchio.dev/en/latest/", constants.Colours.PYTHON_YELLOW, "twitchio")
