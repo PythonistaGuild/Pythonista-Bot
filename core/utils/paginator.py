@@ -29,13 +29,13 @@ import discord
 from discord import ui  # shortcut because I'm lazy
 from discord.ext.commands import CommandError, Paginator as _Paginator  # type: ignore # why does this need a stub file?
 from discord.utils import MISSING
-from typing_extensions import Self
 
 from core import Bot, Context
 
 
 if TYPE_CHECKING:
     from discord.abc import MessageableChannel
+    from typing_extensions import Self
 
 
 __all__ = ("CannotPaginate", "Pager", "KVPager", "TextPager")
