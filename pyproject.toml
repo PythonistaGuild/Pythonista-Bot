@@ -23,6 +23,7 @@ jishaku = "*"
 black = "*"
 isort = "*"
 "asyncpg-stubs" = "*"
+"typing-extensions" = "*"
 
 [tool.black]
 line-length = 125
