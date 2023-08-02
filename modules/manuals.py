@@ -97,6 +97,49 @@ class Manuals(commands.Cog):
 
         return None
 
+    async def get_lib(self, ctx: core.Context, query: str) -> tuple[LibEnum, str, str] | None:  # enum, query, notice
+        if not query:
+            lib = self._smart_guess_lib(ctx)
+
+            if not lib:
+                await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
+                return None
+
+            await ctx.send(str(lib.value), reference=ctx.replied_message)
+            return None
+
+        view = StringView(query)
+        maybe_lib = view.get_word()
+        view.skip_ws()
+        final_query = view.read_rest()
+
+        tip = ""
+        lib: LibEnum | None = None
+
+        if maybe_lib in lib_names:
+            lib = lib_names[maybe_lib]
+        else:
+            maybe_lib = None
+            final_query = query  # ignore the stringview stuff then
+
+        if lib is None:
+            lib = self._smart_guess_lib(ctx)
+
+        if lib is None:
+            await ctx.reply("Sorry, I couldn't find a library that matched. Try again with a different library?")
+            return None
+
+        elif (
+            maybe_lib
+            and isinstance(ctx.channel, discord.Thread)
+            and ctx.channel.parent_id == constants.Channels.HELP_FORUM
+            and lib == self._smart_guess_lib(ctx)
+        ):
+            if 1006717008613740596 not in ctx.channel._applied_tags:  # type: ignore # other-help tag, that one doesnt get a smart guess
+                tip += "\n• Tip: Forum posts with tags will automatically have the relevant libraries used, no need to specify it!"
+
+        return lib, final_query, tip
+
     @commands.command(
         "rtfm",
         brief="Searches documentation",
@@ -111,28 +154,18 @@ class Manuals(commands.Cog):
         On its own it will do its best to figure out the most relevant documentation,
         but you can always specify by prefixing the query with the library you wish to use.
         The following libraries are supported (you can use either the full name or the shorthand):
-        ```
-        - wavelink   | wl
-        - twitchio   | tio
-        - python     | py
-        - discordpy  | dpy
-        ```
+
+        • wavelink   | wl
+        • twitchio   | tio
+        • python     | py
+        • discordpy  | dpy
+
 
         The following flags are available for this command:
-        ```
-        - --labels (Include labels in search results)
-        - --clear (Clearly labels labels with a `label:` prefix. If --labels has not be set it will be implicitly set)
+
+        • --labels (Include labels in search results)
+        • --clear (Clearly labels labels with a `label:` prefix. If --labels has not be set it will be implicitly set)
         """
-        if not query:
-            lib = self._smart_guess_lib(ctx)
-
-            if not lib:
-                await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
-                return
-
-            await ctx.send(str(lib.value), reference=ctx.replied_message)
-            return
-
         labels = False
         clear_labels = False
 
@@ -144,26 +177,14 @@ class Manuals(commands.Cog):
             labels = clear_labels = True  # implicitly set --labels
             query = query.replace("--clear", "")
 
-        view = StringView(query)
-        maybe_lib = view.get_word()
-        view.skip_ws()
-        final_query = view.read_rest()
-        lib: LibEnum | None = None
-
-        if maybe_lib in lib_names:
-            lib = lib_names[maybe_lib]
-        else:
-            final_query = query  # ignore the stringview stuff then
-
-        if lib is None:
-            lib = self._smart_guess_lib(ctx)
-
-        if lib is None:
-            await ctx.reply("Sorry, I couldn't find a library that matched. Try again with a different library?")
+        optional = await self.get_lib(ctx, query)
+        if not optional:
             return
 
+        lib, final_query, tip = optional
+
         if not final_query:
-            await ctx.send(str(lib.value[0]), reference=ctx.replied_message)
+            await ctx.send(str(lib.value[0]) + tip, reference=ctx.replied_message)
             return
 
         url = self.target.with_path("/api/public/rtfm.sphinx").with_query(
@@ -196,7 +217,7 @@ class Manuals(commands.Cog):
         e.description = "\n".join(f"[`{key}`]({url})" for key, url in matches["nodes"].items())
         e.set_author(name=f"Query Time: {float(matches['query_time']):.2f}")
 
-        await ctx.send(embed=e)
+        await ctx.send(tip or None, embed=e)
 
     @commands.command(
         name="rtfs",
@@ -212,26 +233,16 @@ class Manuals(commands.Cog):
         On its own it will do its best to figure out the most relevant library,
         but you can always specify by prefixing the query with the library you wish to use.
         The following libraries are supported (you can use either the full name or the shorthand):
-        ```
-        - wavelink   | wl
-        - twitchio   | tio
-        - discordpy  | dpy
-        - aiohttp    |
-        ```
+
+        • wavelink   | wl
+        • twitchio   | tio
+        • discordpy  | dpy
+        • aiohttp    |
 
         The following flags are available for this command:
-        ```
-        - --source (Sends source code instead of links to the github repository)
+
+        • --source (Sends source code instead of links to the github repository)
         """
-        if not query:
-            lib = self._smart_guess_lib(ctx)
-
-            if not lib:
-                await ctx.reply("Sorry, I couldn't apply a default library to this channel. Try again with a library?")
-                return
-
-            await ctx.send(str(lib.value), reference=ctx.replied_message)
-            return
 
         source = False
 
@@ -239,26 +250,14 @@ class Manuals(commands.Cog):
             source = True
             query = query.replace("--source", "")
 
-        view = StringView(query)
-        maybe_lib = view.get_word()
-        view.skip_ws()
-        final_query = view.read_rest()
-        lib: LibEnum | None = None
-
-        if maybe_lib in lib_names:
-            lib = lib_names[maybe_lib]
-        else:
-            final_query = query  # ignore the stringview stuff then
-
-        if lib is None:
-            lib = self._smart_guess_lib(ctx)
-
-        if lib is None:
-            await ctx.reply("Sorry, I couldn't find a library that matched. Try again with a different library?")
+        optional = await self.get_lib(ctx, query)
+        if not optional:
             return
 
+        lib, final_query, tip = optional
+
         if not final_query:
-            await ctx.reply(str(lib.value[0]))
+            await ctx.reply(str(lib.value[0]) + tip)
             return
 
         url = self.target.with_path("/api/public/rtfs").with_query(
@@ -291,7 +290,7 @@ class Manuals(commands.Cog):
             out = [f"[{name}]({url})" for name, url in nodes.items()]
 
             author: str = f"query Time: {float(matches['query_time']):.03f} • commit {matches['commit'][:6]}"
-            footer: str = f"Is the api behind on commits? Use {discord.utils.escape_mentions(ctx.prefix)}rtfs-reload"  # type: ignore
+            footer: str | None = tip or None
 
             embed: discord.Embed = discord.Embed(title=f"{lib.name.title()}: {final_query}", colour=lib.value[1])
             embed.description = "\n".join(out)
@@ -302,9 +301,11 @@ class Manuals(commands.Cog):
 
         else:
             n = next(iter(nodes.items()))
-            await ctx.send(f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}", reference=ctx.replied_message)
+            await ctx.send(
+                f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}" + tip, reference=ctx.replied_message
+            )
 
-            pages = TextPager(ctx, n[1], prefix="```py")
+            pages = TextPager(ctx, n[1], prefix="```py", reply_author_takes_paginator=True)
             await pages.paginate()
 
 
