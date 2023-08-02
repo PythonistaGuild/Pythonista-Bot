@@ -11,8 +11,10 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/projects/pythonista-bot/
-            docker compose pull bot
-            docker compose up --build -d
+            git reset --hard HEAD || true
+            git pull origin main
+            docker compose --profile snekbox pull
+            docker compose --profile snekbox up --build -d
           username: ${{ secrets.SSH_USER }}
 
 name: Deploy
