@@ -35,6 +35,9 @@ import aiohttp
 import asyncpg
 import discord
 from discord.ext import commands
+from discord.ext.commands.cog import Cog  # type: ignore # stubs
+
+from constants import GUILD_ID
 
 from .context import Context
 from .core import CONFIG
@@ -76,6 +79,11 @@ class Bot(commands.Bot):
         self, message: discord.Message | discord.Interaction, /, *, cls: type[commands.Context[commands.Bot]] | None = None
     ) -> Context:
         return await super().get_context(message, cls=Context)
+
+    async def add_cog(self, cog: Cog, /, *, override: bool = False) -> None:  # type: ignore
+        # we patch this since we're a single guild bot.
+        # it allows for guild syncing only.
+        return await super().add_cog(cog, override=override, guild=discord.Object(id=GUILD_ID))
 
     async def on_ready(self) -> None:
         """On Bot ready - cache is built."""
