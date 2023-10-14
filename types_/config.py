@@ -34,9 +34,9 @@ class BadBin(TypedDict):
 class Suggestions(TypedDict):
     webhook_url: str
 
+
 class Starboard(TypedDict):
     remove_on_delete: bool
-    valid_emojis: list[str]
     entry_requirement: int
     starboard_channel_id: int
 
