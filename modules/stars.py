@@ -97,10 +97,6 @@ class Starboard(core.Cog):
         else:
             return "🌟"
 
-    @commands.command()
-    async def test(self, ctx):
-        await ctx.message.add_reaction("⭐")
-
     async def add_entry(
         self, message_id: int, bot_message_id: int, payload_channel_id: int, reactions: int, content_id: int
     ):
