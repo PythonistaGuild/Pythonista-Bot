@@ -20,7 +20,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from typing import Optional
 import asyncpg
 import discord
 import datetime
@@ -42,11 +41,11 @@ VALID_IMAGE_LINKS = ("https://images-ext-1.discordapp.net", "https://tenor.com/v
 
 class JumpView(discord.ui.View):
     def __init__(
-            self,
-            *,
-            timeout: float,
-            url: Optional[str],
-            label_name: str = "Jump to message",
+        self,
+        *,
+        timeout: float,
+        url: str | None,
+        label_name: str = "Jump to message",
     ):
         super().__init__(timeout=timeout)
         self.add_item(discord.ui.Button(url=url, label=label_name, style=discord.ButtonStyle.primary))
@@ -101,45 +100,41 @@ class Starboard(core.Cog):
             return "🌟"
 
     async def add_entry(
-            self, message_id: int, bot_message_id: int, payload_channel_id: int, reactions: int, content_id: int
+        self, message_id: int, bot_message_id: int, payload_channel_id: int, reactions: int, content_id: int
     ):
-        entry_query = """INSERT INTO starboard_entries VALUES (
-                    {},
-                    {},
-                    {},
-                    {},
-                    {}
-                )""".format(
-            message_id, bot_message_id, payload_channel_id, reactions, content_id
-        )
-        await self.pool.execute(entry_query)
+        query = """INSERT INTO starboard_entries VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5
+                )"""
+        await self.pool.execute(query, message_id, bot_message_id, payload_channel_id, reactions, content_id)
 
     async def add_starer(self, user_id: int, message_id: int):
-        starer_query = """
+        query = """
                 INSERT INTO starers VALUES (
-                    {},
-                    {}
-                )""".format(
-            user_id, message_id
-        )
+                    $1,
+                    $2
+                )"""
 
-        await self.pool.execute(starer_query)
+        await self.pool.execute(query, user_id, message_id)
 
     async def remove_starer(self, message_id: int, user_id: int):
-        query = """DELETE FROM starers WHERE msg_id={} AND user_id={}""".format(message_id, user_id)
-        await self.pool.execute(query)
+        query = """DELETE FROM starers WHERE msg_id = $1 AND user_id= $2"""
+        await self.pool.execute(query, message_id, user_id)
 
     async def update_entry(self, reactions: int, message_id: int):
-        query = """UPDATE starboard_entries SET stars = {} WHERE msg_id={}""".format(reactions, message_id)
-        await self.pool.execute(query)
+        query = """UPDATE starboard_entries SET stars = $1 WHERE msg_id = $2"""
+        await self.pool.execute(query, reactions, message_id)
 
     async def remove_entry(self, message_id: int):
-        query = """DELETE FROM starboard_entries WHERE msg_id={}""".format(message_id)
-        await self.pool.execute(query)
+        query = """DELETE FROM starboard_entries WHERE msg_id= $1"""
+        await self.pool.execute(query, message_id)
 
     async def clear_starers(self, message_id: int):
-        query = """DELETE FROM starers WHERE msg_id={}""".format(message_id)
-        await self.pool.execute(query)
+        query = """DELETE FROM starers WHERE msg_id = $1"""
+        await self.pool.execute(query, message_id)
 
     def get_formatted_time(self):
         now = datetime.datetime.now()
@@ -217,8 +212,9 @@ class Starboard(core.Cog):
             view=JumpView(url=message_url, timeout=40),
         )
 
-        await self.add_entry(message.id, bot_message.id, payload.channel_id, reaction.count,
-                             content_message.id)  # type: ignore
+        await self.add_entry(
+            message.id, bot_message.id, payload.channel_id, reaction.count, content_message.id
+        )  # type: ignore
         await self.add_starer(payload.user_id, message.id)
 
     async def handle_unstar(self, payload: discord.RawReactionActionEvent):
