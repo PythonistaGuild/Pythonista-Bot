@@ -172,20 +172,13 @@ class Starboard(core.Cog):
 
             await self.add_starer(payload.user_id, payload.message_id)
 
-            query = """UPDATE starboard_entries SET stars = starboard_entries.stars + 1 
-                                    WHERE msg_id = {}
-                                """.format(
-                entry.msg_id
-            )
-
-            await self.pool.execute(query)
-
             bot_channel: discord.TextChannel = await self.bot.fetch_channel(self.starboard_channel_id)  # type: ignore
             bot_message = await bot_channel.fetch_message(bot_msg_id)
 
-            stars = entry.stars + 1
+            stars = reaction_count
             star = self.get_star(stars)
             await bot_message.edit(content=HEADER_TEMPLATE.format(star, stars, payload.channel_id, payload.channel_id))
+            await self.update_entry(stars, payload.message_id)
             return
 
         if not reaction_count >= self.entry_requirement:
