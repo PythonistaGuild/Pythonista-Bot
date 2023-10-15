@@ -20,11 +20,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import re
 from typing import Optional
-
 import asyncpg
 import discord
-from datetime import datetime as date
+import datetime
 from discord.ext import commands
 
 import core
@@ -37,8 +37,8 @@ STARBOARD_EMOJI = "⭐"
 HEADER_TEMPLATE = "**{}** {} in: <#{}> ID: {}"
 
 VALID_FILE_ATTACHMENTS = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+VIDEO_FILE_ATTACHMENTS = (".mp4", ".mov")
 VALID_IMAGE_LINKS = ("https://images-ext-1.discordapp.net", "https://tenor.com/view/")
-VALID_VIDEO_ATTACHMENT_LINKS = ("https://www.youtube.com/watch?v=", "https://www.twitch.tv/videos/")
 
 
 class JumpView(discord.ui.View):
@@ -143,7 +143,7 @@ class Starboard(core.Cog):
         await self.pool.execute(query)
 
     def get_formatted_time(self):
-        now = date.now()
+        now = datetime.datetime.now()
         time = now.strftime("%m/%d/%Y %I:%M %p")
         return time
 
@@ -195,25 +195,24 @@ class Starboard(core.Cog):
         star = self.get_star(reaction_count)
 
         embed = discord.Embed(color=STARBOARD_EMBED_COLOR)
-
         if len(message.attachments) > 0:
             for attachment in message.attachments:
                 filename = attachment.filename
                 if filename.endswith(VALID_FILE_ATTACHMENTS):
+                    if attachment.is_spoiler():
+                        embed.add_field(name="", value=f"[Click to view spoiler]({attachment.url})", inline=True)
+                        continue
                     embed.set_image(url=attachment.url)
-                elif message.content in VALID_IMAGE_LINKS:
+                elif filename.endswith(VIDEO_FILE_ATTACHMENTS):
+                    embed.add_field(name="", value=f"[File: {attachment.filename}]({message.jump_url})")
+                elif any(link in message.content for link in VALID_IMAGE_LINKS):
                     embed.set_image(url=message.content)
                 else:
                     continue
-
-        if message.content in VALID_VIDEO_ATTACHMENT_LINKS:
-            val = "[Click to view video]({})".format(message.content)
-        else:
-            val = message.clean_content
         message_url: str = message.jump_url
 
         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar)
-        embed.add_field(name="", value=val)
+        embed.add_field(name="", value=message.content)
         embed.set_footer(text=time)
 
         starboard = self.bot.get_channel(self.starboard_channel_id)
