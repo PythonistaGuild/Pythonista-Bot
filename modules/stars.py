@@ -181,7 +181,7 @@ class Starboard(core.Cog):
 
         star = self.get_star(reaction_count)
 
-        embed = discord.Embed(color=STARBOARD_EMBED_COLOR)
+        embed = discord.Embed(color=STARBOARD_EMBED_COLOR, description=message.content)
         if len(message.attachments) > 0:
             for attachment in message.attachments:
                 filename = attachment.filename
@@ -199,7 +199,6 @@ class Starboard(core.Cog):
         message_url: str = message.jump_url
 
         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar)
-        embed.add_field(name="", value=message.content)
         embed.set_footer(text=time)
 
         starboard = self.bot.get_channel(self.starboard_channel_id)
