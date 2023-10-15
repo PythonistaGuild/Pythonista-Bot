@@ -172,7 +172,7 @@ class Starboard(core.Cog):
 
             await self.add_starer(payload.user_id, payload.message_id)
 
-            bot_channel: discord.TextChannel = await self.bot.fetch_channel(self.starboard_channel_id)  # type: ignore
+            bot_channel: discord.TextChannel = self.bot.get_channel(self.starboard_channel_id)  # type: ignore
             bot_message = await bot_channel.fetch_message(bot_msg_id)
 
             stars = reaction_count
