@@ -36,14 +36,18 @@ STARBOARD_EMBED_COLOR = 0xFFFF00
 STARBOARD_EMOJI = "⭐"
 HEADER_TEMPLATE = "**{}** {} in: <#{}> ID: {}"
 
+VALID_FILE_ATTACHMENTS = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+VALID_IMAGE_LINKS = ("https://images-ext-1.discordapp.net", "https://tenor.com/view/")
+VALID_VIDEO_ATTACHMENT_LINKS = ("https://www.youtube.com/watch?v=", "https://www.twitch.tv/videos/")
+
 
 class JumpView(discord.ui.View):
     def __init__(
-        self,
-        *,
-        timeout: float,
-        url: Optional[str],
-        label_name: str = "Jump to message",
+            self,
+            *,
+            timeout: float,
+            url: Optional[str],
+            label_name: str = "Jump to message",
     ):
         super().__init__(timeout=timeout)
         self.add_item(discord.ui.Button(url=url, label=label_name, style=discord.ButtonStyle.primary))
@@ -98,7 +102,7 @@ class Starboard(core.Cog):
             return "🌟"
 
     async def add_entry(
-        self, message_id: int, bot_message_id: int, payload_channel_id: int, reactions: int, content_id: int
+            self, message_id: int, bot_message_id: int, payload_channel_id: int, reactions: int, content_id: int
     ):
         entry_query = """INSERT INTO starboard_entries VALUES (
                     {},
@@ -195,22 +199,14 @@ class Starboard(core.Cog):
         if len(message.attachments) > 0:
             for attachment in message.attachments:
                 filename = attachment.filename
-                if (
-                    filename.endswith(".jpg")
-                    or filename.endswith(".jpeg")
-                    or filename.endswith(".png")
-                    or filename.endswith(".webp")
-                    or filename.endswith(".gif")
-                ):
+                if filename.endswith(VALID_FILE_ATTACHMENTS):
                     embed.set_image(url=attachment.url)
-                elif (
-                    "https://images-ext-1.discordapp.net" in message.content or "https://tenor.com/view/" in message.content
-                ):
+                elif message.content in VALID_IMAGE_LINKS:
                     embed.set_image(url=message.content)
                 else:
-                    break
+                    continue
 
-        if "https://www.youtube.com/watch?v=" in message.content:
+        if message.content in VALID_VIDEO_ATTACHMENT_LINKS:
             val = "[Click to view video]({})".format(message.content)
         else:
             val = message.clean_content
@@ -230,7 +226,8 @@ class Starboard(core.Cog):
             view=JumpView(url=message_url, timeout=40),
         )
 
-        await self.add_entry(message.id, bot_message.id, payload.channel_id, reaction.count, content_message.id)  # type: ignore
+        await self.add_entry(message.id, bot_message.id, payload.channel_id, reaction.count,
+                             content_message.id)  # type: ignore
         await self.add_starer(payload.user_id, message.id)
 
     async def handle_unstar(self, payload: discord.RawReactionActionEvent):
