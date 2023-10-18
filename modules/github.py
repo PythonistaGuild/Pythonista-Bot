@@ -41,6 +41,7 @@ GITHUB_CODE_REGION_REGEX = re.compile(
 GITHUB_BASE_URL = "https://github.com/"
 GITHUB_RAW_CONTENT_URL = "https://raw.githubusercontent.com/"
 
+
 class LibEnum(Enum):
     wavelink = "PythonistaGuild/Wavelink"
     twitchio = "PythonistaGuild/TwitchIO"
@@ -48,12 +49,13 @@ class LibEnum(Enum):
     mystbin = "PythonistaGuild/Mystbin"
     discordpy = "rapptz/discord.py"
 
+
 aliases = [
     (("wavelink", "wave", "wl"), LibEnum.wavelink),
     (("discordpy", "discord", "dpy"), LibEnum.discordpy),
     (("twitchio", "tio"), LibEnum.twitchio),
     (("mystbin", "mb"), LibEnum.mystbin),
-    (("pythonistabot", "pb"), LibEnum.pythonistaBot)
+    (("pythonistabot", "pb"), LibEnum.pythonistaBot),
 ]
 
 LIB_REPO_MAPPING = {key: value for keys, value in aliases for key in keys}
@@ -210,12 +212,12 @@ class GitHub(core.Cog):
 
             if not lib:
                 lib = self._smart_guess_lib(message)
-            
-            if lib: # no, this should not be an else, as lib can be reassigned in the previous block
+
+            if lib:  # no, this should not be an else, as lib can be reassigned in the previous block
                 issue = match.group("number")
 
                 await message.channel.send(GITHUB_ISSUE_URL.format(lib.value, issue))
-            
+
             else:
                 await message.add_reaction(self.bruhkitty)
 
