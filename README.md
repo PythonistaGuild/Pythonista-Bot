@@ -43,6 +43,11 @@ which will enable all services and snekbox.
 
 This also means that it will use internal docker networking to resolve the database and snekbox names. By default these will be `database` and `snekbox`, but these will be the **service names** in `docker-compose.yml` if you change them. Please keep this in mind when editing your config file.
 
+We also provide a file for ignoring git blame references. You can enable this with:-
+```sh
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
 ### Support
 
 As this bot is not really designed for use outside of our Guild, support provided will be **very** limited.
