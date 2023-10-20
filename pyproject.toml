@@ -21,20 +21,55 @@ jishaku = "*"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
-isort = "*"
+ruff = "*"
 "asyncpg-stubs" = "*"
 "typing-extensions" = "*"
 
 [tool.black]
 line-length = 125
+preview = true
 
-[tool.isort]
-profile = "black"
-lines_after_imports = 2
-line_length = 125
-combine_as_imports = true
-combine_star = true
+[tool.ruff]
+line-length = 125
+exclude = ["docs/extensions/*.py"]
+select = [
+    "C4",
+    "F",
+    "G",
+    "I",
+    "PTH",
+    "RUF",
+    "SIM",
+    "TCH",
+    "UP",
+    "W",
+    "PERF",
+    "ANN",
+]
+ignore = [
+    "F401",
+    "F402",
+    "F403",
+    "F405",
+    "PERF203",
+    "RUF001",
+    "RUF009",
+    "SIM105",
+    "UP034",
+    "UP038",
+    "ANN101",
+    "ANN102",
+    "ANN401",
+]
+[tool.ruff.isort]
+split-on-trailing-comma = true
+combine-as-imports = true
 
+[tool.ruff.flake8-annotations]
+allow-star-arg-any = true
+
+[tool.ruff.flake8-quotes]
+inline-quotes = "single"
 
 [tool.pyright]
 useLibraryCodeForTypes = true
