@@ -7,7 +7,6 @@ from discord.ext import commands
 
 from constants import GUILD_ID, Roles
 
-
 if TYPE_CHECKING:
     from .bot import Bot
 

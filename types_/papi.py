@@ -1,6 +1,5 @@
 from typing import Generic, Literal, TypedDict, TypeVar
 
-
 PayloadT = TypeVar("PayloadT", bound=TypedDict)
 
 

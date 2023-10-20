@@ -26,7 +26,6 @@ from typing import TYPE_CHECKING, Any, NoReturn, cast
 
 import toml
 
-
 if TYPE_CHECKING:
     from typing_extensions import Self
 

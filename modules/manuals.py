@@ -77,7 +77,7 @@ class Manuals(commands.Cog):
             return None  # there's not much hope here, stay quick
 
         if isinstance(ctx.channel, discord.Thread) and ctx.channel.parent_id == constants.Channels.HELP_FORUM:
-            tags = set(x.name for x in ctx.channel.applied_tags)
+            tags = {x.name for x in ctx.channel.applied_tags}
 
             if "twitchio-help" in tags:
                 return LibEnum.twitchio
@@ -136,7 +136,10 @@ class Manuals(commands.Cog):
             and lib == self._smart_guess_lib(ctx)
         ):
             if 1006717008613740596 not in ctx.channel._applied_tags:  # type: ignore # other-help tag, that one doesnt get a smart guess
-                tip += "\n• Tip: Forum posts with tags will automatically have the relevant libraries used, no need to specify it!"
+                tip += (
+                    "\n• Tip: Forum posts with tags will automatically have the relevant libraries used, no need to"
+                    " specify it!"
+                )
 
         return lib, final_query, tip
 

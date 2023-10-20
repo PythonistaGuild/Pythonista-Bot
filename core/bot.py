@@ -31,24 +31,24 @@ import traceback
 from collections import deque
 from typing import TYPE_CHECKING, Any
 
-import aiohttp
-import asyncpg
 import discord
 from discord.ext import commands
-from discord.ext.commands.cog import Cog  # type: ignore # stubs
 
 from constants import GUILD_ID
 
 from .context import Context
 from .core import CONFIG
-from .utils import LogHandler
-
 
 if TYPE_CHECKING:
     from asyncio import Queue
     from logging import LogRecord
 
+    import aiohttp
+    import asyncpg
     import mystbin
+    from discord.ext.commands.cog import Cog  # type: ignore # stubs
+
+    from .utils import LogHandler
 
 
 class Bot(commands.Bot):
@@ -67,7 +67,7 @@ class Bot(commands.Bot):
         "_previous_websocket_events",
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             command_prefix=commands.when_mentioned_or(CONFIG["prefix"]),
             intents=discord.Intents.all(),

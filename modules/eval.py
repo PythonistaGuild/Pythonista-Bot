@@ -33,7 +33,6 @@ import core
 from core.errors import InvalidEval
 from core.utils import formatters
 
-
 LOGGER = logging.getLogger(__name__)
 
 

@@ -27,11 +27,11 @@ from typing import TYPE_CHECKING, Any
 from discord.ext import commands
 
 import constants
-from core.context import GuildContext
-
 
 if TYPE_CHECKING:
     from discord.ext.commands._types import Check  # type: ignore # why would this need stubs
+
+    from core.context import GuildContext
 
 
 def is_role_or_higher(role_id: int) -> Check[Any]:
