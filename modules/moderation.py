@@ -38,11 +38,10 @@ from discord.ext import commands
 
 import core
 from constants import Channels
-from core.context import Interaction
 from core.utils import random_pastel_colour
 
-
 if TYPE_CHECKING:
+    from core.context import Interaction
     from types_.papi import ModLogPayload, PythonistaAPIWebsocketPayload
 
     ModLogType: TypeAlias = PythonistaAPIWebsocketPayload[ModLogPayload]
@@ -140,25 +139,24 @@ class Moderation(commands.Cog):
         if headers is not None:
             hdrs.update(headers)
 
-        async with self._req_lock:
-            async with self.bot.session.request(method, req_url, params=params, json=data, headers=hdrs) as r:
-                remaining = r.headers.get("X-Ratelimit-Remaining")
-                js = await r.json()
+        async with self._req_lock, self.bot.session.request(method, req_url, params=params, json=data, headers=hdrs) as r:
+            remaining = r.headers.get("X-Ratelimit-Remaining")
+            js = await r.json()
 
-                if r.status == 429 or remaining == "0":
-                    # wait before we release the lock
-                    delta = discord.utils._parse_ratelimit_header(r)  # type: ignore # shh this is okay
+            if r.status == 429 or remaining == "0":
+                # wait before we release the lock
+                delta = discord.utils._parse_ratelimit_header(r)  # type: ignore # shh this is okay
 
-                    await asyncio.sleep(delta)
-                    self._req_lock.release()
+                await asyncio.sleep(delta)
+                self._req_lock.release()
 
-                    return await self.github_request(method, url, params=params, data=data, headers=headers)
+                return await self.github_request(method, url, params=params, data=data, headers=headers)
 
-                elif 300 > r.status >= 200:
-                    return js
+            elif 300 > r.status >= 200:
+                return js
 
-                else:
-                    raise GithubError(js["message"])
+            else:
+                raise GithubError(js["message"])
 
     async def create_gist(
         self,
@@ -201,7 +199,7 @@ class Moderation(commands.Cog):
 
         msg: str = (
             f"Hey {message.author.mention}, I found one or more Discord Bot tokens in your message "
-            f"and I've sent them off to be invalidated for you.\n"
+            "and I've sent them off to be invalidated for you.\n"
             f"You can find the token(s) [here]({url})."
         )
         await message.reply(msg)
@@ -274,7 +272,7 @@ class Moderation(commands.Cog):
             embed.set_author(name=moderator.name, icon_url=moderator.display_avatar.url)
         else:
             moderator_format = f"Unknown Moderator with ID: {moderator_id} {PROSE_LOOKUP[moderation_event.value]} "
-            embed.set_author(name=f"Unknown Moderator.")
+            embed.set_author(name="Unknown Moderator.")
 
         if target:
             target_format = target.name
@@ -295,7 +293,7 @@ class Moderation(commands.Cog):
         channel = guild.get_channel(Channels.DPY_MOD_LOGS)
         assert isinstance(channel, discord.TextChannel)  # This is static
 
-        view = ModerationRespostView(timeout=900, target_id=target_id, target_reason=moderation_reason)
+        view = ModerationRespostView(timeout=60 * 60, target_id=target_id, target_reason=moderation_reason)
         view.message = await channel.send(embed=embed, view=view)
 
 

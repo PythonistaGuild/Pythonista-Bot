@@ -31,7 +31,6 @@ import discord
 import constants
 import core
 
-
 GITHUB_ISSUE_URL = "https://github.com/{}/issues/{}"
 LIB_ISSUE_REGEX = re.compile(r"(?P<lib>[a-z]+)?(?P<pounds>#{2,})(?P<number>[0-9]+)", flags=re.IGNORECASE)
 GITHUB_CODE_REGION_REGEX = re.compile(
@@ -166,8 +165,9 @@ class GitHub(core.Cog):
 
         github_dict = {
             "path": file_path,
-            "min": (_min_boundary if _min_boundary > 0 else highlighted_line - 1)
-            + 1,  # Do not display negative numbers if <0
+            "min": (
+                _min_boundary if _min_boundary > 0 else highlighted_line - 1
+            ) + 1,  # Do not display negative numbers if <0
             "max": _max_boundary + 1,
             "msg": msg,
         }
@@ -182,7 +182,7 @@ class GitHub(core.Cog):
             return None  # there's not much hope here, stay quick
 
         if isinstance(msg.channel, discord.Thread) and msg.channel.parent_id == constants.Channels.HELP_FORUM:
-            tags = set(x.name for x in msg.channel.applied_tags)
+            tags = {x.name for x in msg.channel.applied_tags}
 
             if "twitchio-help" in tags:
                 return LibEnum.twitchio

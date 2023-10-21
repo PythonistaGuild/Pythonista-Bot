@@ -30,7 +30,6 @@ from discord.ext import commands
 import core
 from constants import GUILD_ID
 
-
 EntityT = TypeVar("EntityT", discord.Member, discord.User, discord.Role, discord.abc.GuildChannel, discord.Guild)
 
 

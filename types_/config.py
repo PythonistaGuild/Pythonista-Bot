@@ -1,6 +1,5 @@
 from typing import NotRequired, Required, TypedDict
 
-
 __all__ = ("Config",)
 
 

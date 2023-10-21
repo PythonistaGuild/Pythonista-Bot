@@ -74,7 +74,7 @@ class Logging(commands.Cog):
             runner_id: int = core.CONFIG["LOGGING"]["runner"]
             try:
                 user = self.user or await self.bot.get_or_fetch_user(runner_id)
-            except:
+            except discord.HTTPException:
                 self.user = user = None  # This will tell us not to attempt again.
 
             if user:

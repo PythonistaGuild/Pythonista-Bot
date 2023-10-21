@@ -31,7 +31,6 @@ from discord.ext import commands
 
 import core
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -48,7 +47,7 @@ class TypeSelect(ui.Select["TypeView"]):
         suggestion: str,
         webhook: discord.Webhook,
         message: discord.Message | discord.WebhookMessage | None = None,
-    ):
+    ) -> None:
         super().__init__()
         self.original_author = original_author
         self.suggestion = suggestion
@@ -72,7 +71,7 @@ class TypeSelect(ui.Select["TypeView"]):
             emoji="<:wavelink:753851443093438545>",
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction) -> None:
         if self.original_author != interaction.user:
             return await interaction.response.send_message(
                 f"This menu is not for you. See `{core.CONFIG['prefix']}suggest` to make a suggestion!", ephemeral=True
@@ -93,27 +92,30 @@ class TypeSelect(ui.Select["TypeView"]):
 class TypeView(ui.View):
     message: discord.Message | discord.WebhookMessage
 
-    def __init__(self, *, original_author: Union[discord.Member, discord.User], suggestion: str, webhook: discord.Webhook):
+    def __init__(
+        self, *, original_author: Union[discord.Member, discord.User], suggestion: str, webhook: discord.Webhook
+    ) -> None:
         super().__init__(timeout=180)
         self.original_author = original_author
         self.add_item(
             TypeSelect(original_author=original_author, suggestion=suggestion, webhook=webhook, message=self.message)
         )
 
-    async def on_timeout(self):
+    async def on_timeout(self) -> None:
         await self.message.delete()
         await super().on_timeout()
 
 
 class Suggestions(core.Cog):
-    def __init__(self, bot: core.Bot, url: str):
+    def __init__(self, bot: core.Bot, url: str) -> None:
         self.bot = bot
         self.webhook = discord.Webhook.from_url(url, session=self.bot.session)
 
     @commands.group(name="suggest", brief="Send a suggestion for the server, or a library.", invoke_without_command=True)
-    async def suggest(self, ctx: core.Context, *, suggestion: str | None = None):
+    async def suggest(self, ctx: core.Context, *, suggestion: str | None = None) -> None:
         if not suggestion:
-            return await ctx.reply("Re-execute the command. Make sure to give your suggestion this time!")
+            await ctx.reply("Re-execute the command. Make sure to give your suggestion this time!")
+            return
         view = TypeView(original_author=ctx.author, suggestion=suggestion, webhook=self.webhook)
         view.message = await ctx.send(
             "Please select the type of suggestion this is. Your suggestion will not be sent until this step is completed.",
@@ -121,7 +123,7 @@ class Suggestions(core.Cog):
         )
 
 
-async def setup(bot: core.Bot):
+async def setup(bot: core.Bot) -> None:
     if key := core.CONFIG.get("SUGGESTIONS"):
         await bot.add_cog(Suggestions(bot, key["webhook_url"]))
     else:
