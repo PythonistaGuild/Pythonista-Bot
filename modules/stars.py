@@ -46,7 +46,7 @@ class JumpView(discord.ui.View):
         timeout: float,
         url: str | None,
         label_name: str = "Jump to message",
-    ):
+    ) -> None:
         super().__init__(timeout=timeout)
         self.add_item(discord.ui.Button(url=url, label=label_name, style=discord.ButtonStyle.primary))
 
@@ -59,11 +59,11 @@ class StarboardEntry:
     bot_message_id: int = 0
     bot_content_id: int = 0
 
-    def __init__(self, db: asyncpg.Pool, msg_id: int):  # type: ignore
+    def __init__(self, db: asyncpg.Pool, msg_id: int) -> None:  # type: ignore
         self.msg_id = msg_id
         self.db: asyncpg.Pool[asyncpg.Record] = db
 
-    async def fetch(self):
+    async def fetch(self) -> None:
         query = """SELECT * FROM starboard_entries WHERE msg_id=$1"""
 
         result = await self.db.fetchrow(query, self.msg_id)
@@ -81,7 +81,7 @@ class StarboardEntry:
 
 
 class Starboard(core.Cog):
-    def __init__(self, bot: core.Bot):
+    def __init__(self, bot: core.Bot) -> None:
         self.bot = bot
 
         self.remove_on_delete: bool = CONFIG.get("remove_on_delete")
@@ -89,7 +89,7 @@ class Starboard(core.Cog):
         self.starboard_channel_id: int = CONFIG.get("starboard_channel_id")
         self.pool: asyncpg.Pool[asyncpg.Record] = bot.pool
 
-    def get_star(self, stars: int):
+    def get_star(self, stars: int) -> str:
         if stars <= 2:
             return "✨"
         elif stars <= 4:
@@ -101,7 +101,7 @@ class Starboard(core.Cog):
 
     async def add_entry(
         self, message_id: int, bot_message_id: int, payload_channel_id: int, reactions: int, content_id: int
-    ):
+    ) -> None:
         query = """INSERT INTO starboard_entries VALUES (
                     $1,
                     $2,
@@ -111,7 +111,7 @@ class Starboard(core.Cog):
                 )"""
         await self.pool.execute(query, message_id, bot_message_id, payload_channel_id, reactions, content_id)
 
-    async def add_starer(self, user_id: int, message_id: int):
+    async def add_starer(self, user_id: int, message_id: int) -> None:
         query = """
                 INSERT INTO starers VALUES (
                     $1,
@@ -120,28 +120,28 @@ class Starboard(core.Cog):
 
         await self.pool.execute(query, user_id, message_id)
 
-    async def remove_starer(self, message_id: int, user_id: int):
+    async def remove_starer(self, message_id: int, user_id: int) -> None:
         query = """DELETE FROM starers WHERE msg_id = $1 AND user_id= $2"""
         await self.pool.execute(query, message_id, user_id)
 
-    async def update_entry(self, reactions: int, message_id: int):
+    async def update_entry(self, reactions: int, message_id: int) -> None:
         query = """UPDATE starboard_entries SET stars = $1 WHERE msg_id = $2"""
         await self.pool.execute(query, reactions, message_id)
 
-    async def remove_entry(self, message_id: int):
+    async def remove_entry(self, message_id: int) -> None:
         query = """DELETE FROM starboard_entries WHERE msg_id= $1"""
         await self.pool.execute(query, message_id)
 
-    async def clear_starers(self, message_id: int):
+    async def clear_starers(self, message_id: int) -> None:
         query = """DELETE FROM starers WHERE msg_id = $1"""
         await self.pool.execute(query, message_id)
 
-    def get_formatted_time(self):
+    def get_formatted_time(self) -> str:
         now = datetime.datetime.now()
         time = now.strftime("%m/%d/%Y %I:%M %p")
         return time
 
-    async def handle_star(self, payload: discord.RawReactionActionEvent):
+    async def handle_star(self, payload: discord.RawReactionActionEvent) -> None:
         time = self.get_formatted_time()
         entry: StarboardEntry = StarboardEntry(self.pool, payload.message_id)
         await entry.fetch()
@@ -176,7 +176,7 @@ class Starboard(core.Cog):
             await self.update_entry(stars, payload.message_id)
             return
 
-        if not reaction_count >= self.entry_requirement:
+        if reaction_count < self.entry_requirement:
             return
 
         star = self.get_star(reaction_count)
@@ -211,12 +211,10 @@ class Starboard(core.Cog):
             view=JumpView(url=message_url, timeout=40),
         )
 
-        await self.add_entry(
-            message.id, bot_message.id, payload.channel_id, reaction.count, content_message.id
-        )  # type: ignore
+        await self.add_entry(message.id, bot_message.id, payload.channel_id, reaction.count, content_message.id)
         await self.add_starer(payload.user_id, message.id)
 
-    async def handle_unstar(self, payload: discord.RawReactionActionEvent):
+    async def handle_unstar(self, payload: discord.RawReactionActionEvent) -> None:
         entry = StarboardEntry(self.pool, payload.message_id)
         await entry.fetch()
 
@@ -251,15 +249,15 @@ class Starboard(core.Cog):
         await bot_msg.edit(content=message)
 
     @core.Cog.listener()
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
         await self.handle_star(payload)
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent) -> None:
         await self.handle_unstar(payload)
 
     @commands.Cog.listener()
-    async def on_message_delete(self, message: discord.Message):
+    async def on_message_delete(self, message: discord.Message) -> None:
         possible_entry = StarboardEntry(self.pool, message.id)  # type: ignore
         await possible_entry.fetch()
         if not possible_entry.exists:
@@ -278,5 +276,5 @@ class Starboard(core.Cog):
         await self.clear_starers(message.id)
 
 
-async def setup(bot: core.Bot):
+async def setup(bot: core.Bot) -> None:
     await bot.add_cog(Starboard(bot))
