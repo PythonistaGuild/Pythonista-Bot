@@ -64,9 +64,9 @@ class StarboardEntry:
         self.db: asyncpg.Pool[asyncpg.Record] = db
 
     async def fetch(self):
-        query = """SELECT * FROM starboard_entries WHERE msg_id={}""".format(self.msg_id)
+        query = """SELECT * FROM starboard_entries WHERE msg_id=$1"""
 
-        result = await self.db.fetchrow(query)
+        result = await self.db.fetchrow(query, self.msg_id)
 
         if result is None:
             self.exists = False
@@ -158,9 +158,9 @@ class Starboard(core.Cog):
         if entry.exists:
             bot_msg_id = entry.bot_message_id
 
-            query = """SELECT * FROM starers WHERE user_id={} AND msg_id={}""".format(payload.user_id, entry.msg_id)
+            query = """SELECT * FROM starers WHERE user_id=$1 AND msg_id=$2"""
 
-            starer = await self.pool.fetchrow(query)
+            starer = await self.pool.fetchrow(query, payload.user_id, entry.msg_id)
 
             if starer is not None:
                 return
