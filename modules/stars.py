@@ -20,10 +20,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from __future__ import annotations
 import asyncpg
 import discord
 import datetime
 from discord.ext import commands
+
 
 import core
 
@@ -59,7 +61,7 @@ class StarboardEntry:
     bot_message_id: int = 0
     bot_content_id: int = 0
 
-    def __init__(self, db: asyncpg.Pool, msg_id: int) -> None:  # type: ignore
+    def __init__(self, db: asyncpg.Pool[asyncpg.Record], msg_id: int) -> None:
         self.msg_id = msg_id
         self.db: asyncpg.Pool[asyncpg.Record] = db
 
