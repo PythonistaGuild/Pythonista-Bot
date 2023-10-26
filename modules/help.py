@@ -29,11 +29,11 @@ from discord.ext import commands
 
 import core
 from constants import Channels, ForumTags
-from core.context import Context
-
 
 if TYPE_CHECKING:
     from discord.ext.commands._types import Check  # type: ignore # why does this need a stub?
+
+    from core.context import Context
 
 
 _FORUM_BLURB = f"""

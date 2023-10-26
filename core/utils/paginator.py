@@ -30,12 +30,11 @@ from discord import ui  # shortcut because I'm lazy
 from discord.ext.commands import CommandError, Paginator as _Paginator  # type: ignore # why does this need a stub file?
 from discord.utils import MISSING
 
-from core import Bot, Context
-
-
 if TYPE_CHECKING:
     from discord.abc import MessageableChannel
     from typing_extensions import Self
+
+    from core import Bot, Context
 
 
 __all__ = ("CannotPaginate", "Pager", "KVPager", "TextPager")
@@ -63,7 +62,7 @@ class Pager(ui.View):
         author_url: str | None = None,
         stop: bool = False,
         reply_author_takes_paginator: bool = False,
-    ):
+    ) -> None:
         super().__init__()
         self.bot: Bot = ctx.bot
         self.stoppable: bool = stop
@@ -117,7 +116,7 @@ class Pager(ui.View):
     def setup_buttons(self) -> None:
         self.clear_items()
         for emoji, button in self.reaction_emojis:
-            btn = ui.Button[Self](emoji=emoji)
+            btn = ui.Button["Self"](emoji=emoji)
             btn.callback = button  # type: ignore
             self.add_item(btn)
 
@@ -175,7 +174,7 @@ class Pager(ui.View):
 
         self.message = await self.channel.send(content=content, embed=embed, view=self)
 
-    async def checked_show_page(self, page: int):
+    async def checked_show_page(self, page: int) -> None:
         if page != 0 and page <= self.maximum_pages:
             await self.show_page(page)
 
@@ -226,7 +225,7 @@ class Pager(ui.View):
         except (AttributeError, discord.HTTPException):
             pass
 
-    async def stop_pages(self, interaction: discord.Interaction | None = None):
+    async def stop_pages(self, interaction: discord.Interaction | None = None) -> None:
         """stops the interactive pagination session"""
         if self.delete_after and self.message:
             await self.message.delete()
@@ -235,7 +234,7 @@ class Pager(ui.View):
 
     stop = stop_pages  # type: ignore
 
-    def _check(self, interaction: discord.Interaction):
+    def _check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.author.id:
             return False
 
@@ -249,7 +248,7 @@ class Pager(ui.View):
 
         return resp
 
-    async def paginate(self, msg_kwargs: dict[str, Any] | None = None):
+    async def paginate(self, msg_kwargs: dict[str, Any] | None = None) -> None:
         if self.maximum_pages > 1:
             self.paginating = True
 
@@ -276,7 +275,7 @@ class KVPager(Pager):
         title: str | None = None,
         embed_color: discord.Colour = discord.Colour.blurple(),
         **kwargs: Any,
-    ):
+    ) -> None:
         super().__init__(
             ctx,
             entries=entries,
@@ -288,7 +287,7 @@ class KVPager(Pager):
         )
         self.description = description
 
-    def prepare_embed(self, entries: list[Any], page: int, *, first: bool = False):
+    def prepare_embed(self, entries: list[Any], page: int, *, first: bool = False) -> None:
         self.embed.clear_fields()
         self.embed.description = self.description or MISSING
         self.embed.title = self.title or MISSING

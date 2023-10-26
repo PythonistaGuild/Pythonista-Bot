@@ -25,7 +25,6 @@ import random
 from discord import Colour
 from discord.utils import escape_markdown
 
-
 __all__ = (
     "to_codeblock",
     "random_pastel_colour",
@@ -38,7 +37,7 @@ def to_codeblock(
     replace_existing: bool = True,
     escape_md: bool = True,
     new: str = "'''",
-):
+) -> str:
     """
     Quick function to put our content into a Discord accepted codeblock.
     """

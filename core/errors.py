@@ -20,7 +20,6 @@ SOFTWARE.
 """
 from discord.ext import commands
 
-
 __all__ = ("InvalidEval",)
 
 

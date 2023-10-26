@@ -22,5 +22,4 @@ SOFTWARE.
 """
 from .constants import *
 
-
 GUILD_ID: int = 490948346773635102

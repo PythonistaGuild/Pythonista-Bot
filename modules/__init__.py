@@ -1,7 +1,6 @@
 import pathlib
 from pkgutil import ModuleInfo, iter_modules
 
-
 _ext: list[ModuleInfo] = []
 _ext.extend(
     [

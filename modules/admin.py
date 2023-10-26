@@ -28,7 +28,6 @@ import core
 from constants import GUILD_ID
 from core.context import Context
 
-
 LOGGER = logging.getLogger(__name__)
 
 

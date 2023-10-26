@@ -24,14 +24,15 @@ from __future__ import annotations
 
 import asyncio
 import re
+from enum import Enum
 
 import discord
 
+import constants
 import core
 
-
 GITHUB_ISSUE_URL = "https://github.com/{}/issues/{}"
-LIB_ISSUE_REGEX = re.compile(r"(?P<lib>[a-z]+)?##(?P<number>[0-9]+)", flags=re.IGNORECASE)
+LIB_ISSUE_REGEX = re.compile(r"(?P<lib>[a-z]+)?(?P<pounds>#{2,})(?P<number>[0-9]+)", flags=re.IGNORECASE)
 GITHUB_CODE_REGION_REGEX = re.compile(
     r"https?://github\.com/(?P<user>.*)/(?P<repo>.*)/blob/(?P<hash>[a-zA-Z0-9]+)/(?P<path>.*)/(?P<file>.*)(?:\#L)(?P<linestart>[0-9]+)(?:-L)?(?P<lineend>[0-9]+)?"
 )
@@ -39,10 +40,21 @@ GITHUB_CODE_REGION_REGEX = re.compile(
 GITHUB_BASE_URL = "https://github.com/"
 GITHUB_RAW_CONTENT_URL = "https://raw.githubusercontent.com/"
 
+
+class LibEnum(Enum):
+    wavelink = "PythonistaGuild/Wavelink"
+    twitchio = "PythonistaGuild/TwitchIO"
+    pythonistaBot = "PythonistaGuild/PythonistaBot"
+    mystbin = "PythonistaGuild/Mystbin"
+    discordpy = "rapptz/discord.py"
+
+
 aliases = [
-    (("wavelink", "wave", "wl"), "PythonistaGuild/Wavelink"),
-    (("discordpy", "discord", "dpy"), "Rapptz/discord.py"),
-    (("twitchio", "tio"), "TwitchIO/TwitchIO"),
+    (("wavelink", "wave", "wl"), LibEnum.wavelink),
+    (("discordpy", "discord", "dpy"), LibEnum.discordpy),
+    (("twitchio", "tio"), LibEnum.twitchio),
+    (("mystbin", "mb"), LibEnum.mystbin),
+    (("pythonistabot", "pb"), LibEnum.pythonistaBot),
 ]
 
 LIB_REPO_MAPPING = {key: value for keys, value in aliases for key in keys}
@@ -52,6 +64,7 @@ class GitHub(core.Cog):
     def __init__(self, bot: core.Bot) -> None:
         self.bot = bot
         self.code_highlight_emoji = "📃"
+        self.bruhkitty = "<:bruhkitty:710507405347389451>"
         self.highlight_timeout = 10
 
     def _strip_content_path(self, url: str) -> str:
@@ -152,13 +165,40 @@ class GitHub(core.Cog):
 
         github_dict = {
             "path": file_path,
-            "min": (_min_boundary if _min_boundary > 0 else highlighted_line - 1)
-            + 1,  # Do not display negative numbers if <0
+            "min": (
+                _min_boundary if _min_boundary > 0 else highlighted_line - 1
+            ) + 1,  # Do not display negative numbers if <0
             "max": _max_boundary + 1,
             "msg": msg,
         }
 
         return github_dict
+
+    def _smart_guess_lib(self, msg: discord.Message) -> LibEnum | None:
+        # this is mostly the same as the function in manuals.py, however the enum is entirely different so the code isn't reusable.
+        assert msg.channel
+
+        if msg.channel.id == constants.Channels.HELP_CHANNEL:
+            return None  # there's not much hope here, stay quick
+
+        if isinstance(msg.channel, discord.Thread) and msg.channel.parent_id == constants.Channels.HELP_FORUM:
+            tags = {x.name for x in msg.channel.applied_tags}
+
+            if "twitchio-help" in tags:
+                return LibEnum.twitchio
+            elif "wavelink-help" in tags:
+                return LibEnum.wavelink
+            elif "discord.py-help" in tags:
+                return LibEnum.discordpy
+
+            return None
+
+        if msg.channel.id == constants.Channels.WAVELINK_DEV:
+            return LibEnum.wavelink
+        elif msg.channel.id == constants.Channels.TWITCHIO_DEV:
+            return LibEnum.twitchio
+
+        return None
 
     @core.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -167,11 +207,19 @@ class GitHub(core.Cog):
 
         # Check if we can find a valid issue format: lib##number | ##number
         match = LIB_ISSUE_REGEX.search(message.content)
-        if match:
-            lib = LIB_REPO_MAPPING.get(match.group("lib"), "PythonistaGuild/Pythonista-Bot")
-            issue = match.group("number")
+        if match and len(match.group("pounds")) == 2:
+            lib = LIB_REPO_MAPPING.get(match.group("lib"), None)
 
-            await message.channel.send(GITHUB_ISSUE_URL.format(lib, issue))
+            if not lib:
+                lib = self._smart_guess_lib(message)
+
+            if lib:  # no, this should not be an else, as lib can be reassigned in the previous block
+                issue = match.group("number")
+
+                await message.channel.send(GITHUB_ISSUE_URL.format(lib.value, issue))
+
+            else:
+                await message.add_reaction(self.bruhkitty)
 
         code_segment = await self.format_highlight_block(message.content)
 

@@ -37,7 +37,6 @@ from constants import (
     PAPIWebsocketSubscriptions,
 )
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -69,7 +68,7 @@ class API(core.Cog):
             try:
                 self.connection_task.cancel()
             except Exception as e:
-                LOGGER.error(f'Unable to cancel Pythonista API connection_task in "cog_unload": {e}')
+                LOGGER.error('Unable to cancel Pythonista API connection_task in "cog_unload": %s', e)
 
         if self.is_connected():
             assert self.websocket
@@ -79,7 +78,7 @@ class API(core.Cog):
             try:
                 self.keep_alive_task.cancel()
             except Exception as e:
-                LOGGER.error(f'Unable to cancel Pythonista API keep_alive_task in "cog_unload": {e}')
+                LOGGER.error('Unable to cancel Pythonista API keep_alive_task in "cog_unload": %s', e)
 
     def dispatch(self, *, data: dict[str, Any]) -> None:
         subscription: str = data["subscription"]
@@ -99,7 +98,7 @@ class API(core.Cog):
             try:
                 self.keep_alive_task.cancel()
             except Exception as e:
-                LOGGER.warning(f"Failed to cancel Pythonista API Websocket keep alive. This is likely not a problem: {e}")
+                LOGGER.warning("Failed to cancel Pythonista API Websocket keep alive. This is likely not a problem: %s", e)
 
         while True:
             try:
@@ -109,13 +108,13 @@ class API(core.Cog):
                     LOGGER.critical("Unable to connect to Pythonista API Websocket, due to an incorrect token.")
                     return
                 else:
-                    LOGGER.error(f"Unable to connect to Pythonista API Websocket: {e}.")
+                    LOGGER.error("Unable to connect to Pythonista API Websocket: %s.", e)
 
             if self.is_connected():
                 break
             else:
                 delay: float = self.backoff.delay()  # type: ignore
-                LOGGER.warning(f'Retrying Pythonista API Websocket connection in "{delay}" seconds.')
+                LOGGER.warning("Retrying Pythonista API Websocket connection in '%s' seconds.", delay)
 
                 await asyncio.sleep(delay)
 
@@ -149,7 +148,7 @@ class API(core.Cog):
             op: int | None = data.get("op")
 
             if op == PAPIWebsocketOPCodes.HELLO:
-                LOGGER.debug(f'Received HELLO from Pythonista API: user={data["user_id"]}')
+                LOGGER.debug("Received HELLO from Pythonista API: user=%s", data["user_id"])
 
             elif op == PAPIWebsocketOPCodes.EVENT:
                 self.dispatch(data=data)
@@ -159,12 +158,12 @@ class API(core.Cog):
 
                 if type_ == PAPIWebsocketNotificationTypes.SUBSCRIPTION_ADDED:
                     subscribed: str = ", ".join(data["subscriptions"])
-                    LOGGER.info(f"Pythonista API added our subscription, currently subscribed: `{subscribed}`")
+                    LOGGER.info("Pythonista API added our subscription, currently subscribed: `%s`", subscribed)
                 elif type_ == PAPIWebsocketNotificationTypes.SUBSCRIPTION_REMOVED:
                     subscribed: str = ", ".join(data["subscriptions"])
-                    LOGGER.info(f"Pythonista API removed our subscription, currently subscribed: `{subscribed}`")
+                    LOGGER.info("Pythonista API removed our subscription, currently subscribed: `%s`", subscribed)
                 elif type_ == PAPIWebsocketNotificationTypes.UNKNOWN_OP:
-                    LOGGER.info(f'We sent an UNKNOWN OP to Pythonista API: `{data["received"]}`')
+                    LOGGER.info("We sent an UNKNOWN OP to Pythonista API: `%s`", data["received"])
 
             else:
                 LOGGER.info("Received an UNKNOWN OP from Pythonista API.")
