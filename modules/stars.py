@@ -61,9 +61,17 @@ class StarboardEntry:
     bot_message_id: int = 0
     bot_content_id: int = 0
 
+    db: asyncpg.Pool[asyncpg.Record]
+
     def __init__(self, db: asyncpg.Pool[asyncpg.Record], msg_id: int) -> None:
         self.msg_id = msg_id
         self.db: asyncpg.Pool[asyncpg.Record] = db
+
+    @classmethod
+    async def from_query(cls, db: asyncpg.Pool[asyncpg.Record], msg_id: int):
+        instance = cls(db, msg_id)
+        await instance.fetch()
+        return instance
 
     async def fetch(self) -> None:
         query = """SELECT * FROM starboard_entries WHERE msg_id=$1"""
@@ -145,8 +153,7 @@ class Starboard(core.Cog):
 
     async def handle_star(self, payload: discord.RawReactionActionEvent) -> None:
         time = self.get_formatted_time()
-        entry: StarboardEntry = StarboardEntry(self.pool, payload.message_id)
-        await entry.fetch()
+        entry = await StarboardEntry.from_query(self.pool, payload.message_id)
 
         if str(payload.emoji) != STARBOARD_EMOJI:
             return
@@ -217,8 +224,7 @@ class Starboard(core.Cog):
         await self.add_starer(payload.user_id, message.id)
 
     async def handle_unstar(self, payload: discord.RawReactionActionEvent) -> None:
-        entry = StarboardEntry(self.pool, payload.message_id)
-        await entry.fetch()
+        entry = await StarboardEntry.from_query(self.pool, payload.message_id)
 
         bot_msg_id = entry.bot_message_id
         content_id = entry.bot_content_id
@@ -260,7 +266,7 @@ class Starboard(core.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message) -> None:
-        possible_entry = StarboardEntry(self.pool, message.id)  # type: ignore
+        possible_entry = await StarboardEntry.from_query(self.pool, message.id)  # type: ignore
         await possible_entry.fetch()
         if not possible_entry.exists:
             return
