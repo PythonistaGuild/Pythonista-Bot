@@ -95,9 +95,7 @@ class ModerationRespostView(discord.ui.View):
         assert interaction.guild
         await interaction.response.defer(ephemeral=False)
 
-        reason = (
-            f"Banned by {interaction.user} ({interaction.user.id}) due to grievances in discord.py: {self.target_reason!r}"
-        )
+        reason = f"By {interaction.user} ({interaction.user.id}) due to grievances in discord.py: {self.target_reason!r}"
         await interaction.guild.ban(
             self.target,
             reason=shorten(reason, width=128, placeholder="..."),
@@ -112,9 +110,7 @@ class ModerationRespostView(discord.ui.View):
         assert interaction.guild
         await interaction.response.defer(ephemeral=False)
 
-        reason = (
-            f"Kicked by {interaction.user} ({interaction.user.id}) due to grievances in discord.py: {self.target_reason!r}"
-        )
+        reason = f"By {interaction.user} ({interaction.user.id}) due to grievances in discord.py: {self.target_reason!r}"
         await interaction.guild.kick(
             self.target,
             reason=shorten(reason, width=128, placeholder="..."),
