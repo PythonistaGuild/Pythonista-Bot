@@ -95,12 +95,34 @@ class ModerationRespostView(discord.ui.View):
         assert interaction.guild
         await interaction.response.defer(ephemeral=False)
 
-        reason = f"Banned due to grievances in discord.py: {self.target_reason!r}"
+        reason = (
+            f"Banned by {interaction.user} ({interaction.user.id}) due to grievances in discord.py: {self.target_reason!r}"
+        )
         await interaction.guild.ban(
             self.target,
             reason=shorten(reason, width=128, placeholder="..."),
         )
         await interaction.followup.send("Banned.")
+
+        self._disable_all_buttons()
+        await self.message.edit(view=self)
+
+    @discord.ui.button(label="Kick", emoji="\U0001f462")
+    async def kick_button(self, interaction: Interaction, button: discord.ui.Button[Self]) -> None:
+        assert interaction.guild
+        await interaction.response.defer(ephemeral=False)
+
+        reason = (
+            f"Kicked by {interaction.user} ({interaction.user.id}) due to grievances in discord.py: {self.target_reason!r}"
+        )
+        await interaction.guild.kick(
+            self.target,
+            reason=shorten(reason, width=128, placeholder="..."),
+        )
+        await interaction.followup.send("Banned.")
+
+        self._disable_all_buttons()
+        await self.message.edit(view=self)
 
 
 class Moderation(commands.Cog):
