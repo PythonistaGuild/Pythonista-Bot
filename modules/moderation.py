@@ -115,7 +115,7 @@ class ModerationRespostView(discord.ui.View):
             self.target,
             reason=shorten(reason, width=128, placeholder="..."),
         )
-        await interaction.followup.send("Banned.")
+        await interaction.followup.send("Kicked.")
 
         self._disable_all_buttons()
         await self.message.edit(view=self)
