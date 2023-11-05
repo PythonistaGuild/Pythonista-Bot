@@ -46,17 +46,15 @@ class TypeSelect(ui.Select["TypeView"]):
         original_author: Union[discord.Member, discord.User],
         suggestion: str,
         webhook: discord.Webhook,
-        message: discord.Message | discord.WebhookMessage | None = None,
     ) -> None:
         super().__init__()
         self.original_author = original_author
         self.suggestion = suggestion
         self.webhook = webhook
-        self.message = message
 
         self.add_option(label="Guild", value="1", description="This suggestion applies to the guild.", emoji="\U0001f4c1")
         self.add_option(
-            label="Pythonistabot", value="2", description="This suggestion applies to Pythonistabot.", emoji="\U0001f916"
+            label="PythonistaBot", value="2", description="This suggestion applies to PythonistaBot.", emoji="\U0001f916"
         )
         self.add_option(
             label="TwitchIO",
@@ -85,8 +83,6 @@ class TypeSelect(ui.Select["TypeView"]):
         embed.set_author(name=author.name, icon_url=author.display_avatar)
         embed.set_footer(text=f"Suggestion sent by {author} (ID: {author.id})")
         await self.webhook.send(embed=embed, avatar_url=author.display_avatar, username=author.name)
-        if self.message:
-            await self.message.delete()
 
 
 class TypeView(ui.View):
@@ -97,9 +93,7 @@ class TypeView(ui.View):
     ) -> None:
         super().__init__(timeout=180)
         self.original_author = original_author
-        self.add_item(
-            TypeSelect(original_author=original_author, suggestion=suggestion, webhook=webhook, message=self.message)
-        )
+        self.add_item(TypeSelect(original_author=original_author, suggestion=suggestion, webhook=webhook))
 
     async def on_timeout(self) -> None:
         await self.message.delete()
