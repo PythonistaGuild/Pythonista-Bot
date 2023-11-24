@@ -39,7 +39,6 @@ HEADER_TEMPLATE = "**{}** {} in: <#{}> ID: {}"
 
 VALID_FILE_ATTACHMENTS = (".jpg", ".jpeg", ".png", ".webp", ".gif")
 VIDEO_FILE_ATTACHMENTS = (".mp4", ".mov")
-VALID_IMAGE_LINKS = ("https://images-ext-1.discordapp.net", "https://tenor.com/view/")
 
 
 class JumpView(discord.ui.View):
@@ -202,8 +201,6 @@ class Starboard(core.Cog):
                     embed.set_image(url=attachment.url)
                 elif filename.endswith(VIDEO_FILE_ATTACHMENTS):
                     embed.add_field(name="", value=f"[File: {attachment.filename}]({message.jump_url})")
-                elif any(link in message.content for link in VALID_IMAGE_LINKS):
-                    embed.set_image(url=message.content)
                 else:
                     continue
         message_url: str = message.jump_url
