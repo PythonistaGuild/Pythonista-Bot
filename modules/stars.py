@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 from __future__ import annotations
 import asyncpg
 import discord
@@ -101,13 +102,13 @@ class Starboard(core.Cog):
 
     def get_star(self, stars: int) -> str:
         if stars <= 2:
-            return "✨"
-        elif stars <= 4:
-            return "💫"
-        elif stars <= 6:
             return "⭐"
-        else:
+        elif stars <= 4:
             return "🌟"
+        elif stars <= 6:
+            return "💫"
+        else:
+            return "✨"
 
     async def add_entry(
         self, message_id: int, bot_message_id: int, payload_channel_id: int, reactions: int, content_id: int
