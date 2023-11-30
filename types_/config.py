@@ -34,6 +34,12 @@ class Suggestions(TypedDict):
     webhook_url: str
 
 
+class Starboard(TypedDict):
+    remove_on_delete: bool
+    entry_requirement: int
+    starboard_channel_id: int
+
+
 class Config(TypedDict):
     prefix: str
     owner_ids: NotRequired[list[int]]
@@ -43,3 +49,4 @@ class Config(TypedDict):
     SNEKBOX: NotRequired[Snekbox]
     BADBIN: BadBin
     SUGGESTIONS: NotRequired[Suggestions]
+    STARBOARD: Starboard
