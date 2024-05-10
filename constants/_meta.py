@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, NoReturn, cast
@@ -27,8 +28,6 @@ from typing import TYPE_CHECKING, Any, NoReturn, cast
 import toml
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
     from types_.config import Database, Logging, Tokens
 
 
@@ -36,7 +35,7 @@ _config = toml.load("config.toml")
 
 
 class ConstantsMeta(type):
-    def __new__(mcs, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> Self:
+    def __new__(mcs, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> type:
         if name == "CONSTANTS":
             return super().__new__(mcs, name, bases, attrs)
 

@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 from __future__ import annotations
 
 import datetime
@@ -61,7 +62,7 @@ class Logging(commands.Cog):
         attributes = {"INFO": "\U00002139\U0000fe0f", "WARNING": "\U000026a0\U0000fe0f"}
 
         emoji = attributes.get(to_log.levelname, "\N{CROSS MARK}")
-        dt = datetime.datetime.utcfromtimestamp(to_log.created)
+        dt = datetime.datetime.fromtimestamp(to_log.created, tz=datetime.UTC)
 
         message = textwrap.shorten(f"{emoji} {format_dt(dt)}\n{to_log.message}", width=1990)
 

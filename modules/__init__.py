@@ -1,6 +1,8 @@
 import pathlib
 from pkgutil import ModuleInfo, iter_modules
 
+assert __package__  # this exists here
+
 _ext: list[ModuleInfo] = []
 _ext.extend(
     [

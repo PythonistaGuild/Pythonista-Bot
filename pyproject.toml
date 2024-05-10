@@ -16,11 +16,10 @@ python = "^3.11"
 aiohttp = "*"
 asyncpg = "*"
 toml = "*"
-"mystbin.py" = "^6"
+"mystbin.py" = "*"
 jishaku = "*"
 
 [tool.poetry.group.dev.dependencies]
-black = "*"
 ruff = "*"
 "asyncpg-stubs" = "*"
 "typing-extensions" = "*"
@@ -31,6 +30,9 @@ preview = true
 
 [tool.ruff]
 line-length = 125
+target-version = "py311"
+
+[tool.ruff.lint]
 exclude = ["docs/extensions/*.py"]
 select = [
     "C4",
@@ -61,14 +63,15 @@ ignore = [
     "ANN102",
     "ANN401",
 ]
-[tool.ruff.isort]
+
+[tool.ruff.lint.isort]
 split-on-trailing-comma = true
 combine-as-imports = true
 
-[tool.ruff.flake8-annotations]
+[tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 
-[tool.ruff.flake8-quotes]
+[tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"
 
 [tool.pyright]

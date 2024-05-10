@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 from __future__ import annotations
 
 import ast
@@ -27,6 +28,7 @@ import logging
 import textwrap
 import traceback
 
+import mystbin
 from discord.ext import commands
 
 import core
@@ -104,7 +106,7 @@ class Evaluation(core.Cog):
             await ctx.message.add_reaction("\U00002705")
 
             if len(output) > 1000:
-                codeblock = await self.bot.mb_client.create_paste(content=output, filename="eval.py")
+                codeblock = await self.bot.mb_client.create_paste(files=[mystbin.File(content=output, filename="eval.py")])
 
             elif output:
                 codeblock = formatters.to_codeblock(output, escape_md=False)

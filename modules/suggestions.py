@@ -23,7 +23,6 @@ SOFTWARE.
 
 import logging
 from datetime import datetime
-from typing import Union
 
 import discord
 from discord import ui
@@ -43,7 +42,7 @@ class TypeSelect(ui.Select["TypeView"]):
     def __init__(
         self,
         *,
-        original_author: Union[discord.Member, discord.User],
+        original_author: discord.Member | discord.User,
         suggestion: str,
         webhook: discord.Webhook,
     ) -> None:
@@ -88,9 +87,7 @@ class TypeSelect(ui.Select["TypeView"]):
 class TypeView(ui.View):
     message: discord.Message | discord.WebhookMessage
 
-    def __init__(
-        self, *, original_author: Union[discord.Member, discord.User], suggestion: str, webhook: discord.Webhook
-    ) -> None:
+    def __init__(self, *, original_author: discord.Member | discord.User, suggestion: str, webhook: discord.Webhook) -> None:
         super().__init__(timeout=180)
         self.original_author = original_author
         self.add_item(TypeSelect(original_author=original_author, suggestion=suggestion, webhook=webhook))
