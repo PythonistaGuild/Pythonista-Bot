@@ -4,8 +4,7 @@ owner_ids = [123, 456, 789] # user or role ids, optional
 [TOKENS]
 bot = ''
 idevision = ''  # optional key
-mystbin = ''  # optional key
-pythonista = ''  # optional key
+pythonista = '' # optional key
 
 [DATABASE]
 dsn = 'postgres://pythonistabot:pythonistabot@database:5432/pythonistabot' # assumed default
@@ -19,9 +18,9 @@ domains = ["pastebin.com", "hastebin.com"]
 # 20 = INFO
 # 10 = DEBUG
 [LOGGING]
-webhook_url = ""  # optional
+webhook_url = ""        # optional
 webhook_avatar_url = "" # optional
-runner = 123456789 # optional: sets the webhook avatar url (will be overridden by the webhook_avatar_url attribute)
+runner = 123456789      # optional: sets the webhook avatar url (will be overridden by the webhook_avatar_url attribute)
 level = 20
 
 [SUGGESTIONS] # optional

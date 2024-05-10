@@ -20,9 +20,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 from __future__ import annotations
 
-import asyncio
 import re
 from enum import Enum
 
@@ -165,9 +165,8 @@ class GitHub(core.Cog):
 
         github_dict = {
             "path": file_path,
-            "min": (
-                _min_boundary if _min_boundary > 0 else highlighted_line - 1
-            ) + 1,  # Do not display negative numbers if <0
+            "min": (_min_boundary if _min_boundary > 0 else highlighted_line - 1)
+            + 1,  # Do not display negative numbers if <0
             "max": _max_boundary + 1,
             "msg": msg,
         }
@@ -256,7 +255,7 @@ class GitHub(core.Cog):
             msg: str = f"Showing lines `{_min}-{_max}` in: `{path}`\n{code_fmt}"
             await message.channel.send(msg, suppress_embeds=True)
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return
 
 

@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 from __future__ import annotations
 
 import datetime
@@ -106,7 +107,7 @@ class Bot(commands.Bot):
         traceback_text = "".join(traceback.format_exception(exc_type, exception, traceback_))
 
         embed.description = f"```py\n{traceback_text}\n```"
-        embed.timestamp = datetime.datetime.now(datetime.timezone.utc)
+        embed.timestamp = datetime.datetime.now(datetime.UTC)
 
         args_str = ["```py"]
         for index, arg in enumerate(args):

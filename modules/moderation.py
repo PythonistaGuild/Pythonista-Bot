@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -234,11 +235,9 @@ class Moderation(commands.Cog):
 
             return (await f.read()).decode()
 
-    async def post_mystbin_content(self, contents: list[tuple[str, str]]) -> tuple[str, str | None]:
-        response = await self.bot.mb_client.create_paste(
-            files=[mystbin.File(filename=a, content=b, attachment_url=None) for a, b in contents]
-        )
-        return response.id, response.notice or None
+    async def post_mystbin_content(self, contents: list[tuple[str, str]]) -> str:
+        response = await self.bot.mb_client.create_paste(files=[mystbin.File(filename=a, content=b) for a, b in contents])
+        return response.id
 
     @commands.Cog.listener("on_message")
     async def find_badbins(self, message: discord.Message) -> None:

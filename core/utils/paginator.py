@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -31,8 +32,9 @@ from discord.ext.commands import CommandError, Paginator as _Paginator  # type: 
 from discord.utils import MISSING
 
 if TYPE_CHECKING:
+    from typing import Self
+
     from discord.abc import MessageableChannel
-    from typing_extensions import Self
 
     from core import Bot, Context
 
@@ -208,7 +210,7 @@ class Pager(ui.View):
 
         try:
             msg = await self.bot.wait_for("message", check=message_check, timeout=30.0)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             to_delete.append(await self.channel.send("Took too long."))
             await asyncio.sleep(5)
         else:

@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 import asyncio
 
 import aiohttp
@@ -32,9 +33,12 @@ from modules import EXTENSIONS
 
 
 async def main() -> None:
-    async with core.Bot() as bot, aiohttp.ClientSession() as session, asyncpg.create_pool(
-        dsn=core.CONFIG["DATABASE"]["dsn"]
-    ) as pool, LogHandler(bot=bot) as handler:
+    async with (
+        core.Bot() as bot,
+        aiohttp.ClientSession() as session,
+        asyncpg.create_pool(dsn=core.CONFIG["DATABASE"]["dsn"]) as pool,
+        LogHandler(bot=bot) as handler,
+    ):
         bot.logging_queue = asyncio.Queue()
         bot.strip_after_prefix = True
         bot.case_insensitive = True
@@ -42,8 +46,8 @@ async def main() -> None:
         bot.pool = pool
         bot.log_handler = handler
 
-        _mystbin_token = core.CONFIG["TOKENS"].get("mystbin")
-        bot.mb_client = mystbin.Client(token=_mystbin_token, session=session)
+        _mystbin_token = core.CONFIG["TOKENS"]
+        bot.mb_client = mystbin.Client(session=session)
 
         await bot.load_extension("jishaku")
         for extension in EXTENSIONS:

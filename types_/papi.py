@@ -1,6 +1,6 @@
 from typing import Generic, Literal, TypedDict, TypeVar
 
-PayloadT = TypeVar("PayloadT", bound=TypedDict)
+PayloadT = TypeVar("PayloadT")
 
 
 class ModLogPayload(TypedDict):
@@ -12,6 +12,7 @@ class ModLogPayload(TypedDict):
     4. Unban
     5. Helpblock?
     """
+
     moderation_event_type: Literal[1, 2, 3, 4, 5]
     guild_id: int
     target_id: int
