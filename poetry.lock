@@ -264,7 +264,7 @@ files = [
 
 [[package]]
 name = "discord.py"
-version = "2.4.0a4888+ge6a0dc5b"
+version = "2.4.0a4888+ge6a0dc5bc"
 description = "A Python wrapper for the Discord API"
 optional = false
 python-versions = ">=3.8.0"
