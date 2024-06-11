@@ -28,10 +28,6 @@ __all__ = (
     "Colours",
     "Channels",
     "ForumTags",
-    "PAPIWebsocketSubscriptions",
-    "PAPIWebsocketCloseCodes",
-    "PAPIWebsocketNotificationTypes",
-    "PAPIWebsocketOPCodes",
 )
 
 
@@ -76,32 +72,3 @@ class ForumTags(CONSTANTS):
     DISCORDPY = 1006716972802789457
     OTHER = 1006717008613740596
     RESOLVED = 1006769269201195059
-
-
-class PAPIWebsocketCloseCodes(CONSTANTS):
-    NORMAL: int = 1000
-    ABNORMAL: int = 1006
-
-
-class PAPIWebsocketOPCodes(CONSTANTS):
-    # Received from Pythonista API...
-    HELLO: int = 0
-    EVENT: int = 1
-    NOTIFICATION: int = 2
-
-    # Sent to Pythonista API...
-    SUBSCRIBE: str = "subscribe"
-    UNSUBSCRIBE: str = "unsubscribe"
-
-
-class PAPIWebsocketSubscriptions(CONSTANTS):
-    DPY_MODLOG: str = "dpy_modlog"
-
-
-class PAPIWebsocketNotificationTypes(CONSTANTS):
-    # Subscriptions...
-    SUBSCRIPTION_ADDED: str = "subscription_added"
-    SUBSCRIPTION_REMOVED: str = "subscription_removed"
-
-    # Failures...
-    UNKNOWN_OP: str = "unknown_op"

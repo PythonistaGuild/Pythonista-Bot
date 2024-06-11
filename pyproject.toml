@@ -12,12 +12,14 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-"discord.py" = { git = "https://github.com/Rapptz/discord.py.git", rev = "e6a0dc5bc0ba8e739b0def446378088bea65d1df" }
+"discord.py" = { git = "https://github.com/Rapptz/discord.py.git"}
 aiohttp = "*"
 asyncpg = "*"
 toml = "*"
 "mystbin.py" = "*"
 jishaku = "*"
+uvicorn = "*"
+starlette-plus = { git = "https://github.com/PythonistaGuild/StarlettePlus" }
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"

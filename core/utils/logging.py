@@ -24,14 +24,6 @@ class QueueEmitHandler(logging.Handler):
         self.bot.logging_queue.put_nowait(record)
 
 
-class PAPILoggingFilter(logging.Filter):
-    def __init__(self) -> None:
-        super().__init__(name="modules.api")
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        return not ("Received HELLO" in record.msg or "added our subscription" in record.msg)
-
-
 class LogHandler:
     def __init__(self, *, bot: Bot, stream: bool = True) -> None:
         self.log: logging.Logger = logging.getLogger()
@@ -54,7 +46,6 @@ class LogHandler:
         logging.getLogger("discord.http").setLevel(logging.INFO)
         logging.getLogger("discord.state").setLevel(logging.WARNING)
         logging.getLogger("discord.gateway").setLevel(logging.WARNING)
-        logging.getLogger("modules.api").addFilter(PAPILoggingFilter())
 
         self.log.setLevel(logging.INFO)
         handler = RotatingFileHandler(

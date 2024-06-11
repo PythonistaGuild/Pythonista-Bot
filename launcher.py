@@ -26,10 +26,14 @@ import asyncio
 import aiohttp
 import asyncpg
 import mystbin
+import uvicorn
 
 import core
 from core.utils import LogHandler
 from modules import EXTENSIONS
+from server.application import Application
+
+tasks: set[asyncio.Task[None]] = set()
 
 
 async def main() -> None:
@@ -59,8 +63,12 @@ async def main() -> None:
                 extension.name,
             )
 
-        await bot.start(core.CONFIG["TOKENS"]["bot"])
+        app: Application = Application(bot=bot)
+        config: uvicorn.Config = uvicorn.Config(app, port=2332)
+        server: uvicorn.Server = uvicorn.Server(config)
 
+        tasks.add(asyncio.create_task(bot.start(core.CONFIG["TOKENS"]["bot"])))
+        await server.serve()
 
 try:
     asyncio.run(main())

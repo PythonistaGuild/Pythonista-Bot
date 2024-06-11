@@ -30,7 +30,7 @@ import datetime
 import logging
 import re
 from textwrap import shorten
-from typing import TYPE_CHECKING, Any, Self, TypeAlias
+from typing import TYPE_CHECKING, Any, Self
 
 import discord
 import mystbin
@@ -43,11 +43,11 @@ from core.utils import random_pastel_colour
 
 if TYPE_CHECKING:
     from core.context import Interaction
-    from types_.papi import ModLogPayload, PythonistaAPIWebsocketPayload
+    from types_.papi import ModLogPayload
 
-    ModLogType: TypeAlias = PythonistaAPIWebsocketPayload[ModLogPayload]
 
 logger = logging.getLogger(__name__)
+
 
 BASE_BADBIN_RE = r"https://(?P<site>{domains})/(?P<slug>[a-zA-Z0-9]+)[.]?(?P<ext>[a-z]{{1,8}})?"
 TOKEN_RE = re.compile(r"[a-zA-Z0-9_-]{23,28}\.[a-zA-Z0-9_-]{6,7}\.[a-zA-Z0-9_-]{27}")
@@ -264,21 +264,20 @@ class Moderation(commands.Cog):
                 await message.reply(msg, mention_author=False)
 
     @commands.Cog.listener()
-    async def on_papi_dpy_modlog(self, payload: ModLogType, /) -> None:
-        moderation_payload = payload["payload"]
-        moderation_event = core.DiscordPyModerationEvent(moderation_payload["moderation_event_type"])
+    async def on_papi_dpy_modlog(self, payload: ModLogPayload, /) -> None:
+        moderation_event = core.DiscordPyModerationEvent(payload["moderation_event_type"])
 
         embed = discord.Embed(
             title=f"Discord.py Moderation Event: {moderation_event.name.title()}",
             colour=random_pastel_colour(),
         )
 
-        target_id = moderation_payload["target_id"]
+        target_id = payload["target_id"]
         target = await self.bot.get_or_fetch_user(target_id)
 
-        moderation_reason = moderation_payload["reason"]
+        moderation_reason = payload["reason"]
 
-        moderator_id = moderation_payload["author_id"]
+        moderator_id = payload["author_id"]
         moderator = self.dpy_mod_cache.get(moderator_id) or await self.bot.get_or_fetch_user(
             moderator_id, cache=self.dpy_mod_cache
         )
@@ -301,7 +300,7 @@ class Moderation(commands.Cog):
 
         embed.description = moderator_format + target_format
 
-        when = datetime.datetime.fromisoformat(moderation_payload["event_time"])
+        when = datetime.datetime.fromisoformat(payload["event_time"])
         embed.timestamp = when
 
         guild = self.bot.get_guild(490948346773635102)
