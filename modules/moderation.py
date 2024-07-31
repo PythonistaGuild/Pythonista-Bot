@@ -243,25 +243,26 @@ class Moderation(commands.Cog):
     async def find_badbins(self, message: discord.Message) -> None:
         matches = self.BADBIN_RE.findall(message.content)
 
-        if matches:
-            contents: list[tuple[str, str]] = []
+        if not matches:
+            return
 
-            for match in matches:
-                site, slug, ext = match
+        contents: list[tuple[str, str]] = []
 
-                if site is None or slug is None:
-                    continue
+        for match in matches:
+            site, slug, ext = match
 
-                contents.append((await self.pull_badbin_content(site, slug), f"migrated.{ext or 'txt'}"))
+            if site is None or slug is None:
+                continue
 
-            if contents:
-                key, notice = await self.post_mystbin_content(contents)
-                msg = f"I've detected a badbin and have uploaded your pastes here: https://mystb.in/{key}"
+            contents.append((await self.pull_badbin_content(site, slug), f"migrated.{ext or 'txt'}"))
 
-                if notice:
-                    msg += "\nnotice: " + notice
+        if not contents:
+            return
 
-                await message.reply(msg, mention_author=False)
+        key = await self.post_mystbin_content(contents)
+        msg = f"I've detected a badbin and have uploaded your pastes here: https://mystb.in/{key}"
+
+        await message.reply(msg, mention_author=False)
 
     @commands.Cog.listener()
     async def on_papi_dpy_modlog(self, payload: ModLogPayload, /) -> None:
