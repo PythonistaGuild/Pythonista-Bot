@@ -70,6 +70,7 @@ async def main() -> None:
         tasks.add(asyncio.create_task(bot.start(core.CONFIG["TOKENS"]["bot"])))
         await server.serve()
 
+
 try:
     asyncio.run(main())
 except KeyboardInterrupt:

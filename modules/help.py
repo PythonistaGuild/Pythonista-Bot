@@ -73,10 +73,7 @@ def is_forum_thread() -> Check[Context]:
         if not isinstance(channel, discord.Thread):
             return False
 
-        if channel.parent_id != Channels.HELP_FORUM:
-            return False
-
-        return True
+        return channel.parent_id == Channels.HELP_FORUM
 
     return commands.check(predicate)
 

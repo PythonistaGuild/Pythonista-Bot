@@ -237,10 +237,7 @@ class Pager(ui.View):
     stop = stop_pages  # type: ignore
 
     def _check(self, interaction: discord.Interaction) -> bool:
-        if interaction.user.id != self.author.id:
-            return False
-
-        return True
+        return interaction.user.id == self.author.id
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         resp = self._check(interaction)
