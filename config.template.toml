@@ -31,3 +31,7 @@ url = 'http://snekbox:8060/eval' # default url
 
 [GITHUB] # optional
 bot_secret = ""
+
+[WEBSERVER] # optional
+host = "127.0.0.1"
+port = 2332
