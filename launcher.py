@@ -69,10 +69,8 @@ async def main() -> None:
             config: uvicorn.Config = uvicorn.Config(app, host=server_config["host"], port=server_config["port"])
             server: uvicorn.Server = uvicorn.Server(config)
 
-            tasks.add(asyncio.create_task(bot.start(core.CONFIG["TOKENS"]["bot"])))
-            await server.serve()
-        else:
-            await bot.start(core.CONFIG["TOKENS"]["bot"])
+            tasks.add(asyncio.create_task(server.serve()))
+        await bot.start(core.CONFIG["TOKENS"]["bot"])
 
 
 try:
