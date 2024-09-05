@@ -34,6 +34,11 @@ class Suggestions(TypedDict):
     webhook_url: str
 
 
+class Webserver(TypedDict):
+    host: str
+    port: int
+
+
 class Config(TypedDict):
     prefix: str
     owner_ids: NotRequired[list[int]]
@@ -43,3 +48,4 @@ class Config(TypedDict):
     SNEKBOX: NotRequired[Snekbox]
     BADBIN: BadBin
     SUGGESTIONS: NotRequired[Suggestions]
+    WEBSERVER: NotRequired[Webserver]
