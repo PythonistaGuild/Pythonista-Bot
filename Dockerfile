@@ -51,4 +51,4 @@ COPY poetry.lock pyproject.toml ./
 RUN poetry install --only=main
 
 COPY . /app/
-ENTRYPOINT poetry run python -O launcher.py
+ENTRYPOINT ["poetry", "run", "python", "-O", "launcher.py" ]
