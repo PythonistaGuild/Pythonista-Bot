@@ -106,7 +106,13 @@ class Evaluation(core.Cog):
             await ctx.message.add_reaction("\U00002705")
 
             if len(output) > 1000:
-                codeblock = await self.bot.mb_client.create_paste(files=[mystbin.File(content=output, filename="eval.py")])
+                try:
+                    codeblock = await self.bot.mb_client.create_paste(
+                        files=[mystbin.File(content=output, filename="eval.py")]
+                    )
+                except mystbin.APIException:
+                    await ctx.send("Your output was too long to provide in any sensible manner.")
+                    return
 
             elif output:
                 codeblock = formatters.to_codeblock(output, escape_md=False)
