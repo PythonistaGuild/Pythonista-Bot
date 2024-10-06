@@ -57,6 +57,10 @@ PROSE_LOOKUP = {
     3: "muted",
     4: "unbanned",
     5: "helpblocked",
+    6: "generalblocked",
+    7: "unmuted",
+    8: "un-generalblocked",
+    9: "un-helpblocked",
 }
 
 
@@ -77,18 +81,24 @@ class GithubError(commands.CommandError):
 class ModerationRespostView(discord.ui.View):
     message: discord.Message | discord.WebhookMessage
 
-    def __init__(self, *, timeout: float | None = 180, target_id: int, target_reason: str) -> None:
+    def __init__(
+        self, *, timeout: float | None = 180, event_type: core.DiscordPyModerationEvent, target_id: int, target_reason: str
+    ) -> None:
         super().__init__(timeout=timeout)
+        self.event_type: core.DiscordPyModerationEvent = event_type
         self.target: discord.Object = discord.Object(id=target_id, type=discord.Member)
         self.target_reason: str = target_reason
 
-    def _disable_all_buttons(self) -> None:
+        if self.event_type.value in (4, 7, 8, 9):
+            self._disable_all_components()
+
+    def _disable_all_components(self) -> None:
         for item in self.children:
             if isinstance(item, (discord.ui.Button, discord.ui.Select)):
                 item.disabled = True
 
     async def on_timeout(self) -> None:
-        self._disable_all_buttons()
+        self._disable_all_components()
         await self.message.edit(view=self)
 
     @discord.ui.button(label="Ban", emoji="\U0001f528")
@@ -103,7 +113,7 @@ class ModerationRespostView(discord.ui.View):
         )
         await interaction.followup.send("Banned.")
 
-        self._disable_all_buttons()
+        self._disable_all_components()
         await self.message.edit(view=self)
 
     @discord.ui.button(label="Kick", emoji="\U0001f462")
@@ -118,7 +128,7 @@ class ModerationRespostView(discord.ui.View):
         )
         await interaction.followup.send("Kicked.")
 
-        self._disable_all_buttons()
+        self._disable_all_components()
         await self.message.edit(view=self)
 
 
@@ -310,7 +320,12 @@ class Moderation(commands.Cog):
         channel = guild.get_channel(Channels.DPY_MOD_LOGS)
         assert isinstance(channel, discord.TextChannel)  # This is static
 
-        view = ModerationRespostView(timeout=60 * 60, target_id=target_id, target_reason=moderation_reason)
+        view = ModerationRespostView(
+            timeout=60 * 60,
+            event_type=moderation_event,
+            target_id=target_id,
+            target_reason=moderation_reason,
+        )
         view.message = await channel.send(embed=embed, view=view)
 
 
