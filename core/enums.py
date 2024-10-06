@@ -9,3 +9,7 @@ class DiscordPyModerationEvent(Enum):
     mute = 3
     unban = 4
     helpblock = 5
+    generalblock = 6
+    unmute = 7
+    ungeneralblock = 8
+    unhelpblock = 9
