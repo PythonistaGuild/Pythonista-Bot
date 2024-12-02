@@ -22,7 +22,6 @@ SOFTWARE.
 """
 
 import logging
-from datetime import datetime
 
 import discord
 from discord import ui
@@ -53,7 +52,10 @@ class TypeSelect(ui.Select["TypeView"]):
 
         self.add_option(label="Guild", value="1", description="This suggestion applies to the guild.", emoji="\U0001f4c1")
         self.add_option(
-            label="PythonistaBot", value="2", description="This suggestion applies to PythonistaBot.", emoji="\U0001f916"
+            label="PythonistaBot",
+            value="2",
+            description="This suggestion applies to PythonistaBot.",
+            emoji="\U0001f916",
         )
         self.add_option(
             label="TwitchIO",
@@ -71,17 +73,23 @@ class TypeSelect(ui.Select["TypeView"]):
     async def callback(self, interaction: discord.Interaction) -> None:
         if self.original_author != interaction.user:
             return await interaction.response.send_message(
-                f"This menu is not for you. See `{core.CONFIG['prefix']}suggest` to make a suggestion!", ephemeral=True
+                f"This menu is not for you. See `{core.CONFIG['prefix']}suggest` to make a suggestion!",
+                ephemeral=True,
             )
         author = self.original_author
         suggestion_type = get_suggestion_type(self.values[0])
         await interaction.response.send_message("Your suggestion has been sent!")
         embed = discord.Embed(
-            title=f"Suggestion for {suggestion_type}", description=self.suggestion, timestamp=datetime.now(), color=0x7289DA
+            title=f"Suggestion for {suggestion_type}",
+            description=self.suggestion,
+            timestamp=discord.utils.utcnow(),
+            color=0x7289DA,
         )
         embed.set_author(name=author.name, icon_url=author.display_avatar)
         embed.set_footer(text=f"Suggestion sent by {author} (ID: {author.id})")
         await self.webhook.send(embed=embed, avatar_url=author.display_avatar, username=author.name)
+
+        return None
 
 
 class TypeView(ui.View):

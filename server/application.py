@@ -21,6 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from json import JSONDecodeError
 from typing import Any
 
 import starlette_plus
@@ -50,7 +51,7 @@ class Application(starlette_plus.Application):
 
         try:
             data: dict[str, Any] = await request.json()
-        except Exception as e:
+        except (JSONDecodeError, TypeError) as e:
             return starlette_plus.Response(f"Invalid payload: {e}", status_code=400)
 
         if not data:

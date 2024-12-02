@@ -32,7 +32,7 @@ import core
 from constants import Channels, ForumTags
 
 if TYPE_CHECKING:
-    from discord.ext.commands._types import Check  # type: ignore # why does this need a stub?
+    from discord.ext.commands._types import Check  # pyright: ignore[reportMissingTypeStubs] # why does this need a stub?
 
     from core.context import Context
 
@@ -48,15 +48,15 @@ Please include:
 - what you've tried so far
 {{remarks}}
 
-Once your issue has been solved type `{core.CONFIG['prefix']}solved` to close the thread.
+Once your issue has been solved type `{core.CONFIG["prefix"]}solved` to close the thread.
 """.strip()
 
 # fmt: off
-FORUM_BLURB_GENERIC  = _FORUM_BLURB.format(remarks="")
-FORUM_BLURB_PYTHON   = _FORUM_BLURB.format(remarks="- your Python version")
+FORUM_BLURB_GENERIC = _FORUM_BLURB.format(remarks="")
+FORUM_BLURB_PYTHON = _FORUM_BLURB.format(remarks="- your Python version")
 FORUM_BLURB_TWITCHIO = _FORUM_BLURB.format(remarks="- your TwitchIO version")
 FORUM_BLURB_WAVELINK = _FORUM_BLURB.format(remarks="- your Wavelink version\n- your Discord.py version")
-FORUM_BLURB_DPY      = _FORUM_BLURB.format(remarks="- your Discord.py version")
+FORUM_BLURB_DPY = _FORUM_BLURB.format(remarks="- your Discord.py version")
 # fmt: on
 
 
@@ -88,7 +88,7 @@ def can_close_thread() -> Check[Context]:
         if ctx.author == ctx.channel.owner:
             return True
 
-        raise NotThreadOwner()
+        raise NotThreadOwner
 
     return commands.check(predicate)
 
@@ -104,7 +104,7 @@ class Help(commands.Cog):
         if thread.parent_id != Channels.HELP_FORUM:
             return
 
-        channel: discord.TextChannel = thread.guild.get_channel(Channels.FORUM_LOGS)  # type: ignore
+        channel: discord.TextChannel | None = thread.guild.get_channel(Channels.FORUM_LOGS)  # pyright: ignore[reportAssignmentType] # this is narrowed by the constant value
         if not channel:
             return
 

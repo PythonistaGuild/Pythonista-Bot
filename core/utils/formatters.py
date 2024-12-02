@@ -27,14 +27,15 @@ from discord import Colour
 from discord.utils import escape_markdown
 
 __all__ = (
-    "to_codeblock",
     "random_pastel_colour",
+    "to_codeblock",
 )
 
 
 def to_codeblock(
     content: str,
     language: str = "py",
+    *,
     replace_existing: bool = True,
     escape_md: bool = True,
     new: str = "'''",
@@ -50,4 +51,4 @@ def to_codeblock(
 
 
 def random_pastel_colour() -> Colour:
-    return Colour.from_hsv(random.random(), 0.28, 0.97)
+    return Colour.from_hsv(random.random(), 0.28, 0.97)  # noqa: S311 # not for crypto usage

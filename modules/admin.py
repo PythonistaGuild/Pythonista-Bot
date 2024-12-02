@@ -39,7 +39,7 @@ class Administration(commands.Cog):
             LOGGER.info("[Ownership] Setting new owners to:\n%s", ", ".join([str(o) for o in owners]))
             bot.loop.create_task(self.populate_owners(owners))
 
-    async def cog_check(self, ctx: Context) -> bool:  # type: ignore  # maybecoro override woes
+    async def cog_check(self, ctx: Context) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]  # maybecoro override woes
         return await self.bot.is_owner(ctx.author)
 
     async def populate_owners(self, owner_ids: list[int]) -> None:

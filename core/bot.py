@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     import aiohttp
     import asyncpg
     import mystbin
-    from discord.ext.commands.cog import Cog  # type: ignore # stubs
+    from discord.ext.commands.cog import Cog  # pyright: ignore[reportMissingTypeStubs] # stubs
 
     from .utils import LogHandler
 
@@ -60,12 +60,12 @@ class Bot(commands.Bot):
     logging_queue: Queue[LogRecord]
 
     __slots__ = (
-        "session",
-        "pool",
-        "log_handler",
-        "mb_client",
-        "logging_queue",
         "_previous_websocket_events",
+        "log_handler",
+        "logging_queue",
+        "mb_client",
+        "pool",
+        "session",
     )
 
     def __init__(self) -> None:
@@ -77,11 +77,15 @@ class Bot(commands.Bot):
         self._previous_websocket_events: deque[Any] = deque(maxlen=10)
 
     async def get_context(
-        self, message: discord.Message | discord.Interaction, /, *, cls: type[commands.Context[commands.Bot]] | None = None
+        self,
+        message: discord.Message | discord.Interaction,
+        /,
+        *,
+        cls: type[commands.Context[commands.Bot]] | None = None,
     ) -> Context:
         return await super().get_context(message, cls=Context)
 
-    async def add_cog(self, cog: Cog, /, *, override: bool = False) -> None:  # type: ignore
+    async def add_cog(self, cog: Cog, /, *, override: bool = False) -> None:  # pyright: ignore[reportIncompatibleMethodOverride] # weird narrowing on Context generic
         # we patch this since we're a single guild bot.
         # it allows for guild syncing only.
         return await super().add_cog(cog, override=override, guild=discord.Object(id=GUILD_ID))
@@ -111,13 +115,12 @@ class Bot(commands.Bot):
 
         args_str = ["```py"]
         for index, arg in enumerate(args):
-            args_str.append(f"[{index}]: {arg!r}")
-            args_str.append("```")
+            args_str.extend((f"[{index}]: {arg!r}", "```"))
             embed.add_field(name="Args", value="\n".join(args_str), inline=False)
 
         self.log_handler.error("Event Error", extra={"embed": embed})
 
-    async def on_command_error(self, ctx: Context, error: commands.CommandError) -> None:  # type: ignore # weird narrowing
+    async def on_command_error(self, ctx: Context, error: commands.CommandError) -> None:  # pyright: ignore[reportIncompatibleMethodOverride] # weird narrowing on Context generic
         assert ctx.command  # wouldn't be here otherwise
 
         if not isinstance(error, (commands.CommandInvokeError, commands.ConversionError)):
@@ -158,7 +161,7 @@ class Bot(commands.Bot):
                 try:
                     user = await guild.fetch_member(target_id)
                 except discord.HTTPException:
-                    return
+                    return None
 
             if cache:
                 cache[target_id] = user
@@ -169,7 +172,7 @@ class Bot(commands.Bot):
             try:
                 user = await self.fetch_user(target_id)
             except discord.HTTPException:
-                return
+                return None
 
         if cache:
             cache[target_id] = user
@@ -182,11 +185,11 @@ class Bot(commands.Bot):
         finally:
             path = pathlib.Path("logs/prev_events.log")
 
-            with path.open("w+", encoding="utf-8") as f:
+            with path.open("w+", encoding="utf-8") as f:  # noqa: ASYNC230 # this is okay as we're in cleanup phase
                 for event in self._previous_websocket_events:
                     try:
                         last_log = json.dumps(event, ensure_ascii=True, indent=2)
-                    except Exception:
+                    except (ValueError, TypeError):
                         f.write(f"{event}\n")
                     else:
                         f.write(f"{last_log}\n")

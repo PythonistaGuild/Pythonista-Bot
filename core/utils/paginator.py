@@ -28,7 +28,10 @@ from typing import TYPE_CHECKING, Any
 
 import discord
 from discord import ui  # shortcut because I'm lazy
-from discord.ext.commands import CommandError, Paginator as _Paginator  # type: ignore # why does this need a stub file?
+from discord.ext.commands import (  # pyright: ignore[reportMissingTypeStubs] # why does this need a stub file?
+    CommandError,
+    Paginator as _Paginator,
+)
 from discord.utils import MISSING
 
 if TYPE_CHECKING:
@@ -39,7 +42,7 @@ if TYPE_CHECKING:
     from core import Bot, Context
 
 
-__all__ = ("CannotPaginate", "Pager", "KVPager", "TextPager")
+__all__ = ("CannotPaginate", "KVPager", "Pager", "TextPager")
 
 
 class CannotPaginate(CommandError):
@@ -57,7 +60,7 @@ class Pager(ui.View):
         per_page: int = 12,
         show_entry_count: bool = True,
         title: str | None = None,
-        embed_color: discord.Colour = discord.Colour.blurple(),
+        embed_color: discord.Colour | None = None,
         nocount: bool = False,
         delete_after: bool = True,
         author: discord.User | discord.Member | None = None,
@@ -101,7 +104,7 @@ class Pager(ui.View):
         ]
 
         if stop:
-            self.reaction_emojis.append(("\N{BLACK SQUARE FOR STOP}", self.stop_pages))  # type: ignore
+            self.reaction_emojis.append(("\N{BLACK SQUARE FOR STOP}", self.stop_pages))
 
         if ctx.guild:
             self.permissions = self.channel.permissions_for(ctx.guild.me)
@@ -119,7 +122,7 @@ class Pager(ui.View):
         self.clear_items()
         for emoji, button in self.reaction_emojis:
             btn = ui.Button["Self"](emoji=emoji)
-            btn.callback = button  # type: ignore
+            btn.callback = button
             self.add_item(btn)
 
     def get_page(self, page: int) -> list[Any]:
@@ -159,7 +162,11 @@ class Pager(ui.View):
         self.embed.title = self.title or MISSING
 
     async def show_page(
-        self, page: int, *, first: bool = False, msg_kwargs: dict[str, Any] | None = None
+        self,
+        page: int,
+        *,
+        first: bool = False,
+        msg_kwargs: dict[str, Any] | None = None,
     ) -> discord.Message | None:
         self.current_page = page
         entries = self.get_page(page)
@@ -172,28 +179,30 @@ class Pager(ui.View):
         if not first:
             if self.message:
                 await self.message.edit(content=content, embed=embed, view=self)
-            return
+            return None
 
         self.message = await self.channel.send(content=content, embed=embed, view=self)
+
+        return None
 
     async def checked_show_page(self, page: int) -> None:
         if page != 0 and page <= self.maximum_pages:
             await self.show_page(page)
 
-    async def first_page(self, inter: discord.Interaction) -> None:
-        await inter.response.defer()
+    async def first_page(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer()
         await self.show_page(1)
 
-    async def last_page(self, inter: discord.Interaction) -> None:
-        await inter.response.defer()
+    async def last_page(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer()
         await self.show_page(self.maximum_pages)
 
-    async def next_page(self, inter: discord.Interaction) -> None:
-        await inter.response.defer()
+    async def next_page(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer()
         await self.checked_show_page(self.current_page + 1)
 
-    async def previous_page(self, inter: discord.Interaction) -> None:
-        await inter.response.defer()
+    async def previous_page(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer()
         await self.checked_show_page(self.current_page - 1)
 
     async def show_current_page(self, inter: discord.Interaction) -> None:
@@ -223,7 +232,7 @@ class Pager(ui.View):
                 await asyncio.sleep(5)
 
         try:
-            await self.channel.delete_messages(to_delete)  # type: ignore # we handle the attribute error or http since exception handling is free
+            await self.channel.delete_messages(to_delete)  # pyright: ignore[reportUnknownMemberType,reportAttributeAccessIssue] # we handle the attribute error or http since exception handling is free
         except (AttributeError, discord.HTTPException):
             pass
 
@@ -234,7 +243,7 @@ class Pager(ui.View):
 
         super().stop()
 
-    stop = stop_pages  # type: ignore
+    stop = stop_pages  # pyright: ignore[reportAssignmentType] # cheating to shortcut the stop method
 
     def _check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.author.id
@@ -272,7 +281,7 @@ class KVPager(Pager):
         show_entry_count: bool = True,
         description: str | None = None,
         title: str | None = None,
-        embed_color: discord.Colour = discord.Colour.blurple(),
+        embed_color: discord.Colour | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(
@@ -281,7 +290,7 @@ class KVPager(Pager):
             per_page=per_page,
             show_entry_count=show_entry_count,
             title=title,
-            embed_color=embed_color,
+            embed_color=embed_color or discord.Colour.blurple(),
             **kwargs,
         )
         self.description = description
@@ -323,9 +332,6 @@ class TextPager(Pager):
 
     def get_page(self, page: int) -> Any:
         return self.entries[page - 1]
-
-    def get_embed(self, entries: list[str], page: int, *, first: bool = False) -> discord.Embed:
-        return None  # type: ignore
 
     def get_content(self, entry: str, page: int, *, first: bool = False) -> str:
         if self.maximum_pages > 1:

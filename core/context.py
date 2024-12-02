@@ -30,7 +30,7 @@ class Context(commands.Context["Bot"]):
         return self.message
 
     @discord.utils.cached_property
-    def replied_message(self) -> discord.Message | discord.Message:
+    def replied_message(self) -> discord.Message:
         ref = self.message.reference
         if ref and isinstance(ref.resolved, discord.Message):
             return ref.resolved
@@ -53,12 +53,12 @@ class Context(commands.Context["Bot"]):
                 return False
 
         else:
-            member = self.author  # type: ignore
+            member = self.author  # pyright: ignore[reportAssignmentType] # type lie for a shortcut
 
-        roles = member._roles  # type: ignore # we know this won't change for a while
+        roles = member._roles  # pyright: ignore[reportPrivateUsage] # we know this won't change for a while
         return roles.has(Roles.ADMIN) or roles.has(Roles.MODERATOR)
 
 
 class GuildContext(Context):
-    guild: discord.Guild  # type: ignore # type lie due to narrowing
-    author: discord.Member  # type: ignore # type lie due to narrowing
+    guild: discord.Guild  # pyright: ignore[reportIncompatibleVariableOverride] # type lie due to narrowing
+    author: discord.Member  # pyright: ignore[reportIncompatibleVariableOverride] # type lie due to narrowing

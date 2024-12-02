@@ -34,7 +34,7 @@ import core
 GITHUB_ISSUE_URL = "https://github.com/{}/issues/{}"
 LIB_ISSUE_REGEX = re.compile(r"(?P<lib>[a-z]+)?(?P<pounds>#{2,})(?P<number>[0-9]+)", flags=re.IGNORECASE)
 GITHUB_CODE_REGION_REGEX = re.compile(
-    r"https?://github\.com/(?P<user>.*)/(?P<repo>.*)/blob/(?P<hash>[a-zA-Z0-9]+)/(?P<path>.*)/(?P<file>.*)(?:\#L)(?P<linestart>[0-9]+)(?:-L)?(?P<lineend>[0-9]+)?"
+    r"https?://github\.com/(?P<user>.*)/(?P<repo>.*)/blob/(?P<hash>[a-zA-Z0-9]+)/(?P<path>.*)/(?P<file>.*)(?:\#L)(?P<linestart>[0-9]+)(?:-L)?(?P<lineend>[0-9]+)?",
 )
 
 GITHUB_BASE_URL = "https://github.com/"
@@ -68,19 +68,18 @@ class GitHub(core.Cog):
         self.highlight_timeout = 10
 
     def _strip_content_path(self, url: str) -> str:
-        file_path = url[len(GITHUB_BASE_URL) :]
-        return file_path
+        return url[len(GITHUB_BASE_URL) :]
 
     async def format_highlight_block(self, url: str, line_adjustment: int = 10) -> dict[str, str | int] | None:
         match = GITHUB_CODE_REGION_REGEX.search(url)
 
         if not match:
-            return
+            return None
 
         try:
             highlighted_line = int(match["linestart"])  # separate the #L{n} highlight
         except IndexError:
-            return
+            return None
 
         file_path = self._strip_content_path(url)
         raw_url = GITHUB_RAW_CONTENT_URL + file_path.replace("blob/", "")  # Convert it to a raw user content URL
@@ -88,7 +87,7 @@ class GitHub(core.Cog):
         code = ""
         async with self.bot.session.get(raw_url) as resp:
             if resp.status == 404:
-                return
+                return None
 
             code += await resp.text()
 
@@ -163,7 +162,7 @@ class GitHub(core.Cog):
         path = match["path"]
         file_path = f"{path}/{file}"
 
-        github_dict = {
+        return {
             "path": file_path,
             "min": (_min_boundary if _min_boundary > 0 else highlighted_line - 1)
             + 1,  # Do not display negative numbers if <0
@@ -171,10 +170,9 @@ class GitHub(core.Cog):
             "msg": msg,
         }
 
-        return github_dict
-
     def _smart_guess_lib(self, msg: discord.Message) -> LibEnum | None:
-        # this is mostly the same as the function in manuals.py, however the enum is entirely different so the code isn't reusable.
+        # this is mostly the same as the function in manuals.py
+        # however the enum is entirely different so the code isn't reusable.
         assert msg.channel
 
         if msg.channel.id == constants.Channels.HELP_CHANNEL:
@@ -185,16 +183,16 @@ class GitHub(core.Cog):
 
             if "twitchio-help" in tags:
                 return LibEnum.twitchio
-            elif "wavelink-help" in tags:
+            if "wavelink-help" in tags:
                 return LibEnum.wavelink
-            elif "discord.py-help" in tags:
+            if "discord.py-help" in tags:
                 return LibEnum.discordpy
 
             return None
 
         if msg.channel.id == constants.Channels.WAVELINK_DEV:
             return LibEnum.wavelink
-        elif msg.channel.id == constants.Channels.TWITCHIO_DEV:
+        if msg.channel.id == constants.Channels.TWITCHIO_DEV:
             return LibEnum.twitchio
 
         return None
@@ -231,9 +229,10 @@ class GitHub(core.Cog):
         _min = code_segment["min"]
         _max = code_segment["max"]
         code_fmt = code_segment["msg"]
+        assert isinstance(code_fmt, str)
 
         max_message_size = 2002
-        segment_len = len(code_fmt)  # type: ignore
+        segment_len = len(code_fmt)
 
         # is our msg too big for the embed?
         if segment_len > max_message_size:

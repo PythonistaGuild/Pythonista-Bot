@@ -24,10 +24,10 @@ SOFTWARE.
 from ._meta import CONSTANTS
 
 __all__ = (
-    "Roles",
-    "Colours",
     "Channels",
+    "Colours",
     "ForumTags",
+    "Roles",
 )
 
 
