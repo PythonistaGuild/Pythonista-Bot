@@ -66,7 +66,7 @@ async def main() -> None:
         server_config = core.CONFIG.get("WEBSERVER")
         if server_config:
             app: Application = Application(bot=bot)
-            config: uvicorn.Config = uvicorn.Config(app, host=server_config["host"], port=server_config["port"])
+            config: uvicorn.Config = uvicorn.Config(app, host=server_config["host"], port=server_config["port"], no_access_log=True)
             server: uvicorn.Server = uvicorn.Server(config)
 
             tasks.add(asyncio.create_task(server.serve()))
