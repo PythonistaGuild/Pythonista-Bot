@@ -34,7 +34,7 @@ class Application(starlette_plus.Application):
         self.bot: Bot = bot
         self.__auth: str | None = CONFIG["TOKENS"].get("pythonista")
 
-        super().__init__()
+        super().__init__(access_log=False)
 
     @starlette_plus.route("/dpy/modlog", methods=["POST"], prefix=False, include_in_schema=False)
     async def dpy_modlog(self, request: starlette_plus.Request) -> starlette_plus.Response:
