@@ -43,7 +43,7 @@ class CodeblockConverter(commands.Converter[Codeblock]):
     :attr:`Codeblock.language` will be ``None`` if the input was not a complete codeblock.
     """
 
-    async def convert(self, ctx: Context, argument: str) -> Codeblock:  # type: ignore # this is something to do with the typevar
+    async def convert(self, ctx: Context, argument: str) -> Codeblock:  # pyright: ignore[reportIncompatibleMethodOverride] # generic narrowing on Context
         if not argument.startswith("`"):
             return Codeblock(None, argument)
 
@@ -58,12 +58,8 @@ class CodeblockConverter(commands.Converter[Codeblock]):
         for character in argument:
             if character == "`" and not within_code and not within_language:
                 backticks += 1
-            if (
-                previous_characters
-                and previous_characters[-1] == "`"
-                and character != "`"
-                or within_code
-                and "".join(previous_characters) != "`" * backticks
+            if (previous_characters and previous_characters[-1] == "`" and character != "`") or (
+                within_code and "".join(previous_characters) != "`" * backticks
             ):
                 within_code = True
                 code.append(character)

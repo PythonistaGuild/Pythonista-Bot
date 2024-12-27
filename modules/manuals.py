@@ -27,7 +27,7 @@ import discord
 import yarl
 from discord.enums import Enum
 from discord.ext import commands
-from discord.ext.commands.view import StringView  # type: ignore # why does this need a stub
+from discord.ext.commands.view import StringView  # pyright: ignore[reportMissingTypeStubs] # why is this an error?
 
 import constants
 import core
@@ -82,18 +82,18 @@ class Manuals(commands.Cog):
 
             if "twitchio-help" in tags:
                 return LibEnum.twitchio
-            elif "wavelink-help" in tags:
+            if "wavelink-help" in tags:
                 return LibEnum.wavelink
-            elif "discord.py-help" in tags:
+            if "discord.py-help" in tags:
                 return LibEnum.discordpy
-            elif "python-help" in tags:
+            if "python-help" in tags:
                 return LibEnum.python
 
             return None
 
         if ctx.channel.id == constants.Channels.WAVELINK_DEV:
             return LibEnum.wavelink
-        elif ctx.channel.id == constants.Channels.TWITCHIO_DEV:
+        if ctx.channel.id == constants.Channels.TWITCHIO_DEV:
             return LibEnum.twitchio
 
         return None
@@ -130,17 +130,16 @@ class Manuals(commands.Cog):
             await ctx.reply("Sorry, I couldn't find a library that matched. Try again with a different library?")
             return None
 
-        elif (
+        if (
             maybe_lib
             and isinstance(ctx.channel, discord.Thread)
             and ctx.channel.parent_id == constants.Channels.HELP_FORUM
             and lib == self._smart_guess_lib(ctx)
+            and 1006717008613740596 not in ctx.channel._applied_tags  # pyright: ignore[reportPrivateUsage] # shortcut
         ):
-            if 1006717008613740596 not in ctx.channel._applied_tags:  # type: ignore # other-help tag, that one doesnt get a smart guess
-                tip += (
-                    "\n• Tip: Forum posts with tags will automatically have the relevant libraries used, no need to"
-                    " specify it!"
-                )
+            tip += (
+                "\n• Tip: Forum posts with tags will automatically have the relevant libraries used, no need to specify it!"
+            )
 
         return lib, final_query, tip
 
@@ -151,7 +150,7 @@ class Manuals(commands.Cog):
         signature="[library]? [query]",
         aliases=["docs", "rtfd"],
     )
-    @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
+    @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # pyright: ignore[reportArgumentType] # this is generic narrowing nonsense
     async def rtfm(self, ctx: core.Context, *, query: str) -> None:
         """
         Searches relevant documentation.
@@ -197,7 +196,7 @@ class Manuals(commands.Cog):
                 "location": str(lib.value[0]),
                 "show-labels": str(labels),
                 "label-labels": str(clear_labels),
-            }
+            },
         )
 
         headers = {
@@ -230,7 +229,7 @@ class Manuals(commands.Cog):
         signature="[library]? [query]",
         aliases=["source"],
     )
-    @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # type: ignore
+    @commands.dynamic_cooldown(_cooldown_bucket, commands.BucketType.member)  # pyright: ignore[reportArgumentType] # this is generic narrowing nonsense
     async def rtfs(self, ctx: core.Context, *, query: str) -> None:
         """
         Searches relevant library source code.
@@ -269,7 +268,7 @@ class Manuals(commands.Cog):
                 "query": final_query,
                 "library": str(lib.value[2]),
                 "format": "links" if not source else "source",
-            }
+            },
         )
 
         headers = {
@@ -306,7 +305,8 @@ class Manuals(commands.Cog):
         else:
             n = next(iter(nodes.items()))
             await ctx.send(
-                f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}" + tip, reference=ctx.replied_message
+                f"Showing source for `{n[0]}`\nCommit: {matches['commit'][:6]}" + tip,
+                reference=ctx.replied_message,
             )
 
             pages = TextPager(ctx, n[1], prefix="```py", reply_author_takes_paginator=True)

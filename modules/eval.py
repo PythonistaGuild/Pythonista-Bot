@@ -91,7 +91,10 @@ class Evaluation(core.Cog):
     @commands.max_concurrency(1, per=commands.BucketType.user, wait=False)
     @commands.cooldown(rate=1, per=10.0, type=commands.BucketType.user)
     async def eval(
-        self, ctx: core.Context, *, code: core.Codeblock = commands.param(converter=core.CodeblockConverter)
+        self,
+        ctx: core.Context,
+        *,
+        code: core.Codeblock = commands.param(converter=core.CodeblockConverter),  # noqa: B008 # this is how converters work
     ) -> None:
         """Evaluates your code in the form of a Discord message.
 
@@ -108,7 +111,7 @@ class Evaluation(core.Cog):
             if len(output) > 1000:
                 try:
                     codeblock = await self.bot.mb_client.create_paste(
-                        files=[mystbin.File(content=output, filename="eval.py")]
+                        files=[mystbin.File(content=output, filename="eval.py")],
                     )
                 except mystbin.APIException:
                     await ctx.send("Your output was too long to provide in any sensible manner.")
@@ -132,9 +135,10 @@ class Evaluation(core.Cog):
             # let's silently suppress these error, don't want to spam the reaction / message delete
             return
 
-        elif isinstance(error, core.InvalidEval):
+        if isinstance(error, core.InvalidEval):
             await ctx.send(
-                f"Hey! Your eval job failed with status code: {error.error_code}. Error message is below:-\n{error}.\nDon't worry, the team here know!"
+                f"Hey! Your eval job failed with status code: {error.error_code}. "
+                f"Error message is below:-\n{error}.\nDon't worry, the team here know!",
             )
             LOGGER.error("Eval Cog raised an error during eval:\n%s", str(error))
 

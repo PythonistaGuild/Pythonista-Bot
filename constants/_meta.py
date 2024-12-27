@@ -51,10 +51,12 @@ class ConstantsMeta(type):
         return super().__new__(mcs, name, bases, attrs)
 
     def __setattr__(self, attr: str, nv: Any) -> NoReturn:
-        raise RuntimeError(f"Constant <{attr}> cannot be assigned to.")
+        msg = f"Constant <{attr}> cannot be assigned to."
+        raise RuntimeError(msg)
 
     def __delattr__(self, attr: str) -> NoReturn:
-        raise RuntimeError(f"Constant <{attr}> cannot be deleted.")
+        msg = f"Constant <{attr}> cannot be deleted."
+        raise RuntimeError(msg)
 
 
 class CONSTANTS(metaclass=ConstantsMeta):
