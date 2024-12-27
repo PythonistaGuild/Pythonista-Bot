@@ -37,7 +37,7 @@ class Context(commands.Context["Bot"]):
         return self.message
 
     def author_is_mod(self) -> bool:
-        member: discord.Member
+        member: discord.Member | None
 
         if self.guild is None:  # dms
             guild = self.bot.get_guild(GUILD_ID)
@@ -45,17 +45,14 @@ class Context(commands.Context["Bot"]):
             if not guild:
                 return False
 
-            _member = guild.get_member(self.author.id)
-            if _member is not None:
-                member = _member
-
-            else:
+            member = guild.get_member(self.author.id)
+            if member is None:
                 return False
 
         else:
             member = self.author  # pyright: ignore[reportAssignmentType] # type lie for a shortcut
 
-        roles = member._roles  # pyright: ignore[reportPrivateUsage] # we know this won't change for a while
+        roles = member._roles  # pyright: ignore[reportPrivateUsage,reportOptionalMemberAccess] # we know this won't change for a while
         return roles.has(Roles.ADMIN) or roles.has(Roles.MODERATOR)
 
 

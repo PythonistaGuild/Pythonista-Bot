@@ -118,29 +118,29 @@ class GitHub(core.Cog):
             return None
 
         bound_adj = line_adjustment  # adjustment for upper and lower bound display.
-        _min_boundary = highlighted_line - 1 - bound_adj if bulk is False else line_start - 1
-        _max_boundary = highlighted_line - 1 + bound_adj if bulk is False else line_end - 1
+        min_boundary = highlighted_line - 1 - bound_adj if bulk is False else line_start - 1
+        max_boundary = highlighted_line - 1 + bound_adj if bulk is False else line_end - 1
 
         # is our minimum greater than our maximum?
-        if _min_boundary > _max_boundary:
+        if min_boundary > max_boundary:
             # re-arrange the variables so we get the proper min - max scale
-            _min = _min_boundary
-            _max = _max_boundary
+            min_ = min_boundary
+            max_ = max_boundary
 
-            _min_boundary = _max
-            _max_boundary = _min
+            min_boundary = max_
+            max_boundary = min_
 
         # get the file extension to format nicely
         file = match["file"]
         extension = file.rsplit(".")[-1]
 
         msg = f"```{extension}\n"
-        key = _min_boundary
+        key = min_boundary
 
-        max_digit = len(str(_max_boundary))
+        max_digit = len(str(max_boundary))
 
         # loop through all our lines
-        while key <= _max_boundary:
+        while key <= max_boundary:
             curr_line_no: str = str(key + 1)
             spaced_line_no = f"%{max_digit}d" % int(curr_line_no)
 
@@ -164,9 +164,8 @@ class GitHub(core.Cog):
 
         return {
             "path": file_path,
-            "min": (_min_boundary if _min_boundary > 0 else highlighted_line - 1)
-            + 1,  # Do not display negative numbers if <0
-            "max": _max_boundary + 1,
+            "min": (min_boundary if min_boundary > 0 else highlighted_line - 1) + 1,  # Do not display negative numbers if <0
+            "max": max_boundary + 1,
             "msg": msg,
         }
 
@@ -226,8 +225,8 @@ class GitHub(core.Cog):
         await message.add_reaction(self.code_highlight_emoji)
 
         path = code_segment["path"]
-        _min = code_segment["min"]
-        _max = code_segment["max"]
+        min_ = code_segment["min"]
+        max_ = code_segment["max"]
         code_fmt = code_segment["msg"]
         assert isinstance(code_fmt, str)
 
@@ -251,7 +250,7 @@ class GitHub(core.Cog):
                 await message.channel.send("You've selected too many lines for me to display!")
                 return
 
-            msg: str = f"Showing lines `{_min}-{_max}` in: `{path}`\n{code_fmt}"
+            msg: str = f"Showing lines `{min_}-{max_}` in: `{path}`\n{code_fmt}"
             await message.channel.send(msg, suppress_embeds=True)
 
         except TimeoutError:
