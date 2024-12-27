@@ -113,6 +113,9 @@ venv.bak/
 # Visual Studio Code settings
 .vscode/
 
+# Intellij settings
+.idea/
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -133,6 +136,5 @@ dmypy.json
 
 # config
 config.toml
-
-.vscode/
-.idea/
+postgres_password.txt
+.pdm-python
