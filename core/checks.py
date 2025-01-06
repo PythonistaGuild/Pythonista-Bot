@@ -30,7 +30,7 @@ from discord.ext import commands
 import constants
 
 if TYPE_CHECKING:
-    from discord.ext.commands._types import Check  # type: ignore # why would this need stubs
+    from discord.ext.commands._types import Check  # pyright: ignore[reportMissingTypeStubs] # why would this need stubs
 
     from core.context import GuildContext
 
@@ -42,7 +42,8 @@ def is_role_or_higher(role_id: int) -> Check[Any]:
         # This should never be a problem, but just in case...
         if not role:
             # TODO: Change this to a custom exception.
-            raise commands.CheckFailure(f"Role with ID <{role_id}> does not exist.")
+            msg = f"Role with ID <{role_id}> does not exist."
+            raise commands.CheckFailure(msg)
 
         ignored = (constants.Roles.NITRO_BOOSTER, constants.Roles.MUTED)
         roles = [r for r in ctx.author.roles if r.id not in ignored and ctx.author.top_role >= r]
@@ -51,6 +52,7 @@ def is_role_or_higher(role_id: int) -> Check[Any]:
             return True
 
         # TODO: Change this to a custom exception.
-        raise commands.CheckFailure(f"{ctx.author} is not in or higher than role <{role.name}(ID: {role.id})>.")
+        msg = f"{ctx.author} is not in or higher than role <{role.name}(ID: {role.id})>."
+        raise commands.CheckFailure(msg)
 
     return commands.check(predicate)

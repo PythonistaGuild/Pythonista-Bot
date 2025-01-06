@@ -76,4 +76,4 @@ async def main() -> None:
 try:
     asyncio.run(main())
 except KeyboardInterrupt:
-    print("Fix this later, but you killed bot with KeyboardInterrupt...")
+    print("Fix this later, but you killed bot with KeyboardInterrupt...")  # noqa: T201 # this is okay

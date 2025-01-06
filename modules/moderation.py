@@ -82,7 +82,12 @@ class ModerationRespostView(discord.ui.View):
     message: discord.Message | discord.WebhookMessage
 
     def __init__(
-        self, *, timeout: float | None = 180, event_type: core.DiscordPyModerationEvent, target_id: int, target_reason: str
+        self,
+        *,
+        timeout: float | None = 180,
+        event_type: core.DiscordPyModerationEvent,
+        target_id: int,
+        target_reason: str,
     ) -> None:
         super().__init__(timeout=timeout)
         self.event_type: core.DiscordPyModerationEvent = event_type
@@ -155,7 +160,7 @@ class Moderation(commands.Cog):
     ) -> Any:
         api_key = core.CONFIG["TOKENS"].get("github_bot")
         if not api_key:
-            return
+            return None
 
         hdrs = {
             "Accept": "application/vnd.github.inertia-preview+json",
@@ -174,18 +179,17 @@ class Moderation(commands.Cog):
 
             if r.status == 429 or remaining == "0":
                 # wait before we release the lock
-                delta = discord.utils._parse_ratelimit_header(r)  # type: ignore # shh this is okay
+                delta = discord.utils._parse_ratelimit_header(r)  # pyright: ignore[reportPrivateUsage] # shh this is okay
 
                 await asyncio.sleep(delta)
                 self._req_lock.release()
 
                 return await self.github_request(method, url, params=params, data=data, headers=headers)
 
-            elif 300 > r.status >= 200:
+            if 300 > r.status >= 200:
                 return js
 
-            else:
-                raise GithubError(js["message"])
+            raise GithubError(js["message"])
 
     async def create_gist(
         self,
@@ -205,7 +209,7 @@ class Moderation(commands.Cog):
             "files": {
                 filename: {
                     "content": content,
-                }
+                },
             },
         }
 
@@ -223,7 +227,9 @@ class Moderation(commands.Cog):
             return
 
         url = await self.create_gist(
-            "\n".join(tokens), filename="tokens.txt", description="Tokens found within the Pythonista guild."
+            "\n".join(tokens),
+            filename="tokens.txt",
+            description="Tokens found within the Pythonista guild.",
         )
 
         msg: str = (
@@ -290,7 +296,8 @@ class Moderation(commands.Cog):
 
         moderator_id = payload["author_id"]
         moderator = self.dpy_mod_cache.get(moderator_id) or await self.bot.get_or_fetch_user(
-            moderator_id, cache=self.dpy_mod_cache
+            moderator_id,
+            cache=self.dpy_mod_cache,
         )
 
         if moderator:

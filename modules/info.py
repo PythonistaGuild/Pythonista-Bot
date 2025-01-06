@@ -44,7 +44,7 @@ class Information(core.Cog):
     def __init__(self, bot: core.Bot) -> None:
         self.bot: core.Bot = bot
 
-    async def cog_command_error(self, ctx: core.Context, error: commands.CommandError) -> None:  # type: ignore # bad lib types.
+    async def cog_command_error(self, ctx: core.Context, error: commands.CommandError) -> None:  # pyright: ignore[reportIncompatibleMethodOverride] # generic Context is incorrect.
         error = getattr(error, "original", error)
 
         if isinstance(error, NoPermissions):
@@ -58,20 +58,19 @@ class Information(core.Cog):
 
         if isinstance(entity, discord.User):
             return self._user_info(entity, embed=embed)
-        elif isinstance(entity, discord.Member):
-            embed = self._user_info(entity, embed=embed)  # type: ignore # superclass
+        if isinstance(entity, discord.Member):
+            embed = self._user_info(entity, embed=embed)
             return self._member_info(entity, embed=embed)
-        elif isinstance(entity, discord.Role):
+        if isinstance(entity, discord.Role):
             return self._role_info(entity, embed=embed)
-        elif isinstance(entity, discord.abc.GuildChannel):
+        if isinstance(entity, discord.abc.GuildChannel):
             return self._channel_info(entity, embed=embed)
-        else:
-            return self._guild_info(entity, embed=embed)
+        return self._guild_info(entity, embed=embed)
 
     def _member_info(self, member: discord.Member, /, *, embed: discord.Embed) -> discord.Embed:
         if member.joined_at:
             joined_at_fmt = (
-                discord.utils.format_dt(member.joined_at, "F") + "\n" f"({discord.utils.format_dt(member.joined_at, 'R')})"
+                discord.utils.format_dt(member.joined_at, "F") + f"\n({discord.utils.format_dt(member.joined_at, 'R')})"
             )
             embed.add_field(name="Member joined the guild on:", value=joined_at_fmt)
 
@@ -82,12 +81,12 @@ class Information(core.Cog):
 
         return embed
 
-    def _user_info(self, user: discord.User, /, *, embed: discord.Embed) -> discord.Embed:
+    def _user_info(self, user: discord.User | discord.Member, /, *, embed: discord.Embed) -> discord.Embed:
         embed = discord.Embed(title=f"Info on {user.display_name}!", colour=discord.Colour.random())
         embed.set_author(name=user.name)
         embed.set_image(url=user.display_avatar.url)
         created_at_fmt = (
-            discord.utils.format_dt(user.created_at, "F") + "\n" f"({discord.utils.format_dt(user.created_at, 'R')})"
+            discord.utils.format_dt(user.created_at, "F") + f"\n({discord.utils.format_dt(user.created_at, 'R')})"
         )
         embed.add_field(name="Account was created on:", value=created_at_fmt)
 
@@ -154,7 +153,7 @@ class Information(core.Cog):
 
         entity: Accepts a Person's ID, a Role ID or a Channel ID. Defaults to showing info on the Guild.
         """
-        embed = self._embed_factory(entity)  # type: ignore # we ignore because converter sadness
+        embed = self._embed_factory(entity)  # pyright: ignore[reportArgumentType] # converter usage messes with types
         await ctx.reply(embed=embed, mention_author=False)
 
 

@@ -1,11 +1,14 @@
-from __future__ import annotations
+from __future__ import annotations  # noqa: A005 # we access this as a namespace
 
 import logging
 import pathlib
 from logging.handlers import RotatingFileHandler
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from discord.utils import _ColourFormatter as ColourFormatter, stream_supports_colour  # type: ignore # shh, I need it
+from discord.utils import (
+    _ColourFormatter as ColourFormatter,  # pyright: ignore[reportPrivateUsage] # shh, I need it  # noqa: PLC2701
+    stream_supports_colour,
+)
 
 import core
 
@@ -46,6 +49,7 @@ class LogHandler:
         logging.getLogger("discord.http").setLevel(logging.INFO)
         logging.getLogger("discord.state").setLevel(logging.WARNING)
         logging.getLogger("discord.gateway").setLevel(logging.WARNING)
+        logging.getLogger("starlette_plus.core").setLevel(logging.WARNING)
 
         self.log.setLevel(logging.INFO)
         handler = RotatingFileHandler(
@@ -70,10 +74,10 @@ class LogHandler:
 
         return self
 
-    async def __aexit__(self, *args: Any) -> None:
+    async def __aexit__(self, *args: object) -> None:
         return self.__exit__(*args)
 
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(self, *args: object) -> None:
         handlers = self.log.handlers[:]
         for hdlr in handlers:
             hdlr.close()

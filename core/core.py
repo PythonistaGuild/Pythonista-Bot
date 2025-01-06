@@ -38,7 +38,7 @@ __all__ = (
 )
 
 
-CONFIG: Config = toml.load("config.toml")  # type: ignore # weird non-assertion
+CONFIG: Config = toml.load("config.toml")  # pyright: ignore[reportAssignmentType] # weirdly narrow library type
 
 
 class Cog(commands.Cog):
