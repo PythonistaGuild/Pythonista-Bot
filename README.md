@@ -28,7 +28,7 @@ python -O launcher.py
 We also provide both `Dockerfile` and `docker-compose.yml` files for running the bot in Docker.
 The default compose file assumes you want snekbox too, however you can comment out or remove that entire key if this is not the case.
 
-Make a copy of `.template.env` and name it to `.env`, edit the values as you see fit (the defaults will work too, and be okay so long as you don't expose this database to the internet).
+Make a copy of `postgres_password.example.txt` and name it to `postgres_password.txt`, edit the text within the file as you see fit.
 Then a simple `docker compose up` will bring your bot up!
 
 NOTE: If you want to enable the snekbox service for sandboxed open eval, do:
@@ -43,7 +43,7 @@ which will enable all services and snekbox.
 
 This also means that it will use internal docker networking to resolve the database and snekbox names. By default these will be `database` and `snekbox`, but these will be the **service names** in `docker-compose.yml` if you change them. Please keep this in mind when editing your config file.
 
-We also provide a file for ignoring git blame references. You can enable this with:-
+We also provide a file for ignoring git blame references (for mass edits like formatting tools and so on). You can enable this with:-
 ```sh
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```

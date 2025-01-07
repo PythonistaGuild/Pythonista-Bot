@@ -1,33 +1,34 @@
-[tool.poetry]
+[project]
 name = "pythonista-bot"
 version = "0.1.0"
 description = "The bot that runs the Pythonista guild!"
 authors = [
-    "Alex Nørgaard <umbra@abstractumbra.dev>",
-    "IAmTomahawkx <iamtomahawkx@gmail.com>",
-    "EvieePy <29671945+evieepy@users.noreply.github.com>",
+    { name = "Alex Nørgaard", email = "umbra@abstractumbra.dev" },
+    { name = "IAmTomahawkx", email = "iamtomahawkx@gmail.com" },
+    { name = "EvieePy", email = "29671945+evieepy@users.noreply.github.com" },
 ]
-license = "MPL2.0"
+dependencies = [
+    "discord-py[speed] @ git+https://github.com/Rapptz/discord.py.git",
+    "aiohttp",
+    "asyncpg",
+    "toml",
+    "mystbin-py",
+    "jishaku",
+    "uvicorn",
+    "starlette-plus @ git+https://github.com/PythonistaGuild/StarlettePlus",
+]
+requires-python = "<4.0,>=3.11"
 readme = "README.md"
-package-mode = false
+license = { file = "LICENSE" }
 
-[tool.poetry.dependencies]
-python = "^3.11"
-"discord.py" = { git = "https://github.com/Rapptz/discord.py.git", extras = [
-    "speed",
-] }
-aiohttp = "*"
-asyncpg = "*"
-toml = "*"
-"mystbin.py" = "*"
-jishaku = "*"
-uvicorn = "*"
-starlette-plus = { git = "https://github.com/PythonistaGuild/StarlettePlus" }
+[tool.pdm]
+distribution = false
 
-[tool.poetry.group.dev.dependencies]
-ruff = "*"
-"asyncpg-stubs" = "*"
-"typing-extensions" = "*"
+[tool.pdm.build]
+includes = []
+
+[dependency-groups]
+dev = ["ruff", "asyncpg-stubs", "typing-extensions"]
 
 [tool.ruff]
 line-length = 125
@@ -149,7 +150,3 @@ inline-quotes = "double"
 useLibraryCodeForTypes = true
 typeCheckingMode = "strict"
 pythonVersion = "3.11"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

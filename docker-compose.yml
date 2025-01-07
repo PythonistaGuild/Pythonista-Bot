@@ -11,18 +11,18 @@ services:
   database:
     image: postgres
     container_name: pythonista-bot-db
-    env_file:
-      - .env
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=pythonistabot
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-password
+      - POSTGRES_DB=pythonistabot
     healthcheck:
       interval: 1s
       retries: 10
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       timeout: 5s
     restart: always
+    secrets:
+      - postgres-password
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
@@ -37,6 +37,10 @@ services:
     profiles:
       - "snekbox"
     restart: always
+
+secrets:
+  postgres-password:
+    file: ./postgres-password.txt
 
 volumes:
   pgdata:
