@@ -1,3 +1,12 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Create and publish a Docker image"]
+    branches: [main]
+    types:
+      - completed
+
 jobs:
   deploy:
     name: Deploy bot
@@ -16,12 +25,3 @@ jobs:
             docker compose --profile snekbox pull
             docker compose --profile snekbox up --build -d
           username: ${{ secrets.SSH_USER }}
-
-name: Deploy
-
-on:
-  workflow_run:
-    workflows: ["Create and publish a Docker image"]
-    branches: [main]
-    types:
-      - completed

@@ -9,7 +9,7 @@ services:
       - database
 
   database:
-    image: postgres
+    image: postgres:16
     container_name: pythonista-bot-db
     env_file:
       - .env
